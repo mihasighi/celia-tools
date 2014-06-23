@@ -24,7 +24,7 @@
 #include "shad.h"
 #include "shape.h"
 #include "shape_fun.h"
-#include "smtlib2sl3.h"
+//#include "smtlib2sl3.h"
 
 /* variable for exchanging between domains */
 sh_formula_t* sh_pos = NULL;

@@ -22,6 +22,7 @@
 
 
 
+#include "ap_coeff.h"
 #include "apron2shape.h"
 #include "shape_macros.h"
 
@@ -2440,7 +2441,7 @@ shape_init_name_of_dim (size_t intdim, size_t segmdim)
     }
 }
 
-bool shape_print_dot = true;
+bool shape_print_dot = 1; //true;
 
 inline bool
 shape_get_print (void)

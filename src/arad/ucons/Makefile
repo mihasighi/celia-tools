@@ -11,6 +11,7 @@ include ./Makefile.config
 
 PREFIX = ../..
 SHAD_PREFIX = ../../shad
+SHAD_INCLUDE = ../../include
 
 # C include and lib directories
 INCDIR = $(PREFIX)/include
@@ -32,21 +33,12 @@ SHARED = $(CC) -shared
 
 # Use ICFLAGS to specify machine-independent compilation flags.
 ICFLAGS = \
--I$(MPFR_PREFIX)/include \
--I$(GMP_PREFIX)/include \
--I$(CAML_PREFIX)/lib/ocaml \
--I$(CAMLIDL_PREFIX)/lib/ocaml \
--I$(MLGMPIDL_PREFIX)/include \
--I$(APRON_PREFIX)/include \
--I$(APRON_PREFIX)/lib \
--I$(SHAD_PREFIX)/include \
--I$(SMTLIB2_PREFIX)
+-I$(APRON_INCLUDE) \
+-I$(SHAD_INCLUDE)
 
 # Caml
 OCAMLINC = \
--I $(MLGMPIDL_PREFIX)/include \
--I $(APRON_PREFIX)/include \
--I $(APRON_PREFIX)/lib 
+-I $(APRON_INCLUDE)/include 
 
 #---------------------------------------
 # Files
@@ -67,7 +59,7 @@ CCSOURCES = $(UCONS_CCSOURCES)
 CCINC = $(UCONS_CCINC) 
 
 # trigers a whole recompilation
-#DEPS = $(APRON_PREFIX)/include/ap_abstract0.h
+#DEPS = $(APRON_INCLUDE)/ap_abstract0.h
 
 #---------------------------------------
 # Rules
@@ -150,8 +142,8 @@ SHARED_LIBS = $(APRON_LIBS) \
 
 LDFLAGS = -L$(GMP_PREFIX)/lib \
 	-L$(MPFR_PREFIX)/lib \
-	-L$(APRON_PREFIX)/lib \
-	-L$(SHAD_PREFIX)/lib
+	-L$(APRON_LIB) \
+	-L$(SHAD_LIB)
 
 # ucons_*
 #
