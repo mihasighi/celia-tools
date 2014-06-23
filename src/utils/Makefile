@@ -37,8 +37,7 @@ ICFLAGS = \
 -I$(CAMLIDL_PREFIX)/lib/ocaml \
 -I$(MLGMPIDL_PREFIX)/include \
 -I$(APRON_CCINC) \
--I$(APRON_OCINC) \
--I../products
+-I$(APRON_OCINC) 
 
 # Caml
 OCAMLINC = \
@@ -55,7 +54,7 @@ AP2SH_CCINC = apron2shape.h ap_pcons0.h ap_passign0.h
 
 CCSOURCES = $(AP2SH_CCSOURCES) 
 
-CCINC = $(AP2SH_CCINC) ../products
+CCINC = sh_macros.h $(AP2SH_CCINC) 
 
 # trigers a whole recompilation
 #DEPS = $(APRON_INCLUDE)/ap_abstract0.h
@@ -130,7 +129,7 @@ distclean: uninstall
 
 indent: $(CCSOURCES) $(CCINC)
 	for i in $(CCSOURCES) $(CCINC); do \
-		echo "* indent $$i"; indent -bl -i2 -tuc $$i; \
+		echo "* indent $$i"; indent -bl -i2 -nut $$i; \
 	done
 
 #-----------------------------------

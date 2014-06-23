@@ -52,105 +52,111 @@ extern "C" {
      *
      * - memory free       free(x)
      */
-    typedef enum /* kind of assignment */ {
-        PA_ASSIGN_INT = 0,
-        PA_ASSIGN_PTR,
-        PA_ALLOC,
-        PA_ALLOC_N,
-        PA_FREE,
-        PA_OTHER
-    } passign0_op_t;
+typedef enum /* kind of assignment */
+{
+  PA_ASSIGN_INT = 0,
+  PA_ASSIGN_PTR,
+  PA_ALLOC,
+  PA_ALLOC_N,
+  PA_FREE,
+  PA_OTHER
+} passign0_op_t;
 
-    typedef struct {
-        passign0_op_t op; /* type */
+typedef struct
+{
+  passign0_op_t op;             /* type */
 
-        /* left hand side */
-        ap_dim_t x; /* lhs in [0..intdim+ptrdim-1] */
-        int offx; /* offset of x (field or index) */
-        /* fields are in negatives,
-         * 0 is data field or index,
-         * positive are index (integer vars) dimensions
-         */
+  /* left hand side */
+  ap_dim_t x;                   /* lhs in [0..intdim+ptrdim-1] */
+  int offx;                     /* offset of x (field or index) */
+  /* fields are in negatives,
+   * 0 is data field or index,
+   * positive are index (integer vars) dimensions
+   */
 
-        /* right hand side */
-        union {
+  /* right hand side */
+  union
+  {
 
-            struct {
-                ap_dim_t y; /* ptr dimension in [intdim..intdim+ptrdim-1] or NULL_DIM */
-                int offy;   /* offset of y (index, field, function) */
-            } ptr;
+    struct
+    {
+      ap_dim_t y;               /* ptr dimension in [intdim..intdim+ptrdim-1] or NULL_DIM */
+      int offy;                 /* offset of y (index, field, function) */
+    } ptr;
 
-            struct {
-                ap_linexpr0_t *expr; /* integer expr over dimensions [0..intdim+ptrdim-1] */
-                int* offsets; /* only for ptr dimensions (data=0 or index dimension) */
-            } data;
+    struct
+    {
+      ap_linexpr0_t *expr;      /* integer expr over dimensions [0..intdim+ptrdim-1] */
+      int *offsets;             /* only for ptr dimensions (data=0 or index dimension) */
+    } data;
 
-            struct {
-                bool cst; /* alloc with a constant */
+    struct
+    {
+      bool cst;                 /* alloc with a constant */
 
-                union {
-                    size_t c;
-                    ap_dim_t l;
-                } size;
-            } alloc;
+      union
+      {
+        size_t c;
+        ap_dim_t l;
+      } size;
+    } alloc;
 
-        } info;
+  } info;
 
-        ap_dim_t lhs;
-        size_t intdim;
-        size_t ptrdim;
-        ap_linexpr0_t *lexpr;
-        ap_texpr0_t *texpr;
-        UT_hash_handle hh; /* make structure hashable */
-        /* keys are lhs--texpr */
-    } passign0_t;
+  ap_dim_t lhs;
+  size_t intdim;
+  size_t ptrdim;
+  ap_linexpr0_t *lexpr;
+  ap_texpr0_t *texpr;
+  UT_hash_handle hh;            /* make structure hashable */
+  /* keys are lhs--texpr */
+} passign0_t;
 
         /* Array of assignments */
-    typedef struct passign0_array_t {
-        passign0_t **p;
-        size_t size;
-    } passign0_array_t;
+typedef struct passign0_array_t
+{
+  passign0_t **p;
+  size_t size;
+} passign0_array_t;
 
   /* ================================================================== */
   /* Globals */
   /* ================================================================== */
 
 extern passign0_t *passigns_ht; /* global set (hash table) of ptr constraints */
-   
+
   /* ================================================================== */
   /* Constructors/Destructors */
   /* ================================================================== */
 
-    void ap_passign0_init(void);
+void ap_passign0_init (void);
     /* Init the hash table to NULL */
 
-    void shape_passign0_clear(passign0_t * c);
+void shape_passign0_clear (passign0_t * c);
     /* Clear the data constraint in c */
-    void shape_passign0_array_clear(passign0_array_t * array);
+void shape_passign0_array_clear (passign0_array_t * array);
     /* Clear the constraints of the array, and then the array itself */
 
 /* ===================================================================== */
 /* Global Set Manipulation */
 /* ===================================================================== */
 
-passign0_t *
-shape_passign_search (ap_dim_t lhs,
-                      size_t intdim, size_t ptrdim,
-                      ap_linexpr0_t * lexpr, ap_texpr0_t * texpr);
+passign0_t *shape_passign_search (ap_dim_t lhs,
+                                  size_t intdim, size_t ptrdim,
+                                  ap_linexpr0_t * lexpr, ap_texpr0_t * texpr);
 /* Search a value in the set using keys lhs, lexpr, and texpr */
 
-passign0_t *
-shape_passign_add (passign0_t * a);
+passign0_t *shape_passign_add (passign0_t * a);
 /* Add a value to the global set */
 
   /* ================================================================== */
   /* Printing */
   /* ================================================================== */
 
-    void shape_passign_fdump(FILE * stream, passign0_t * c,
-            size_t intdim, size_t ptrdim);
-    void shape_passign_array_fdump(FILE * stream, passign0_array_t * a,
-            size_t intdim, size_t ptrdim);
+void shape_passign_fdump (FILE * stream, passign0_t * c,
+                          size_t intdim, size_t ptrdim);
+void shape_passign_array_fdump (FILE * stream, passign0_array_t * a,
+                                size_t intdim, size_t ptrdim);
     /* Printing */
 
     /* *INDENT-OFF* */

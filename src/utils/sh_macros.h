@@ -1,8 +1,8 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / Utilities for Abstract Domains                          */
 /*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
+/*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
 /*                                                                        */
 /*                                                                        */
@@ -21,8 +21,8 @@
 /**************************************************************************/
 
 
-#ifndef __SHAPE_MACROS_H_
-#define __SHAPE_MACROS_H_
+#ifndef __SH_MACROS_H_
+#define __SH_MACROS_H_
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
@@ -38,8 +38,6 @@ do { if (!(cond)) {                                                   \
     snprintf(buf_,sizeof(buf_),                                       \
              "assertion (%s) failed in %s at %s:%i",                  \
              #cond, __func__, __FILE__, __LINE__);            \
-    ap_manager_raise_exception(ap_man,AP_EXC_INVALID_ARGUMENT,       \
-                               AP_FUNID_UNKNOWN,buf_);             \
     fprintf(stdout,"%s\n",buf_); fflush(stdout); \
     action }                                                          \
 } while(0)
@@ -49,7 +47,7 @@ do { if (!(cond)) {                                                   \
   {                                                          \
     fprintf(stdout,"[shad:] warning: %s\n", msg); fflush(stdout);  \
     action                                        \
-  } 
+  }
 
   /* internal errors */
 #define ERROR(msg,action)                                       \
@@ -58,11 +56,8 @@ do { if (!(cond)) {                                                   \
     snprintf(buf_,sizeof(buf_),                                 \
              "exception (%s) raised in %s at %s:%i",            \
               msg, __func__, __FILE__, __LINE__);               \
-    ap_manager_raise_exception(ap_man,AP_EXC_NOT_IMPLEMENTED,  \
-                               AP_FUNID_UNKNOWN,buf_);                 \
     fprintf(stdout,"%s\n",buf_); fflush(stdout);  \
     action                                        \
-    pr->error_++;                                 \
   } while (0)
 
   /* malloc with safe-guard */
@@ -75,8 +70,6 @@ do {                                                                  \
              "cannot allocate %s[%lu] for %s in %s at %s:%i",         \
              #t, (long unsigned)(nb), #ptr,                           \
              __func__, __FILE__, __LINE__);                           \
-    ap_manager_raise_exception(ap_man,AP_EXC_OUT_OF_SPACE,           \
-                               AP_FUNID_UNKNOWN,buf_);                       \
     action }                                                          \
 } while(0)
 
@@ -91,8 +84,6 @@ do {                                                                  \
              "cannot allocate %s[%lu] for %s in %s at %s:%i",         \
              #t, (long unsigned)(nb), #ptr,                           \
              __func__, __FILE__, __LINE__);                           \
-    ap_manager_raise_exception(ap_man,AP_EXC_OUT_OF_SPACE,           \
-                               AP_FUNID_UNKNOWN,buf_);                       \
     action }                                                          \
 } while(0)
 
@@ -105,8 +96,6 @@ do {                                                                  \
              "cannot allocate %s[%lu] for %s in %s at %s:%i",         \
              #t, (long unsigned)(nb), #ptr,                           \
              __func__, __FILE__, __LINE__);                           \
-    ap_manager_raise_exception(ap_man,AP_EXC_OUT_OF_SPACE,           \
-                               AP_FUNID_UNKNOWN,buf_);                       \
     action }                                                          \
 } while(0)
 
@@ -118,4 +107,4 @@ do {                                                                  \
 /* *INDENT-ON* */
 
 
-#endif /* SHAPE_MACROS_H_ */
+#endif /* SH_MACROS_H_ */

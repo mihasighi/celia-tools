@@ -24,7 +24,7 @@
 
 #include "ap_coeff.h"
 #include "apron2shape.h"
-#include "shape_macros.h"
+#include "sh_macros.h"
 
 /* ====================================================================== */
 /* Translation of linear expressions.                                     */
@@ -38,8 +38,7 @@ shape_pcons_of_linexpr (ap_linexpr0_t * e,
   size_t i;
   ap_coeff_t *coeff;
   ap_dim_t d;
-  arg_assert (r, return;
-              );
+  arg_assert (r, return;);
 #ifndef NDEBUG2
   fprintf (stdout, "\n====shape_pcons_of_linexpr: with e=(");
   ap_linexpr0_fprint (stdout, e, NULL);
@@ -63,17 +62,14 @@ shape_pcons_of_linexpr (ap_linexpr0_t * e,
         if (!ap_coeff_zero (coeff))
           {
             int coef = ap_scalar_sgn (coeff->val.scalar);
-            arg_assert ((coeff->discr == AP_COEFF_SCALAR), return;
-                        );
-            arg_assert (IS_PTRDIM (d, intdim, ptrdim), return;
-                        );
+            arg_assert ((coeff->discr == AP_COEFF_SCALAR), return;);
+            arg_assert (IS_PTRDIM (d, intdim, ptrdim), return;);
             if (coef == -1)
               r->info.ptr.y = d;
             else if (coef == 1)
               r->info.ptr.x = d;
             else
-              arg_assert (0, return;
-                          );
+              arg_assert (0, return;);
           }
       }
       if (r->info.ptr.y == 0 && r->type == REACH_CONS)
@@ -93,10 +89,8 @@ shape_pcons_of_linexpr (ap_linexpr0_t * e,
       {
         if (!ap_coeff_zero (coeff))
           {
-            arg_assert ((coeff->discr == AP_COEFF_SCALAR), return;
-                        );
-            arg_assert (IS_PTRDIM (d, intdim, ptrdim), return;
-                        );
+            arg_assert ((coeff->discr == AP_COEFF_SCALAR), return;);
+            arg_assert (IS_PTRDIM (d, intdim, ptrdim), return;);
             /* TODO: be more precise in checking */
             r->info.ptr.x = d;
           }
@@ -122,14 +116,13 @@ shape_pcons_of_linexpr (ap_linexpr0_t * e,
           if (!ap_coeff_zero (coeff))
             {
               int coef = ap_scalar_sgn (coeff->val.scalar);
-              arg_assert (!found && (coeff->discr == AP_COEFF_SCALAR), return;
-                          );
+              arg_assert (!found
+                          && (coeff->discr == AP_COEFF_SCALAR), return;);
               found = true;
               if (IS_PTRDIM (d, intdim, ptrdim) && (coef == 1))
                 r->info.ptr.x = d;
               else
-                arg_assert (0, return;
-                            );
+                arg_assert (0, return;);
               /* TODO: be more precise in checking */
             }
         }
@@ -144,8 +137,7 @@ shape_pcons_of_linexpr (ap_linexpr0_t * e,
 /* ====================================================================== */
 
 pcons0_t *
-shape_pcons_of_lincons (ap_lincons0_t * c,
-                        size_t intdim, size_t ptrdim)
+shape_pcons_of_lincons (ap_lincons0_t * c, size_t intdim, size_t ptrdim)
 {
   pcons0_t *r;
 #ifndef NDEBUG2
@@ -166,8 +158,7 @@ shape_pcons_of_lincons (ap_lincons0_t * c,
   else
     {
       ap_linexpr0_t *e = c->linexpr0;
-      checked_malloc (r, pcons0_t, sizeof (pcons0_t), 1, return NULL;
-                      );
+      checked_malloc (r, pcons0_t, sizeof (pcons0_t), 1, return NULL;);
       if (ap_linexpr0_is_real (e, intdim))
         {
           /* only constraints */
@@ -188,21 +179,19 @@ shape_pcons_of_lincons (ap_lincons0_t * c,
             case AP_CONS_EQMOD:
               r->type = ISO_CONS;
               break;
-            default: /* ERROR */
-              arg_assert (0, return r;
-                          );
+            default:           /* ERROR */
+              arg_assert (0, return r;);
               break;
             }
         }
       else if (ap_linexpr0_is_integer (e, intdim))
-        { /* only constraints on integer variables */
+        {                       /* only constraints on integer variables */
           r->type = DATA_CONS;
           r->info.data.cons.constyp = c->constyp;
           r->info.data.cons.scalar = c->scalar;
         }
-      else /* ERROR */
-        arg_assert (0, return r;
-                    );
+      else                      /* ERROR */
+        arg_assert (0, return r;);
       /* fill from expression */
       shape_pcons_of_linexpr (c->linexpr0, r, intdim, ptrdim);
       r->lcons = c;
@@ -220,7 +209,7 @@ shape_pcons_of_lincons (ap_lincons0_t * c,
 
 /* Rewritten because the Apron function is not corect */
 bool
-shape_coeff_equal_int (ap_coeff_t* coeff, int i)
+shape_coeff_equal_int (ap_coeff_t * coeff, int i)
 {
   switch (coeff->discr)
     {
@@ -228,7 +217,7 @@ shape_coeff_equal_int (ap_coeff_t* coeff, int i)
       return ap_scalar_equal_int (coeff->val.scalar, i);
     case AP_COEFF_INTERVAL:
       return (ap_scalar_cmp_int (coeff->val.interval->inf, i) <= 0)
-              && (ap_scalar_cmp_int (coeff->val.interval->sup, i) >= 0);
+        && (ap_scalar_cmp_int (coeff->val.interval->sup, i) >= 0);
     default:
       ;
     }
@@ -237,23 +226,20 @@ shape_coeff_equal_int (ap_coeff_t* coeff, int i)
 
 /* Texpr e represents a variable of type integer */
 bool
-shape_is_int_var (ap_texpr0_t * e,
-                  size_t intdim, size_t ptrdim)
+shape_is_int_var (ap_texpr0_t * e, size_t intdim, size_t ptrdim)
 {
-  if (ptrdim != ptrdim) /* to remove gcc warning */
+  if (ptrdim != ptrdim)         /* to remove gcc warning */
     return false;
   return (e->discr == AP_TEXPR_DIM) && IS_INTDIM (e->val.dim, intdim, ptrdim);
 }
 
 /* Texpr e represents a variable of type pointer */
 bool
-shape_is_ptr_var (ap_texpr0_t * e,
-                  size_t intdim, size_t ptrdim)
+shape_is_ptr_var (ap_texpr0_t * e, size_t intdim, size_t ptrdim)
 {
-  if (intdim != intdim) /* to remove gcc warning */
+  if (intdim != intdim)         /* to remove gcc warning */
     return false;
-  return (e->discr == AP_TEXPR_DIM)
-          && IS_PTRDIM (e->val.dim, intdim, ptrdim);
+  return (e->discr == AP_TEXPR_DIM) && IS_PTRDIM (e->val.dim, intdim, ptrdim);
 }
 
 /* Texpr e represents a free statement */
@@ -261,8 +247,8 @@ bool
 shape_is_free_stmt (ap_texpr0_t * e)
 {
   return (e->discr == AP_TEXPR_NODE) &&
-          (e->val.node->op == AP_TEXPR_SQRT) &&
-          IS_FREE_STMT (e->val.node->type, e->val.node->dir);
+    (e->val.node->op == AP_TEXPR_SQRT) &&
+    IS_FREE_STMT (e->val.node->type, e->val.node->dir);
 }
 
 /* Texpr e represents a dereferencing to NULL, i.e., x->f = NULL
@@ -270,9 +256,9 @@ shape_is_free_stmt (ap_texpr0_t * e)
  * The field f is returned as result (or 0) if not.
  */
 int
-shape_is_field_null_stmt (ap_texpr0_t *e, size_t intdim, size_t ptrdim)
+shape_is_field_null_stmt (ap_texpr0_t * e, size_t intdim, size_t ptrdim)
 {
-  if (ptrdim != ptrdim) /* remove gcc warning */
+  if (ptrdim != ptrdim)         /* remove gcc warning */
     return 0;
 
   if ((e->discr == AP_TEXPR_NODE) &&
@@ -297,7 +283,8 @@ shape_is_field_null_stmt (ap_texpr0_t *e, size_t intdim, size_t ptrdim)
             if (shape_coeff_equal_int (&e_fld, i))
               {
 #ifndef NDEBUG2
-                fprintf (stdout, "+++++ shape_is_field_null_stmt: with dim (%zu,%zu) field=(%d)\n",
+                fprintf (stdout,
+                         "+++++ shape_is_field_null_stmt: with dim (%zu,%zu) field=(%d)\n",
                          intdim, ptrdim, i);
 #endif
                 return intdim + OFFSET_DATA + i;
@@ -313,19 +300,18 @@ shape_is_alloc_stmt (ap_texpr0_t * e)
 {
 
   return (e->discr == AP_TEXPR_NODE) &&
-          (e->val.node->op == AP_TEXPR_SQRT) &&
-          IS_ALLOC_STMT (e->val.node->type, e->val.node->dir);
+    (e->val.node->op == AP_TEXPR_SQRT) &&
+    IS_ALLOC_STMT (e->val.node->type, e->val.node->dir);
 }
 
 /* Texpr e represents a data field access or dereferencing. */
 bool
-shape_is_ptrfield_texpr (ap_texpr0_t* e,
-                         size_t intdim, size_t ptrdim)
+shape_is_ptrfield_texpr (ap_texpr0_t * e, size_t intdim, size_t ptrdim)
 {
-	
+
   if ((intdim != intdim) || (ptrdim != ptrdim)) /* remove gcc warning */
     return 0;
-    
+
   if ((e->discr == AP_TEXPR_NODE) &&
       (e->val.node->op == AP_TEXPR_CAST) &&
       (IS_FIELD_REF (e->val.node->type, e->val.node->dir) ||
@@ -345,14 +331,12 @@ shape_is_ptrfield_texpr (ap_texpr0_t* e,
 
 /* Texpr e represents a data field access or dereferencing. */
 bool
-shape_is_datafield_texpr (ap_texpr0_t* e,
-                          size_t intdim, size_t ptrdim)
+shape_is_datafield_texpr (ap_texpr0_t * e, size_t intdim, size_t ptrdim)
 {
   if ((intdim != intdim) || (ptrdim != ptrdim)) /* remove gcc warning */
     return 0;
-    
-  if ((e->discr == AP_TEXPR_NODE) &&
-      (e->val.node->op == AP_TEXPR_CAST))
+
+  if ((e->discr == AP_TEXPR_NODE) && (e->val.node->op == AP_TEXPR_CAST))
     {
       if (IS_ARRAY_REF (e->val.node->type, e->val.node->dir) ||
           IS_ARRAY_DEREF (e->val.node->type, e->val.node->dir))
@@ -379,30 +363,28 @@ shape_is_datafield_texpr (ap_texpr0_t* e,
 
 /* Texpr e contains a function application (length, sum, multi-set). */
 bool
-shape_is_fun_texpr (ap_texpr0_t* e,
-                    size_t intdim, size_t ptrdim)
+shape_is_fun_texpr (ap_texpr0_t * e, size_t intdim, size_t ptrdim)
 {
   if ((intdim != intdim) || (ptrdim != ptrdim)) /* remove gcc warning */
     return 0;
-    
-  if (e->discr == AP_TEXPR_NODE &&
-      e->val.node->op == AP_TEXPR_CAST)
+
+  if (e->discr == AP_TEXPR_NODE && e->val.node->op == AP_TEXPR_CAST)
     return IS_LENGTH_FUN (e->val.node->type, e->val.node->dir) ||
-    IS_SUM_FUN (e->val.node->type, e->val.node->dir) ||
-    IS_MSET_FUN (e->val.node->type, e->val.node->dir) ||
-    IS_UCONS_FUN (e->val.node->type, e->val.node->dir);
+      IS_SUM_FUN (e->val.node->type, e->val.node->dir) ||
+      IS_MSET_FUN (e->val.node->type, e->val.node->dir) ||
+      IS_UCONS_FUN (e->val.node->type, e->val.node->dir);
 
   return false;
 }
 
 bool
-shape_has_field_texpr (ap_texpr0_t* e,
+shape_has_field_texpr (ap_texpr0_t * e,
                        size_t intdim, size_t ptrdim,
-                       bool (*is_field)(ap_texpr0_t*, size_t, size_t))
+                       bool (*is_field) (ap_texpr0_t *, size_t, size_t))
 {
   if (e->discr == AP_TEXPR_NODE)
     {
-      if ((*is_field)(e, intdim, ptrdim))
+      if ((*is_field) (e, intdim, ptrdim))
         return true;
       switch (e->val.node->op)
         {
@@ -411,11 +393,14 @@ shape_has_field_texpr (ap_texpr0_t* e,
         case AP_TEXPR_MUL:
         case AP_TEXPR_DIV:
         case AP_TEXPR_MOD:
-          return shape_has_field_texpr (e->val.node->exprA, intdim, ptrdim, is_field) ||
-                  shape_has_field_texpr (e->val.node->exprB, intdim, ptrdim, is_field);
+          return shape_has_field_texpr (e->val.node->exprA, intdim, ptrdim,
+                                        is_field)
+            || shape_has_field_texpr (e->val.node->exprB, intdim, ptrdim,
+                                      is_field);
 
         case AP_TEXPR_NEG:
-          return shape_has_field_texpr (e->val.node->exprA, intdim, ptrdim, is_field);
+          return shape_has_field_texpr (e->val.node->exprA, intdim, ptrdim,
+                                        is_field);
 
         default:
           return false;
@@ -428,7 +413,7 @@ shape_has_field_texpr (ap_texpr0_t* e,
  * If offset can be set (no other offset) return true, otherwise false.
  */
 bool
-shape_set_pexpr (ap_linexpr0_t * l, int* offsets, ap_dim_t pdim, double coef,
+shape_set_pexpr (ap_linexpr0_t * l, int *offsets, ap_dim_t pdim, double coef,
                  int offset, size_t intdim, size_t ptrdim)
 {
 #ifndef NDEBUG
@@ -440,7 +425,7 @@ shape_set_pexpr (ap_linexpr0_t * l, int* offsets, ap_dim_t pdim, double coef,
       && offsets[DIM2PTR (pdim, intdim)] != OFFSET_NONE)
     return false;
   ap_linexpr0_set_coeff_scalar_double (l, pdim, coef);
-  offsets[DIM2PTR (pdim, intdim)] = offset; /* TODO: check the offset encoding */
+  offsets[DIM2PTR (pdim, intdim)] = offset;     /* TODO: check the offset encoding */
 
   return true;
 }
@@ -451,16 +436,15 @@ shape_set_pexpr (ap_linexpr0_t * l, int* offsets, ap_dim_t pdim, double coef,
  */
 int
 shape_offset_from_cast (ap_texpr_rtype_t t, ap_texpr_rdir_t d,
-                        ap_texpr0_t* e, size_t intdim, size_t ptrdim)
+                        ap_texpr0_t * e, size_t intdim, size_t ptrdim)
 {
-  if (ptrdim != ptrdim) /* remove gcc warning */
+  if (ptrdim != ptrdim)         /* remove gcc warning */
     return 0;
-    
+
   if (IS_OFFSET (t, d) &&
-      e->discr == AP_TEXPR_NODE &&
-      e->val.node->op == AP_TEXPR_CAST)
+      e->discr == AP_TEXPR_NODE && e->val.node->op == AP_TEXPR_CAST)
     {
-      ap_texpr0_t* e_op = e->val.node->exprA;
+      ap_texpr0_t *e_op = e->val.node->exprA;
       if ((IS_FIELD_REF (t, d) || IS_FIELD_DEREF (t, d)) &&
           e_op->discr == AP_TEXPR_NODE &&
           (e_op->val.node->op == AP_TEXPR_DIV ||
@@ -470,7 +454,8 @@ shape_offset_from_cast (ap_texpr_rtype_t t, ap_texpr_rdir_t d,
           // extract field no
           size_t i;
 #ifndef NDEBUG2
-          fprintf (stdout, "===== shape_offset_from_cast: dim=(%zu,%zu), field = (",
+          fprintf (stdout,
+                   "===== shape_offset_from_cast: dim=(%zu,%zu), field = (",
                    intdim, ptrdim);
           ap_coeff_fprint (stdout, &e_op->val.node->exprB->val.cst);
           fprintf (stdout, ")\n");
@@ -480,7 +465,8 @@ shape_offset_from_cast (ap_texpr_rtype_t t, ap_texpr_rdir_t d,
             if (shape_coeff_equal_int (&(e_op->val.node->exprB->val.cst), i))
               {
 #ifndef NDEBUG2
-                fprintf (stdout, "===== shape_offset_from_cast: i = (%zu)\n", i);
+                fprintf (stdout, "===== shape_offset_from_cast: i = (%zu)\n",
+                         i);
 #endif
                 return intdim + OFFSET_DATA + i;
               }
@@ -521,23 +507,27 @@ shape_offset_from_cast (ap_texpr_rtype_t t, ap_texpr_rdir_t d,
         }
       return OFFSET_NONE;
     }
-  if (IS_LENGTH_FUN (t, d)) return OFFSET_LEN;
-  if (IS_SUM_FUN (t, d)) return OFFSET_SUM;
-  if (IS_MSET_FUN (t, d)) return OFFSET_MSET;
-  if (IS_UCONS_FUN (t, d)) return OFFSET_UCONS;
+  if (IS_LENGTH_FUN (t, d))
+    return OFFSET_LEN;
+  if (IS_SUM_FUN (t, d))
+    return OFFSET_SUM;
+  if (IS_MSET_FUN (t, d))
+    return OFFSET_MSET;
+  if (IS_UCONS_FUN (t, d))
+    return OFFSET_UCONS;
 
   return OFFSET_NONE;
 }
 
-int*
+int *
 shape_init_offsets (size_t intdim, size_t ptrdim)
 {
-	
-  if (intdim != intdim) /* remove gcc warning */
+
+  if (intdim != intdim)         /* remove gcc warning */
     return 0;
-    
+
   size_t size = ptrdim;
-  int* r = (int*) malloc (size * sizeof (int));
+  int *r = (int *) malloc (size * sizeof (int));
   size_t i;
   for (i = 0; i < size; i++)
     r[i] = OFFSET_NONE;
@@ -558,7 +548,8 @@ shape_init_offsets (size_t intdim, size_t ptrdim)
 ap_scalar_t *
 shape_dataexpr_of_texpr (ap_texpr0_t * t,
                          ap_scalar_t * coef,
-                         ap_linexpr0_t * l, int* offsets, size_t intdim, size_t ptrdim)
+                         ap_linexpr0_t * l, int *offsets, size_t intdim,
+                         size_t ptrdim)
 {
 
   ap_scalar_t *r = NULL;
@@ -582,8 +573,7 @@ shape_dataexpr_of_texpr (ap_texpr0_t * t,
           r = ap_scalar_alloc_set_double (ncoef);
         }
       else
-        arg_assert (0, return r;
-                    );
+        arg_assert (0, return r;);
       break;
 
     case AP_TEXPR_DIM:
@@ -600,12 +590,10 @@ shape_dataexpr_of_texpr (ap_texpr0_t * t,
               ap_linexpr0_set_coeff_scalar_double (l, t->val.dim, dcoef);
             }
           else
-            arg_assert (0, return r;
-                        );
+            arg_assert (0, return r;);
         }
-      else /* ptr vars can be seen only above a cast node texpr */
-        arg_assert (0, return r;
-                    );
+      else                      /* ptr vars can be seen only above a cast node texpr */
+        arg_assert (0, return r;);
       break;
 
     case AP_TEXPR_NODE:
@@ -618,16 +606,14 @@ shape_dataexpr_of_texpr (ap_texpr0_t * t,
         case AP_TEXPR_SUB:
           {
             ap_scalar_t *ncoef = (t->val.node->op == AP_TEXPR_SUB) ?
-                    ap_scalar_alloc_set_double (-dcoef) : coef;
+              ap_scalar_alloc_set_double (-dcoef) : coef;
             /* recursively apply on subexpressions */
-            ap_scalar_t *r1 =
-                    shape_dataexpr_of_texpr (t->val.node->exprA,
-                                             coef, l, offsets,
-                                             intdim, ptrdim);
-            ap_scalar_t *r2 =
-                    shape_dataexpr_of_texpr (t->val.node->exprB,
-                                             ncoef, l, offsets,
-                                             intdim, ptrdim);
+            ap_scalar_t *r1 = shape_dataexpr_of_texpr (t->val.node->exprA,
+                                                       coef, l, offsets,
+                                                       intdim, ptrdim);
+            ap_scalar_t *r2 = shape_dataexpr_of_texpr (t->val.node->exprB,
+                                                       ncoef, l, offsets,
+                                                       intdim, ptrdim);
             /* compute the final value of coefficients for each term */
             double d1, d2;
             if (r1)
@@ -666,16 +652,14 @@ shape_dataexpr_of_texpr (ap_texpr0_t * t,
             if (t->val.node->exprA->discr == AP_TEXPR_CST)
               {
                 ap_scalar_t *newcoef =
-                        shape_dataexpr_of_texpr (t->val.node->exprA,
-                                                 coef, l, offsets,
-                                                 intdim, ptrdim);
+                  shape_dataexpr_of_texpr (t->val.node->exprA,
+                                           coef, l, offsets,
+                                           intdim, ptrdim);
                 shape_dataexpr_of_texpr (t->val.node->exprB,
-                                         newcoef, l, offsets,
-                                         intdim, ptrdim);
+                                         newcoef, l, offsets, intdim, ptrdim);
               }
             else
-              arg_assert (0, return r;
-                          );
+              arg_assert (0, return r;);
 
             break;
           }
@@ -684,8 +668,7 @@ shape_dataexpr_of_texpr (ap_texpr0_t * t,
           {
             ap_scalar_t *newcoef = ap_scalar_alloc_set_double (-dcoef);
             shape_dataexpr_of_texpr (t->val.node->exprA,
-                                     newcoef, l, offsets,
-                                     intdim, ptrdim);
+                                     newcoef, l, offsets, intdim, ptrdim);
             ap_scalar_free (newcoef);
             break;
           }
@@ -699,52 +682,52 @@ shape_dataexpr_of_texpr (ap_texpr0_t * t,
               {
                 /* the operand shall be a node * */
                 arg_assert (t->val.node->exprA->discr == AP_TEXPR_NODE &&
-                            t->val.node->exprA->val.node->op == AP_TEXPR_MUL &&
-                            t->val.node->exprA->val.node->exprA->discr == AP_TEXPR_DIM &&
-                            IS_PTRDIM (t->val.node->exprA->val.node->exprA->val.dim,
-                                       intdim, ptrdim), return r;);
+                            t->val.node->exprA->val.node->op == AP_TEXPR_MUL
+                            && t->val.node->exprA->val.node->exprA->discr ==
+                            AP_TEXPR_DIM
+                            && IS_PTRDIM (t->val.node->exprA->val.node->
+                                          exprA->val.dim, intdim, ptrdim),
+                            return r;
+                  );
                 /* set coefficient and offset */
-                int ofs = shape_offset_from_cast (
-                                                  t->val.node->type, t->val.node->dir,
-                                                  t->val.node->exprA,
-                                                  intdim, ptrdim);
+                int ofs =
+                  shape_offset_from_cast (t->val.node->type, t->val.node->dir,
+                                          t->val.node->exprA,
+                                          intdim, ptrdim);
                 ap_dim_t pdim = t->val.node->exprA->val.node->exprA->val.dim;
                 arg_assert (shape_set_pexpr (l, offsets, pdim, dcoef, ofs,
-                                             intdim, ptrdim),
-                            return r;
-                            );
+                                             intdim, ptrdim), return r;);
               }
             else if (IS_FUN (t->val.node->type, t->val.node->dir))
               {
                 /* the operand shall be a varptr */
                 arg_assert (t->val.node->exprA->discr == AP_TEXPR_DIM &&
                             IS_PTRDIM (t->val.node->exprA->val.dim,
-                                       intdim, ptrdim), return r;);
+                                       intdim, ptrdim), return r;
+                  );
                 /* set ptrvar and offset */
-                int ofs = shape_offset_from_cast (
-                                                  t->val.node->type, t->val.node->dir,
-                                                  t->val.node->exprA,
-                                                  intdim, ptrdim);
+                int ofs =
+                  shape_offset_from_cast (t->val.node->type, t->val.node->dir,
+                                          t->val.node->exprA,
+                                          intdim, ptrdim);
                 ap_dim_t pdim = t->val.node->exprA->val.dim;
                 arg_assert (shape_set_pexpr (l, offsets, pdim, dcoef, ofs,
-                                             intdim, ptrdim),
-                            return r;
-                            );
+                                             intdim, ptrdim), return r;);
               }
             else
               /* the expression shall be a data expression */
               shape_dataexpr_of_texpr (t->val.node->exprA,
-                                       coef, l, offsets,
-                                       intdim, ptrdim);
+                                       coef, l, offsets, intdim, ptrdim);
             break;
           }
 
-        default: /* no other operators are valid */
+        default:               /* no other operators are valid */
 #ifndef NDEBUG1
-          fprintf (stdout, "+++++shape_dataexpr_of_texpr: operator %d not known!\n", t->val.node->op);
+          fprintf (stdout,
+                   "+++++shape_dataexpr_of_texpr: operator %d not known!\n",
+                   t->val.node->op);
 #endif
-          arg_assert (0, return r;
-                      );
+          arg_assert (0, return r;);
         }
     }
   return r;
@@ -777,8 +760,7 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
     else if (IS_PTRDIM (dim_array[i], intdim, ptrdim))
       hasptr = true;
     else
-      arg_assert (0, return false;
-                  ); /* bad dimension */
+      arg_assert (0, return false;);    /* bad dimension */
   free (dim_array);
   /* do not assign i, since used below to build linear constraints */
 
@@ -786,12 +768,13 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
   hasdatafield = shape_has_field_texpr (e, intdim, ptrdim,
                                         shape_is_datafield_texpr);
   hasdatafield = hasdatafield ||
-          shape_has_field_texpr (e, intdim, ptrdim, shape_is_fun_texpr);
+    shape_has_field_texpr (e, intdim, ptrdim, shape_is_fun_texpr);
   hasptrfield = shape_has_field_texpr (e, intdim, ptrdim,
                                        shape_is_ptrfield_texpr);
 
 #ifndef NDEBUG2
-  fprintf (stdout, "\n====shape_pcons_of_texpr: with info hasdatafield=%zu, hasptrfield=%zu\n",
+  fprintf (stdout,
+           "\n====shape_pcons_of_texpr: with info hasdatafield=%zu, hasptrfield=%zu\n",
            hasdatafield, hasptrfield);
 #endif
 
@@ -804,8 +787,7 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
        * pure pointer constraints, only x[->f] - y[->f] or
        * x, x->f, or x/f for assign
        */
-      arg_assert (r->type != DATA_CONS, return OFFSET_NONE;
-                  );
+      arg_assert (r->type != DATA_CONS, return OFFSET_NONE;);
 
       if (e->discr == AP_TEXPR_DIM)
         {
@@ -823,7 +805,8 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
           switch (e->val.node->op)
             {
             case AP_TEXPR_ADD:
-              arg_assert (r->type == OTHER_CONS, return false;);
+              arg_assert (r->type == OTHER_CONS, return false;
+                );
               /* one of subnodes shall be NEG */
               /* first operand */
               if (e->val.node->exprA &&
@@ -838,19 +821,16 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
                           && y == NULL)
                         y = e->val.node->exprA->val.node->exprA;
                       else
-                        arg_assert (0, return OFFSET_NONE;
-                                    );
+                        arg_assert (0, return OFFSET_NONE;);
                     }
                 }
               else
                 {
                   if (e->val.node->exprA &&
-                      e->val.node->exprA->discr == AP_TEXPR_DIM &&
-                      x == NULL)
+                      e->val.node->exprA->discr == AP_TEXPR_DIM && x == NULL)
                     x = e->val.node->exprA;
                   else
-                    arg_assert (0, return OFFSET_NONE;
-                                );
+                    arg_assert (0, return OFFSET_NONE;);
                 }
               /* second operand */
               if (e->val.node->exprB
@@ -865,19 +845,16 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
                           && y == NULL)
                         y = e->val.node->exprB->val.node->exprA;
                       else
-                        arg_assert (0, return OFFSET_NONE;
-                                    );
+                        arg_assert (0, return OFFSET_NONE;);
                     }
                 }
               else
                 {
                   if (e->val.node->exprB &&
-                      e->val.node->exprB->discr == AP_TEXPR_DIM &&
-                      x == NULL)
+                      e->val.node->exprB->discr == AP_TEXPR_DIM && x == NULL)
                     x = e->val.node->exprB;
-                  else /* for ADD, both operands exist */
-                    arg_assert (0, return OFFSET_NONE;
-                                );
+                  else          /* for ADD, both operands exist */
+                    arg_assert (0, return OFFSET_NONE;);
                 }
               break;
 
@@ -889,22 +866,20 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
                    e->val.node->exprA->discr == AP_TEXPR_DIM))
                 x = e->val.node->exprA;
               else
-                arg_assert (0, return OFFSET_NONE;
-                            );
+                arg_assert (0, return OFFSET_NONE;);
 
               /* second operand */
               if (e->val.node->exprB && y == NULL)
                 y = e->val.node->exprB;
-                // TODO: e->val.node->exprB->discr == AP_TEXPR_CST
-                // accepted only used for coding INIT
+              // TODO: e->val.node->exprB->discr == AP_TEXPR_CST
+              // accepted only used for coding INIT
               else
-                arg_assert (0, return OFFSET_NONE;
-                            );
+                arg_assert (0, return OFFSET_NONE;);
               break;
 
             case AP_TEXPR_MUL: /* shall be multiplication by constant 1 */
               {
-                ap_coeff_t* coeff1 = ap_coeff_alloc (AP_COEFF_SCALAR);
+                ap_coeff_t *coeff1 = ap_coeff_alloc (AP_COEFF_SCALAR);
                 ap_coeff_set_scalar_int (coeff1, 1);
                 if (e->val.node->exprA->discr == AP_TEXPR_CST &&
                     ap_coeff_equal (coeff1, &e->val.node->exprA->val.cst))
@@ -914,14 +889,14 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
                       ap_coeff_equal (coeff1, &e->val.node->exprB->val.cst))
                   x = e->val.node->exprA;
                 else
-                  arg_assert (0, return OFFSET_NONE;);
+                  arg_assert (0, return OFFSET_NONE;
+                  );
                 ap_coeff_free (coeff1);
                 break;
               }
 
-            case AP_TEXPR_CAST: /* uses ptr field */
-              arg_assert (r->type == OTHER_CONS, return false;
-                          );
+            case AP_TEXPR_CAST:        /* uses ptr field */
+              arg_assert (r->type == OTHER_CONS, return false;);
               if (IS_FIELD_REF (e->val.node->type, e->val.node->dir) &&
                   e->val.node->exprA->discr == AP_TEXPR_NODE &&
                   e->val.node->exprA->val.node->op == AP_TEXPR_MUL)
@@ -934,16 +909,15 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
                 {
                   x = e->val.node->exprA->val.node->exprA;
                   deref_offset = shape_offset_from_cast (e->val.node->type,
-                                                         e->val.node->dir, e, intdim, ptrdim);
+                                                         e->val.node->dir, e,
+                                                         intdim, ptrdim);
                 }
               else
-                arg_assert (0, return OFFSET_NONE;
-                            );
+                arg_assert (0, return OFFSET_NONE;);
               break;
 
             default:
-              arg_assert (0, return OFFSET_NONE;
-                          );
+              arg_assert (0, return OFFSET_NONE;);
             }
           /* fill r from x */
           r->info.ptr.offx = OFFSET_NONE;
@@ -955,12 +929,12 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
                 x->val.node->exprA->val.node->op == AP_TEXPR_MUL)
               {
                 r->info.ptr.offx = shape_offset_from_cast (x->val.node->type,
-                                                           x->val.node->dir, x, intdim, ptrdim);
+                                                           x->val.node->dir,
+                                                           x, intdim, ptrdim);
                 x = x->val.node->exprA->val.node->exprA;
               }
             else
-              arg_assert (0, return OFFSET_NONE;
-                          );
+              arg_assert (0, return OFFSET_NONE;);
           if (x)
             r->info.ptr.x = x->val.dim;
 
@@ -973,12 +947,12 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
                 y->val.node->exprA->val.node->op == AP_TEXPR_MUL)
               {
                 r->info.ptr.offy = shape_offset_from_cast (x->val.node->type,
-                                                           x->val.node->dir, x, intdim, ptrdim);
+                                                           x->val.node->dir,
+                                                           x, intdim, ptrdim);
                 y = y->val.node->exprA->val.node->exprA;
               }
             else
-              arg_assert (0, return OFFSET_NONE;
-                          );
+              arg_assert (0, return OFFSET_NONE;);
           if (y)
             {
               if (y->discr == AP_TEXPR_DIM)
@@ -988,38 +962,34 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
                 // shall be NULL
                 r->info.ptr.y = NULL_DIM;
               else
-                arg_assert (0, return OFFSET_NONE;
-                            );
+                arg_assert (0, return OFFSET_NONE;);
             }
           else
             r->info.ptr.y = NULL_DIM;
         }
       else
-        arg_assert (0, return OFFSET_NONE;
-                    );
+        arg_assert (0, return OFFSET_NONE;);
     }
   else if (hasptr && hasdata && !hasdatafield && !hasptrfield)
     {
       /* split constraint x * l */
-      arg_assert (e->discr == AP_TEXPR_NODE, return OFFSET_NONE;
-                  );
+      arg_assert (e->discr == AP_TEXPR_NODE, return OFFSET_NONE;);
       if (e->val.node->op == AP_TEXPR_CAST &&
           IS_ARRAY_SPLIT (e->val.node->type, e->val.node->dir))
-	{
+        {
           r->info.ptr.x = e->val.node->exprA->val.node->exprA->val.dim;
-          r->info.ptr.offx = shape_offset_from_cast (e->val.node->type, 
-						     e->val.node->dir,
-						     e, intdim, ptrdim);
+          r->info.ptr.offx = shape_offset_from_cast (e->val.node->type,
+                                                     e->val.node->dir,
+                                                     e, intdim, ptrdim);
 #ifndef NDEBUG2
-	  fprintf (stdout, "\n====shape_pcons_of_texpr: x%d[x%d]\n", 
-		   r->info.ptr.x, r->info.ptr.offx);
+          fprintf (stdout, "\n====shape_pcons_of_texpr: x%d[x%d]\n",
+                   r->info.ptr.x, r->info.ptr.offx);
 #endif
           r->info.ptr.y = NULL_DIM;
           r->info.ptr.offy = OFFSET_NONE;
         }
       else
-	arg_assert (0, return OFFSET_NONE;
-		    );
+        arg_assert (0, return OFFSET_NONE;);
     }
   else if (hasdatafield && !hasptrfield)
     {
@@ -1028,8 +998,7 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
        * and an array of offsets for the ptr vars.
        */
       ap_texpr0_t *linexpr;
-      arg_assert (e->discr == AP_TEXPR_NODE, return OFFSET_NONE;
-                  );
+      arg_assert (e->discr == AP_TEXPR_NODE, return OFFSET_NONE;);
       /* for assign expression, fill dereferencing field */
       if (e->val.node->op == AP_TEXPR_CAST &&
           IS_OFFSET (e->val.node->type, e->val.node->dir))
@@ -1042,17 +1011,21 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
               e->val.node->exprA->discr == AP_TEXPR_NODE &&
               e->val.node->exprA->val.node->op == AP_TEXPR_DIV)
             {
-              deref_offset = shape_offset_from_cast (e->val.node->type, e->val.node->dir,
-                                                     e, intdim, ptrdim);
+              deref_offset =
+                shape_offset_from_cast (e->val.node->type, e->val.node->dir,
+                                        e, intdim, ptrdim);
 #ifndef NDEBUG2
-              fprintf (stdout, "\n====shape_pcons_of_texpr: deref_offset=%d\n", deref_offset);
+              fprintf (stdout,
+                       "\n====shape_pcons_of_texpr: deref_offset=%d\n",
+                       deref_offset);
 #endif
               linexpr = e->val.node->exprA->val.node->exprA;
             }
-          else // field or array reference, normal cast, function application, etc
+          else                  // field or array reference, normal cast, function application, etc
             linexpr = e;
 #ifndef NDEBUG2
-          fprintf (stdout, "\n====shape_pcons_of_texpr: offset=%d, op=%d\n", deref_offset, e->val.node->exprA->val.node->op);
+          fprintf (stdout, "\n====shape_pcons_of_texpr: offset=%d, op=%d\n",
+                   deref_offset, e->val.node->exprA->val.node->op);
 #endif
         }
       else
@@ -1061,21 +1034,23 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
 
       /* fill r->info.data.cons.linexpr0 field from linexpr */
       r->info.data.cons.linexpr0 =
-              ap_linexpr0_alloc (AP_LINEXPR_DENSE, intdim + ptrdim);
+        ap_linexpr0_alloc (AP_LINEXPR_DENSE, intdim + ptrdim);
       /* fill r->info.data.offsets also */
       r->info.data.offsets = shape_init_offsets (intdim, ptrdim);
       // call analysis of texpr
-      ap_scalar_t *cst =
-              shape_dataexpr_of_texpr (linexpr, NULL,
-                                       r->info.data.cons.linexpr0, r->info.data.offsets,
-                                       intdim, ptrdim);
+      ap_scalar_t *cst = shape_dataexpr_of_texpr (linexpr, NULL,
+                                                  r->info.data.cons.linexpr0,
+                                                  r->info.data.offsets,
+                                                  intdim, ptrdim);
       if (cst)
         {
           ap_linexpr0_set_cst_scalar (r->info.data.cons.linexpr0, cst);
           ap_scalar_free (cst);
         }
 #ifndef NDEBUG
-      fprintf (stdout, "\n====shape_pcons_of_texpr: for dim=(%d,%d) returns (", intdim, ptrdim);
+      fprintf (stdout,
+               "\n====shape_pcons_of_texpr: for dim=(%d,%d) returns (",
+               intdim, ptrdim);
       // produces a memory access error because the pcons has no final scalar
       // shape_pcons_fdump(stdout, r);
       fprintf (stdout, ")\n");
@@ -1087,10 +1062,10 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
       /* shall be a linear constraint on data vars only */
       r->type = DATA_CONS;
       r->info.data.cons.linexpr0 =
-              ap_linexpr0_alloc (AP_LINEXPR_DENSE, intdim + ptrdim);
+        ap_linexpr0_alloc (AP_LINEXPR_DENSE, intdim + ptrdim);
       r->info.data.offsets = NULL;
-      shape_dataexpr_of_texpr (e, NULL, r->info.data.cons.linexpr0, r->info.data.offsets,
-                               intdim, ptrdim);
+      shape_dataexpr_of_texpr (e, NULL, r->info.data.cons.linexpr0,
+                               r->info.data.offsets, intdim, ptrdim);
     }
   else if (!hasptr && !hasdata && !hasdatafield && !hasptrfield)
     {
@@ -1099,24 +1074,24 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
       /* if (e->discr == AP_TEXPR_CST) { */
       r->type = (e->discr == AP_TEXPR_CST) ? DATA_CONS : SL3_CONS;
       r->info.data.cons.linexpr0 =
-              ap_linexpr0_alloc (AP_LINEXPR_DENSE, intdim + ptrdim);
+        ap_linexpr0_alloc (AP_LINEXPR_DENSE, intdim + ptrdim);
       r->info.data.offsets = NULL;
       ap_scalar_t *cst =
-              shape_dataexpr_of_texpr (e, NULL, r->info.data.cons.linexpr0, r->info.data.offsets,
-                                       intdim, ptrdim);
+        shape_dataexpr_of_texpr (e, NULL, r->info.data.cons.linexpr0,
+                                 r->info.data.offsets,
+                                 intdim, ptrdim);
       if (cst)
-        { /* TODO: test that ths computations is corectly done */
+        {                       /* TODO: test that ths computations is corectly done */
           ap_linexpr0_set_cst_scalar (r->info.data.cons.linexpr0, cst);
           ap_scalar_free (cst);
         }
       /*  } else
-          arg_assert(0, return OFFSET_NONE;
-          );
+         arg_assert(0, return OFFSET_NONE;
+         );
        */
     }
-  else /* combination of data and next dereferencing is not allowed */
-    arg_assert (0, return OFFSET_NONE;
-                );
+  else                          /* combination of data and next dereferencing is not allowed */
+    arg_assert (0, return OFFSET_NONE;);
 
   return deref_offset;
 }
@@ -1128,8 +1103,7 @@ shape_pcons_of_texpr (ap_texpr0_t * e,
 /* ===================================================================== */
 
 pcons0_t *
-shape_pcons_of_tcons (ap_tcons0_t * c,
-                      size_t intdim, size_t ptrdim)
+shape_pcons_of_tcons (ap_tcons0_t * c, size_t intdim, size_t ptrdim)
 {
   pcons0_t *r;
 #ifndef NDEBUG2
@@ -1152,8 +1126,7 @@ shape_pcons_of_tcons (ap_tcons0_t * c,
   else
     {
       ap_texpr0_t *e = c->texpr0;
-      checked_malloc (r, pcons0_t, sizeof (pcons0_t), 1, return NULL;
-                      );
+      checked_malloc (r, pcons0_t, sizeof (pcons0_t), 1, return NULL;);
       memset (r, 0, sizeof (pcons0_t));
       r->intdim = intdim;
       r->ptrdim = ptrdim;
@@ -1176,9 +1149,8 @@ shape_pcons_of_tcons (ap_tcons0_t * c,
         case AP_CONS_SUP:
           r->type = OTHER_CONS;
           break;
-        default: /* ERROR */
-          arg_assert (0, return r;
-                      );
+        default:               /* ERROR */
+          arg_assert (0, return r;);
           break;
         }
 
@@ -1210,15 +1182,13 @@ shape_pcons_of_tcons (ap_tcons0_t * c,
 
           r->info.data.cons.scalar = NULL;
         }
-      else /* pointer constraints */
+      else                      /* pointer constraints */
         {
           arg_assert ((c->constyp == AP_CONS_EQ
                        || c->constyp == AP_CONS_DISEQ
                        || c->constyp == AP_CONS_SUP
                        || c->constyp == AP_CONS_SUPEQ
-                       || c->constyp == AP_CONS_EQMOD),
-                      return r;
-                      );
+                       || c->constyp == AP_CONS_EQMOD), return r;);
           if (c->constyp == AP_CONS_SUP || c->constyp == AP_CONS_SUPEQ)
             {
               // may be REACH, ACYCLIC, CYCLIC
@@ -1322,8 +1292,7 @@ shape_pcons_array_of_lincons_array (ap_lincons0_array_t * array,
 {
   pcons0_array_t *arr;
   size_t s;
-  PCONS_ARRAY_OF_CONS_ARRAY (array, shape_pcons_of_lincons, intdim,
-                             ptrdim);
+  PCONS_ARRAY_OF_CONS_ARRAY (array, shape_pcons_of_lincons, intdim, ptrdim);
 
   return arr;
 }
@@ -1334,8 +1303,7 @@ shape_pcons_array_of_tcons_array (ap_tcons0_array_t * array, size_t intdim,
 {
   pcons0_array_t *arr;
   size_t s;
-  PCONS_ARRAY_OF_CONS_ARRAY (array, shape_pcons_of_tcons, intdim,
-                             ptrdim);
+  PCONS_ARRAY_OF_CONS_ARRAY (array, shape_pcons_of_tcons, intdim, ptrdim);
 
   return arr;
 }
@@ -1344,21 +1312,20 @@ shape_pcons_array_of_tcons_array (ap_tcons0_array_t * array, size_t intdim,
  * from a linear constraint on ptrvar.
  */
 ap_lincons0_t
-shape_lincons_of_node (ap_lincons0_t * c, int* offsets,
+shape_lincons_of_node (ap_lincons0_t * c, int *offsets,
                        size_t * v2n,
                        size_t size, size_t intdim, size_t ptrdim)
 {
   ap_linexpr0_t *l =
-          shape_linexpr_of_node (c->linexpr0, v2n, size, intdim, ptrdim);
-  ap_scalar_t * zero = ap_scalar_alloc ();
+    shape_linexpr_of_node (c->linexpr0, v2n, size, intdim, ptrdim);
+  ap_scalar_t *zero = ap_scalar_alloc ();
   /* TODO: the code below works only for uniforms offsets and not for arrays */
   int kind = intdim + OFFSET_DATA;
   if (offsets != NULL)
     {
       size_t i;
       for (i = 0; i < ptrdim; i++)
-        if (offsets[i] != OFFSET_NONE &&
-            offsets[i] != kind)
+        if (offsets[i] != OFFSET_NONE && offsets[i] != kind)
           kind = offsets[i];
     }
   ap_scalar_set_int (zero, kind);
@@ -1376,8 +1343,7 @@ shape_passign_of_linexpr (ap_dim_t lhs, ap_linexpr0_t * rhs,
 {
   passign0_t *r;
 
-  arg_assert (rhs && lhs < intdim + ptrdim, return NULL;
-              );
+  arg_assert (rhs && lhs < intdim + ptrdim, return NULL;);
 
 #ifndef NDEBUG
   fprintf (stdout, "****shape_passign_of_linexpr: x%zu = ", lhs);
@@ -1388,21 +1354,18 @@ shape_passign_of_linexpr (ap_dim_t lhs, ap_linexpr0_t * rhs,
   if ((r = shape_passign_search (lhs, intdim, ptrdim, rhs, NULL)) != NULL)
     return r;
 
-  checked_malloc (r, passign0_t, sizeof (passign0_t), 1, return NULL;
-                  );
+  checked_malloc (r, passign0_t, sizeof (passign0_t), 1, return NULL;);
 
   /* Fill the lhs part */
   r->x = lhs;
   r->intdim = intdim;
   r->ptrdim = ptrdim;
   r->offx = OFFSET_NONE;
-  if (IS_PTRDIM (lhs, intdim, ptrdim) &&
-      ap_linexpr0_is_real (rhs, intdim))
+  if (IS_PTRDIM (lhs, intdim, ptrdim) && ap_linexpr0_is_real (rhs, intdim))
     {
       /* x = y ptr assignment, the expression can be y or NULL */
       pcons0_t *c;
-      checked_malloc (c, pcons0_t, sizeof (pcons0_t), 1, return NULL;
-                      );
+      checked_malloc (c, pcons0_t, sizeof (pcons0_t), 1, return NULL;);
       c->type = OTHER_CONS;
       shape_pcons_of_linexpr (rhs, c, intdim, ptrdim);
       r->info.ptr.y = c->info.ptr.x;
@@ -1418,8 +1381,7 @@ shape_passign_of_linexpr (ap_dim_t lhs, ap_linexpr0_t * rhs,
       r->op = PA_ASSIGN_INT;
     }
   else
-    arg_assert (0, return NULL;
-                );
+    arg_assert (0, return NULL;);
   // fill hashable fields
   r->lhs = lhs;
   r->lexpr = rhs;
@@ -1436,12 +1398,10 @@ shape_passign_of_linexpr_array (ap_dim_t * lhs, ap_linexpr0_t ** rhs,
   size_t i;
   passign0_array_t *r = NULL;
   checked_malloc (r, passign0_array_t, sizeof (passign0_array_t), 1,
-                  return NULL;
-                  );
+                  return NULL;);
   r->size = size;
   checked_malloc (r->p, passign0_t *, sizeof (passign0_t *), size,
-                  return NULL;
-                  );
+                  return NULL;);
   for (i = 0; i < size; i++)
     r->p[i] = shape_passign_of_linexpr (lhs[i], rhs[i], intdim, ptrdim);
 
@@ -1460,18 +1420,17 @@ shape_passign_of_texpr (ap_dim_t lhs, ap_texpr0_t * rhs,
 
   passign0_t *r;
 #ifndef NDEBUG1
-  fprintf (stdout, "===== shape_passign_of_texpr: (over intdim=%zu, ptrdim=%zu) of lhs=%d\n",
+  fprintf (stdout,
+           "===== shape_passign_of_texpr: (over intdim=%zu, ptrdim=%zu) of lhs=%d\n",
            intdim, ptrdim, lhs);
   fflush (stdout);
 #endif
-  arg_assert (rhs && lhs < intdim + ptrdim, return NULL;
-              );
+  arg_assert (rhs && lhs < intdim + ptrdim, return NULL;);
 
   if ((r = shape_passign_search (lhs, intdim, ptrdim, NULL, rhs)) != NULL)
     return r;
 
-  checked_malloc (r, passign0_t, sizeof (passign0_t), 1, return NULL;
-                  );
+  checked_malloc (r, passign0_t, sizeof (passign0_t), 1, return NULL;);
 
   /* fill lhs part with a ptr dimension and set dereferencing part */
   r->x = lhs;
@@ -1481,16 +1440,17 @@ shape_passign_of_texpr (ap_dim_t lhs, ap_texpr0_t * rhs,
   if (shape_is_free_stmt (rhs))
     {
       r->op = PA_FREE;
-      r->offx = OFFSET_NONE; // WARNING: no dereference in free
+      r->offx = OFFSET_NONE;    // WARNING: no dereference in free
     }
   else if (shape_is_alloc_stmt (rhs))
     {
-      r->op = PA_ALLOC; // TODO
+      r->op = PA_ALLOC;         // TODO
       r->offx = OFFSET_NONE;
       r->info.alloc.cst = true; // TODO
       r->info.alloc.size.c = 1; // TODO
     }
-  else if ((r->offx = shape_is_field_null_stmt (rhs, intdim, ptrdim)) != OFFSET_NONE)
+  else if ((r->offx = shape_is_field_null_stmt (rhs, intdim, ptrdim)) !=
+           OFFSET_NONE)
     {
       r->op = PA_ASSIGN_PTR;
       r->info.ptr.y = NULL_DIM;
@@ -1502,8 +1462,7 @@ shape_passign_of_texpr (ap_dim_t lhs, ap_texpr0_t * rhs,
       int deref_offset;
 
       /* other cases than free and alloc */
-      checked_malloc (c, pcons0_t, sizeof (pcons0_t), 1, return NULL;
-                      );
+      checked_malloc (c, pcons0_t, sizeof (pcons0_t), 1, return NULL;);
       c->type = OTHER_CONS;
       c->intdim = intdim;
       c->ptrdim = ptrdim;
@@ -1511,26 +1470,24 @@ shape_passign_of_texpr (ap_dim_t lhs, ap_texpr0_t * rhs,
       if (IS_PTRDIM (lhs, intdim, ptrdim))
         {
           /* pointer assignment */
-          if (c->type == DATA_CONS
-              && (deref_offset <= ((int) intdim + OFFSET_DATA))
-              && deref_offset >= 0) /* data assignment */
+          if (c->type == DATA_CONS && (deref_offset <= ((int) intdim + OFFSET_DATA)) && deref_offset >= 0)      /* data assignment */
             {
               r->op = PA_ASSIGN_INT;
               r->offx = deref_offset;
               r->info.data.expr = c->info.data.cons.linexpr0;
               r->info.data.offsets = c->info.data.offsets;
-              c->info.data.cons.linexpr0 = NULL; /* to secure free c  */
+              c->info.data.cons.linexpr0 = NULL;        /* to secure free c  */
               c->info.data.offsets = NULL;
             }
           else if (c->type == DATA_CONS)
-            { // data constant, thus NULL
+            {                   // data constant, thus NULL
               r->op = PA_ASSIGN_PTR;
               r->offx = deref_offset;
               r->info.ptr.y = NULL_DIM;
               r->info.ptr.offy = OFFSET_NONE;
             }
           else
-            { // ptr expression
+            {                   // ptr expression
               r->op = PA_ASSIGN_PTR;
               r->offx = deref_offset;
               r->info.ptr.y = c->info.ptr.x;
@@ -1539,18 +1496,17 @@ shape_passign_of_texpr (ap_dim_t lhs, ap_texpr0_t * rhs,
         }
       else if (IS_INTDIM (lhs, intdim, ptrdim))
         {
-          arg_assert (deref_offset == OFFSET_NONE && c->type == DATA_CONS, return NULL;
-                      );
+          arg_assert (deref_offset == OFFSET_NONE
+                      && c->type == DATA_CONS, return NULL;);
           r->op = PA_ASSIGN_INT;
           r->offx = deref_offset;
           r->info.data.expr = c->info.data.cons.linexpr0;
           r->info.data.offsets = c->info.data.offsets;
-          c->info.data.cons.linexpr0 = NULL; /* to secure free c  */
+          c->info.data.cons.linexpr0 = NULL;    /* to secure free c  */
           c->info.data.offsets = NULL;
         }
       else
-        arg_assert (0, return NULL;
-                    );
+        arg_assert (0, return NULL;);
       free (c);
     }
   r->lhs = lhs;
@@ -1568,12 +1524,10 @@ shape_passign_of_texpr_array (ap_dim_t * lhs, ap_texpr0_t ** rhs, size_t size,
   size_t i;
   passign0_array_t *r = NULL;
   checked_malloc (r, passign0_array_t, sizeof (passign0_array_t), 1,
-                  return NULL;
-                  );
+                  return NULL;);
   r->size = size;
   checked_malloc (r->p, passign0_t *, sizeof (passign0_t *), size,
-                  return NULL;
-                  );
+                  return NULL;);
   for (i = 0; i < size; i++)
     r->p[i] = shape_passign_of_texpr (lhs[i], rhs[i], intdim, ptrdim);
 
@@ -1599,7 +1553,7 @@ shape_texpr_null (size_t intdim, size_t ptrdim)
 {
   if ((intdim != intdim) || (ptrdim != ptrdim)) /* remove gcc warning */
     return 0;
-    
+
   return ap_texpr0_cst_scalar_double (0.0);
 }
 
@@ -1618,9 +1572,10 @@ shape_texpr_x_next (size_t x, size_t intdim, size_t ptrdim)
     return ap_texpr0_unop (AP_TEXPR_CAST,
                            ap_texpr0_binop (AP_TEXPR_MUL,
                                             ap_texpr0_dim (x),
-                                            ap_texpr0_cst_scalar_int (OFFSET_NEXT),
-                                            AP_RTYPE_REAL, AP_RDIR_ZERO),
-                           AP_RTYPE_REAL, AP_RDIR_ZERO);
+                                            ap_texpr0_cst_scalar_int
+                                            (OFFSET_NEXT), AP_RTYPE_REAL,
+                                            AP_RDIR_ZERO), AP_RTYPE_REAL,
+                           AP_RDIR_ZERO);
   else
     return NULL;
 }
@@ -1633,9 +1588,10 @@ shape_texpr_x_data (size_t x, size_t intdim, size_t ptrdim)
     return ap_texpr0_unop (AP_TEXPR_CAST,
                            ap_texpr0_binop (AP_TEXPR_MUL,
                                             ap_texpr0_dim (x),
-                                            ap_texpr0_cst_scalar_int (OFFSET_DATA),
-                                            AP_RTYPE_REAL, AP_RDIR_ZERO),
-                           AP_RTYPE_INT, AP_RDIR_ZERO);
+                                            ap_texpr0_cst_scalar_int
+                                            (OFFSET_DATA), AP_RTYPE_REAL,
+                                            AP_RDIR_ZERO), AP_RTYPE_INT,
+                           AP_RDIR_ZERO);
 
   else
     return NULL;
@@ -1646,8 +1602,7 @@ shape_texpr_x_len (size_t x, size_t intdim, size_t ptrdim)
 {
   if (IS_PTRDIM (x, intdim, ptrdim))
     return ap_texpr0_unop (AP_TEXPR_CAST,
-                           ap_texpr0_dim (x),
-                           AP_RTYPE_QUAD, AP_RDIR_UP);
+                           ap_texpr0_dim (x), AP_RTYPE_QUAD, AP_RDIR_UP);
   else
     return NULL;
 }
@@ -1657,8 +1612,7 @@ shape_texpr_x_ucons (size_t x, size_t intdim, size_t ptrdim)
 {
   if (IS_PTRDIM (x, intdim, ptrdim))
     return ap_texpr0_unop (AP_TEXPR_CAST,
-                           ap_texpr0_dim (x),
-                           AP_RTYPE_QUAD, AP_RDIR_DOWN);
+                           ap_texpr0_dim (x), AP_RTYPE_QUAD, AP_RDIR_DOWN);
   else
     return NULL;
 }
@@ -1672,9 +1626,10 @@ shape_texpr_deref_next (ap_texpr0_t * t)
     return ap_texpr0_unop (AP_TEXPR_CAST,
                            ap_texpr0_binop (AP_TEXPR_DIV,
                                             t,
-                                            ap_texpr0_cst_scalar_int (OFFSET_NEXT),
-                                            AP_RTYPE_REAL, AP_RDIR_ZERO),
-                           AP_RTYPE_REAL, AP_RDIR_ZERO);
+                                            ap_texpr0_cst_scalar_int
+                                            (OFFSET_NEXT), AP_RTYPE_REAL,
+                                            AP_RDIR_ZERO), AP_RTYPE_REAL,
+                           AP_RDIR_ZERO);
   else
     return NULL;
 }
@@ -1688,9 +1643,10 @@ shape_texpr_deref_data (ap_texpr0_t * t)
     return ap_texpr0_unop (AP_TEXPR_CAST,
                            ap_texpr0_binop (AP_TEXPR_DIV,
                                             t,
-                                            ap_texpr0_cst_scalar_int (OFFSET_DATA),
-                                            AP_RTYPE_INT, AP_RDIR_ZERO),
-                           AP_RTYPE_REAL, AP_RDIR_ZERO);
+                                            ap_texpr0_cst_scalar_int
+                                            (OFFSET_DATA), AP_RTYPE_INT,
+                                            AP_RDIR_ZERO), AP_RTYPE_REAL,
+                           AP_RDIR_ZERO);
   else
     return NULL;
 }
@@ -1698,30 +1654,32 @@ shape_texpr_deref_data (ap_texpr0_t * t)
 ap_texpr0_t *
 shape_texpr_x_at_i (size_t x, size_t i, size_t intdim, size_t ptrdim)
 {
- 
+
   if ((intdim != intdim) || (ptrdim != ptrdim)) /* remove gcc warning */
     return 0;
-       
-    return ap_texpr0_unop (AP_TEXPR_CAST,
-                           ap_texpr0_binop (AP_TEXPR_MUL,
-                                            ap_texpr0_dim(x),
-                                            ap_texpr0_dim(i),
-                                            AP_RTYPE_INT, AP_RDIR_ZERO),
-                           AP_RTYPE_REAL, AP_RDIR_NEAREST);
+
+  return ap_texpr0_unop (AP_TEXPR_CAST,
+                         ap_texpr0_binop (AP_TEXPR_MUL,
+                                          ap_texpr0_dim (x),
+                                          ap_texpr0_dim (i),
+                                          AP_RTYPE_INT, AP_RDIR_ZERO),
+                         AP_RTYPE_REAL, AP_RDIR_NEAREST);
 }
 
 ap_lincons0_t
 shape_lincons_same_x_y (size_t x, size_t y, size_t intdim, size_t ptrdim)
 {
   if (x != NULL_DIM && y != NULL_DIM)
-    return shape_lincons_x_y_l (AP_CONS_EQ, 1, x, -1, y, 0, 0, intdim, ptrdim);
+    return shape_lincons_x_y_l (AP_CONS_EQ, 1, x, -1, y, 0, 0, intdim,
+                                ptrdim);
   if (x != NULL_DIM && y == NULL_DIM)
     return shape_lincons_x_cst (AP_CONS_EQ, x, 0, intdim, ptrdim);
   if (x == NULL_DIM && y != NULL_DIM)
     return shape_lincons_x_cst (AP_CONS_EQ, y, 0, intdim, ptrdim);
 
   /* 0 = 0 */
-  return ap_lincons0_make (AP_CONS_EQ, ap_linexpr0_alloc (AP_LINEXPR_DENSE, 0), NULL);
+  return ap_lincons0_make (AP_CONS_EQ,
+                           ap_linexpr0_alloc (AP_LINEXPR_DENSE, 0), NULL);
 }
 
 ap_tcons0_t
@@ -1764,11 +1722,13 @@ shape_lincons_diff_x_y (size_t x, size_t y, size_t intdim, size_t ptrdim)
     return shape_lincons_x_cst (AP_CONS_DISEQ, x, 0, intdim, ptrdim);
 
   else
-    return shape_lincons_x_y_l (AP_CONS_DISEQ, 1, x, -1, y, 0, 0, intdim, ptrdim);
+    return shape_lincons_x_y_l (AP_CONS_DISEQ, 1, x, -1, y, 0, 0, intdim,
+                                ptrdim);
 }
 
 ap_tcons0_t
-shape_tcons_diff_x_y (size_t x, bool nx, size_t y, bool ny, size_t intdim, size_t ptrdim)
+shape_tcons_diff_x_y (size_t x, bool nx, size_t y, bool ny, size_t intdim,
+                      size_t ptrdim)
 {
 
   return shape_tcons_x_y (AP_CONS_DISEQ, x, nx, y, ny, intdim, ptrdim);
@@ -1782,11 +1742,13 @@ shape_lincons_reach_x_y (size_t x, size_t y, size_t intdim, size_t ptrdim)
     return shape_lincons_x_cst (AP_CONS_SUP, x, 0, intdim, ptrdim);
 
   else
-    return shape_lincons_x_y_l (AP_CONS_SUP, 1, x, -1, y, 0, 0, intdim, ptrdim);
+    return shape_lincons_x_y_l (AP_CONS_SUP, 1, x, -1, y, 0, 0, intdim,
+                                ptrdim);
 }
 
 ap_tcons0_t
-shape_tcons_reach_x_y (size_t x, bool nx, size_t y, bool ny, size_t intdim, size_t ptrdim)
+shape_tcons_reach_x_y (size_t x, bool nx, size_t y, bool ny, size_t intdim,
+                       size_t ptrdim)
 {
 
   return shape_tcons_x_y (AP_CONS_SUP, x, nx, y, ny, intdim, ptrdim);
@@ -1807,8 +1769,7 @@ shape_texpr_x_alloc (size_t x, size_t intdim, size_t ptrdim)
 }
 
 ap_texpr0_t *
-shape_texpr_x_free (size_t x, size_t intdim,
-                    size_t ptrdim)
+shape_texpr_x_free (size_t x, size_t intdim, size_t ptrdim)
 {
   // correct if x is a ptr variable
   if (IS_PTRDIM (x, intdim, ptrdim))
@@ -1820,8 +1781,9 @@ shape_texpr_x_free (size_t x, size_t intdim,
 }
 
 /* Random constructors: High level */
-const char *exprname[] = {"ptr ", "reach ", "lindata ",
-  "next ", "deref ", "data ", "deref_data"};
+const char *exprname[] = { "ptr ", "reach ", "lindata ",
+  "next ", "deref ", "data ", "deref_data"
+};
 
 /* Build randomly linear expressions. */
 ap_linexpr0_t *
@@ -1876,21 +1838,22 @@ shape_texpr_random (exprmode_t mode, size_t intdim, size_t ptrdim)
 
   switch (mode)
     {
-    case expr_next: /* generate x->next */
+    case expr_next:            /* generate x->next */
       /* choose a variable x randomly, either if it points to null */
       x = RANDOM_PTRDIM (intdim, ptrdim);
       return shape_texpr_x_next (x, intdim, ptrdim);
 
-    case expr_deref: /* x / next or x->next/next */
+    case expr_deref:           /* x / next or x->next/next */
       /* choose a variable x randomly, either if it points to null */
       x = RANDOM_PTRDIM_OR_NULL (intdim, ptrdim);
       if (lrand48 () % 10 < 2 && x != NULL_DIM)
-        return shape_texpr_deref_next (shape_texpr_x_next (x, intdim, ptrdim));
+        return
+          shape_texpr_deref_next (shape_texpr_x_next (x, intdim, ptrdim));
       else
         return shape_texpr_deref_next (ap_texpr0_dim (x));
 
     case expr_reach:
-      { /* generate x[* next] - y[* next] */
+      {                         /* generate x[* next] - y[* next] */
         size_t y;
         ap_texpr0_t *xn, *yn;
         /* choose a variable x randomly, either if it points to null */
@@ -1918,55 +1881,55 @@ shape_texpr_random (exprmode_t mode, size_t intdim, size_t ptrdim)
                                 AP_RTYPE_SINGLE, AP_RDIR_NEAREST);
       }
 
-    case expr_data: /* v1 + x->data or cst + x->data */
+    case expr_data:            /* v1 + x->data or cst + x->data */
       {
         ap_texpr0_t *e;
         x = RANDOM_PTRDIM (intdim, ptrdim);
         e = shape_texpr_x_data (x, intdim, ptrdim);
         switch (lrand48 () % 4)
           {
-          case 0: /* cst * x->data */
+          case 0:              /* cst * x->data */
             e = ap_texpr0_binop (AP_TEXPR_MUL,
                                  ap_texpr0_cst_scalar_double ((double)
                                                               (lrand48 () %
                                                                5 + 1)), e,
                                  AP_RTYPE_INT, AP_RDIR_NEAREST);
             break;
-          case 1: /* cst + cst * x*data */
+          case 1:              /* cst + cst * x*data */
             e = ap_texpr0_binop (AP_TEXPR_MUL,
                                  ap_texpr0_cst_scalar_double ((double)
                                                               (lrand48 () %
                                                                5 + 1)), e,
                                  AP_RTYPE_INT, AP_RDIR_NEAREST);
             e =
-                    ap_texpr0_binop (AP_TEXPR_ADD,
-                                     ap_texpr0_cst_scalar_double ((double)
-                                                                  (lrand48 () % 5 +
-                                                                   1)), e,
-                                     AP_RTYPE_INT, AP_RDIR_NEAREST);
+              ap_texpr0_binop (AP_TEXPR_ADD,
+                               ap_texpr0_cst_scalar_double ((double)
+                                                            (lrand48 () % 5 +
+                                                             1)), e,
+                               AP_RTYPE_INT, AP_RDIR_NEAREST);
             break;
-          case 2: /* v + x->data */
+          case 2:              /* v + x->data */
             e =
-                    ap_texpr0_binop (AP_TEXPR_ADD,
-                                     ap_texpr0_dim (lrand48 () % intdim), e,
-                                     AP_RTYPE_INT, AP_RDIR_NEAREST);
+              ap_texpr0_binop (AP_TEXPR_ADD,
+                               ap_texpr0_dim (lrand48 () % intdim), e,
+                               AP_RTYPE_INT, AP_RDIR_NEAREST);
             break;
-          default: /* v + cst*x->data */
+          default:             /* v + cst*x->data */
             e = ap_texpr0_binop (AP_TEXPR_MUL,
                                  ap_texpr0_cst_scalar_double ((double)
                                                               (lrand48 () %
                                                                5 + 1)), e,
                                  AP_RTYPE_INT, AP_RDIR_NEAREST);
             e =
-                    ap_texpr0_binop (AP_TEXPR_ADD,
-                                     ap_texpr0_dim (lrand48 () % intdim), e,
-                                     AP_RTYPE_INT, AP_RDIR_NEAREST);
+              ap_texpr0_binop (AP_TEXPR_ADD,
+                               ap_texpr0_dim (lrand48 () % intdim), e,
+                               AP_RTYPE_INT, AP_RDIR_NEAREST);
 
             break;
           }
         return e;
       }
-    default: /* expr_data / data */
+    default:                   /* expr_data / data */
       return shape_texpr_deref_data (shape_texpr_random (expr_data, intdim,
                                                          ptrdim));
     }
@@ -2040,8 +2003,8 @@ ap_texpr0_t *
 shape_texpr_x_y (size_t x, bool nx, size_t y, bool ny, size_t intdim,
                  size_t ptrdim)
 {
-  ap_texpr0_t* tx = NULL;
-  ap_texpr0_t* ty = NULL;
+  ap_texpr0_t *tx = NULL;
+  ap_texpr0_t *ty = NULL;
   if (x != NULL_DIM)
     tx = shape_texpr_x_n_next (x, (nx) ? 1 : 0, intdim, ptrdim);
   else
@@ -2074,35 +2037,36 @@ shape_texpr_x_y_v_cst_data (int cx, size_t x, int cy, size_t y,
   ap_texpr0_t *t;
   if (cx)
     t = ap_texpr0_binop (AP_TEXPR_MUL, ap_texpr0_cst_scalar_int (cx),
-                         shape_texpr_x_data (x, intdim, ptrdim), AP_RTYPE_INT, AP_RDIR_RND);
+                         shape_texpr_x_data (x, intdim, ptrdim), AP_RTYPE_INT,
+                         AP_RDIR_RND);
   else
     t = NULL;
   if (cy)
     {
       ap_texpr0_t *ty =
-              ap_texpr0_binop (AP_TEXPR_MUL, ap_texpr0_cst_scalar_int (cy),
-                               shape_texpr_x_data (y, intdim, ptrdim),
-                               AP_RTYPE_INT, AP_RDIR_RND);
+        ap_texpr0_binop (AP_TEXPR_MUL, ap_texpr0_cst_scalar_int (cy),
+                         shape_texpr_x_data (y, intdim, ptrdim),
+                         AP_RTYPE_INT, AP_RDIR_RND);
       t =
-              (t == NULL) ? ty : ap_texpr0_binop (AP_TEXPR_ADD, t, ty, AP_RTYPE_INT,
-                                                  AP_RDIR_RND);
+        (t == NULL) ? ty : ap_texpr0_binop (AP_TEXPR_ADD, t, ty, AP_RTYPE_INT,
+                                            AP_RDIR_RND);
     }
   if (cv)
     {
       ap_texpr0_t *tv =
-              ap_texpr0_binop (AP_TEXPR_MUL, ap_texpr0_cst_scalar_int (cv),
-                               ap_texpr0_dim (v),
-                               AP_RTYPE_INT, AP_RDIR_RND);
+        ap_texpr0_binop (AP_TEXPR_MUL, ap_texpr0_cst_scalar_int (cv),
+                         ap_texpr0_dim (v),
+                         AP_RTYPE_INT, AP_RDIR_RND);
       t =
-              (t == NULL) ? tv : ap_texpr0_binop (AP_TEXPR_ADD, t, tv, AP_RTYPE_INT,
-                                                  AP_RDIR_RND);
+        (t == NULL) ? tv : ap_texpr0_binop (AP_TEXPR_ADD, t, tv, AP_RTYPE_INT,
+                                            AP_RDIR_RND);
     }
   if (cst || !t)
     {
       ap_texpr0_t *tcst = ap_texpr0_cst_scalar_int (cst);
       t =
-              (t == NULL) ? tcst : ap_texpr0_binop (AP_TEXPR_ADD, t, tcst,
-                                                    AP_RTYPE_INT, AP_RDIR_RND);
+        (t == NULL) ? tcst : ap_texpr0_binop (AP_TEXPR_ADD, t, tcst,
+                                              AP_RTYPE_INT, AP_RDIR_RND);
     }
   if (t && rhs)
     t = shape_texpr_deref_data (t);
@@ -2130,8 +2094,7 @@ shape_texpr_x_n_next (size_t x, int offx, size_t intdim, size_t ptrdim)
 
 /** Build expression x(->next)- cst */
 ap_texpr0_t *
-shape_texpr_x_cst (size_t x, bool offx, int cst, size_t intdim,
-                   size_t ptrdim)
+shape_texpr_x_cst (size_t x, bool offx, int cst, size_t intdim, size_t ptrdim)
 {
   ap_texpr0_t *tx, *ty;
   tx = shape_texpr_x_n_next (x, (offx) ? 1 : 0, intdim, ptrdim);
@@ -2178,15 +2141,15 @@ shape_texpr_merge (size_t ** nodes, size_t size, size_t max)
   size_t i, j;
   ap_texpr0_t **r = (ap_texpr0_t **) malloc (size * sizeof (ap_texpr0_t *));
   for (i = 0; i < size; i++)
-    { // create r[i] from nodes[i]
+    {                           // create r[i] from nodes[i]
       ap_texpr0_t *tmp = ap_texpr0_dim ((ap_dim_t) nodes[i][max - 1]);
       if (max >= 2)
 
         for (j = max - 2; j != ((size_t) - 1); j--)
           tmp =
-                ap_texpr0_binop (AP_TEXPR_DIV,
-                                 ap_texpr0_dim ((ap_dim_t) nodes[i][j]), tmp,
-                                 AP_RTYPE_REAL, AP_RDIR_RND);
+            ap_texpr0_binop (AP_TEXPR_DIV,
+                             ap_texpr0_dim ((ap_dim_t) nodes[i][j]), tmp,
+                             AP_RTYPE_REAL, AP_RDIR_RND);
       r[i] = tmp;
     }
   return r;
@@ -2209,14 +2172,12 @@ shape_linexpr_of_node (ap_linexpr0_t * e,
   {
     if (!ap_coeff_zero (coeff))
       {
-        arg_assert ((coeff->discr == AP_COEFF_SCALAR), return NULL;
-                    );
+        arg_assert ((coeff->discr == AP_COEFF_SCALAR), return NULL;);
         if (IS_PTRDIM (d, intdim, ptrdim))
           {
             size_t v = DIM2PTR (d, intdim);
             size_t n = 0;
-            arg_assert (!IS_NULLDIM (v), return NULL;
-                        );
+            arg_assert (!IS_NULLDIM (v), return NULL;);
             n = v2n[v];
             ap_coeff_set (l->p.coeff + intdim + n, coeff);
           }
@@ -2316,15 +2277,14 @@ struct name_of_dim_typ
 {
   size_t intdim;
   size_t segmdim;
-  char** names;
+  char **names;
 } shape_names;
 
-char*
+char *
 shape_name_of_dim (size_t dim)
 {
   if (dim < shape_names.intdim + shape_names.segmdim
-      && shape_names.names != NULL
-      && shape_names.names[dim] != NULL)
+      && shape_names.names != NULL && shape_names.names[dim] != NULL)
     return shape_names.names[dim];
 
   else
@@ -2335,8 +2295,7 @@ void
 shape_init_name_of_dim (size_t intdim, size_t segmdim)
 {
   if (shape_names.intdim == intdim
-      && shape_names.segmdim == segmdim
-      && shape_names.names != NULL)
+      && shape_names.segmdim == segmdim && shape_names.names != NULL)
     /* nothing to do */
     return;
 
@@ -2353,8 +2312,7 @@ shape_init_name_of_dim (size_t intdim, size_t segmdim)
   dim = intdim + segmdim;
   shape_names.intdim = intdim;
   shape_names.segmdim = segmdim;
-  shape_names.names =
-          (char **) malloc (dim * sizeof (char *));
+  shape_names.names = (char **) malloc (dim * sizeof (char *));
   for (i = 0; i < intdim; i++)
     {
       shape_names.names[i] = (char *) malloc (5 * sizeof (char));
@@ -2367,7 +2325,7 @@ shape_init_name_of_dim (size_t intdim, size_t segmdim)
     }
 }
 
-bool shape_print_dot = 1; //true;
+bool shape_print_dot = 1;       //true;
 
 inline bool
 shape_get_print (void)

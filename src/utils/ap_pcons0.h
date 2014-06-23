@@ -40,22 +40,23 @@ extern "C" {
      * - function offsets (used in logic)
      * - index offsets are in 0..intdim-1
      */
-    typedef enum {
-        OFFSET_DATA = 0, /* for data field */
-        OFFSET_NEXT = 1, /* for next field */
-        OFFSET_PREV = 2, /* for next field */
-        OFFSET_LEN = -3, /* for length function */
-        OFFSET_SUM = -4, /* for sum function */
-        OFFSET_MSET = -5, /* for mset function */
-        OFFSET_UCONS = -6, /* for ucons function */
-        OFFSET_SL3 = -7, /* for sl3 formulas */
-        OFFSET_NONE = -8, /* special use, take care! */
-    } offset_t;
+typedef enum
+{
+  OFFSET_DATA = 0,              /* for data field */
+  OFFSET_NEXT = 1,              /* for next field */
+  OFFSET_PREV = 2,              /* for next field */
+  OFFSET_LEN = -3,              /* for length function */
+  OFFSET_SUM = -4,              /* for sum function */
+  OFFSET_MSET = -5,             /* for mset function */
+  OFFSET_UCONS = -6,            /* for ucons function */
+  OFFSET_SL3 = -7,              /* for sl3 formulas */
+  OFFSET_NONE = -8,             /* special use, take care! */
+} offset_t;
 
     /* Maximum number of fields supported, @see ptrfields_max in interp_eqn.ml */
 #define OFFSET_FLD_MAX 10
 
-    
+
     /**
      * Pointer constraints.
      *
@@ -76,93 +77,98 @@ extern "C" {
      *           to be applied to ptr dimensions
      */
 
-    typedef enum {
-        DATA_CONS = 0, /* only constraint on int vars or data fields */
-        ACYCLIC_CONS, /* unary segment description */
-        CYCLIC_CONS,
-        ISO_CONS, /* segment isomorphism */
-        SEP_CONS, /* segment separation */
-        EQ_CONS, /* ptr equality */
-        NE_CONS, /* ptr difference */
-        REACH_CONS, /* binary reachability */
-	SL3_CONS,  /* SL3 constraint */
-        OTHER_CONS,
-    } pcons0_typ_t;
+typedef enum
+{
+  DATA_CONS = 0,                /* only constraint on int vars or data fields */
+  ACYCLIC_CONS,                 /* unary segment description */
+  CYCLIC_CONS,
+  ISO_CONS,                     /* segment isomorphism */
+  SEP_CONS,                     /* segment separation */
+  EQ_CONS,                      /* ptr equality */
+  NE_CONS,                      /* ptr difference */
+  REACH_CONS,                   /* binary reachability */
+  SL3_CONS,                     /* SL3 constraint */
+  OTHER_CONS,
+} pcons0_typ_t;
 
-    typedef struct {
-        pcons0_typ_t type;
+typedef struct
+{
+  pcons0_typ_t type;
 
-        size_t intdim;
-        size_t ptrdim;
+  size_t intdim;
+  size_t ptrdim;
 
-        union {
+  union
+  {
 
-            struct {
-                ap_dim_t x, y; /* in [intdim..intdim+ptrdim-1] or NULL_DIM */
-                int offx, offy; /* offset of each variable */
-            } ptr;
+    struct
+    {
+      ap_dim_t x, y;            /* in [intdim..intdim+ptrdim-1] or NULL_DIM */
+      int offx, offy;           /* offset of each variable */
+    } ptr;
 
-            /* TODO: support all the offsets in a constraint */
-            struct {
-                ap_lincons0_t cons; /* over dimensions intdim + ptrdim */
-                int* offsets; /* of size ptrdim, only for ptr dimensions above */
-            } data;
+    /* TODO: support all the offsets in a constraint */
+    struct
+    {
+      ap_lincons0_t cons;       /* over dimensions intdim + ptrdim */
+      int *offsets;             /* of size ptrdim, only for ptr dimensions above */
+    } data;
 
-        } info;
+  } info;
 
-        ap_lincons0_t *lcons;
-        ap_tcons0_t *tcons;
-        UT_hash_handle hh; /* make structure hashable */
-        /* keys are lcons--tcons */
-    } pcons0_t;
+  ap_lincons0_t *lcons;
+  ap_tcons0_t *tcons;
+  UT_hash_handle hh;            /* make structure hashable */
+  /* keys are lcons--tcons */
+} pcons0_t;
 
     /* Array of constraints */
-    typedef struct pcons0_array_t {
-        pcons0_t **p;
-        size_t size;
-    } pcons0_array_t;
+typedef struct pcons0_array_t
+{
+  pcons0_t **p;
+  size_t size;
+} pcons0_array_t;
 
   /* ================================================================== */
   /* Globals */
   /* ================================================================== */
 
-extern pcons0_t *pcons_ht; /* global hash table of ptr constraints */
-extern ap_manager_t *ap_man; /* apron manager used */
-  
+extern pcons0_t *pcons_ht;      /* global hash table of ptr constraints */
+extern ap_manager_t *ap_man;    /* apron manager used */
+
   /* ================================================================== */
   /* Constructors/Destructors */
   /* ================================================================== */
 
-    void ap_pcons0_init(void);
+void ap_pcons0_init (void);
     /* Init the hash table to NULL */
-    
-    void shape_pcons0_clear(pcons0_t * c);
+
+void shape_pcons0_clear (pcons0_t * c);
     /* Clear the data constraint in c */
-    void shape_pcons0_array_clear(pcons0_array_t * array);
+void shape_pcons0_array_clear (pcons0_array_t * array);
     /* Clear the constraints of the array, and then the array itself */
-   
+
   /* ================================================================== */
   /* Global Set manipulation */
   /* ================================================================== */
 
-pcons0_t *
-shape_pcons_search (ap_lincons0_t * lcons, ap_tcons0_t * tcons);
+pcons0_t *shape_pcons_search (ap_lincons0_t * lcons, ap_tcons0_t * tcons);
 /* Search an entry */
 
-pcons0_t *
-shape_pcons_add (pcons0_t * cons);
+pcons0_t *shape_pcons_add (pcons0_t * cons);
 /* Add an entry return a pointer to it */
 
   /* ================================================================== */
   /* Printing */
   /* ================================================================== */
 
-    void shape_offset_fprint(FILE * stream, int ofs, size_t intdim, size_t dim);
+void shape_offset_fprint (FILE * stream, int ofs, size_t intdim, size_t dim);
 
-    void shape_offsets_fprint(FILE * stream, int* offsets, size_t intdim, size_t dim);
+void shape_offsets_fprint (FILE * stream, int *offsets, size_t intdim,
+                           size_t dim);
 
-    void shape_pcons_fdump(FILE * stream, pcons0_t * c);
-    void shape_pcons_array_fdump(FILE * stream, pcons0_array_t * a);
+void shape_pcons_fdump (FILE * stream, pcons0_t * c);
+void shape_pcons_array_fdump (FILE * stream, pcons0_array_t * a);
     /* Printing */
 
     /* *INDENT-OFF* */
