@@ -1,8 +1,8 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / Utilities for Abstract Domains                          */
 /*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
+/*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
 /*                                                                        */
 /*                                                                        */
@@ -24,7 +24,7 @@
 #ifndef AP_PCONS0_H_
 #define AP_PCONS0_H_
 
-
+#include "ap_manager.h"
 #include "ap_dimension.h"
 #include "ap_expr0.h"
 #include "uthash.h"
@@ -122,11 +122,40 @@ extern "C" {
         size_t size;
     } pcons0_array_t;
 
+  /* ================================================================== */
+  /* Globals */
+  /* ================================================================== */
+
+extern pcons0_t *pcons_ht; /* global hash table of ptr constraints */
+extern ap_manager_t *ap_man; /* apron manager used */
+  
+  /* ================================================================== */
+  /* Constructors/Destructors */
+  /* ================================================================== */
+
+    void ap_pcons0_init(void);
+    /* Init the hash table to NULL */
+    
     void shape_pcons0_clear(pcons0_t * c);
     /* Clear the data constraint in c */
     void shape_pcons0_array_clear(pcons0_array_t * array);
     /* Clear the constraints of the array, and then the array itself */
+   
+  /* ================================================================== */
+  /* Global Set manipulation */
+  /* ================================================================== */
 
+pcons0_t *
+shape_pcons_search (ap_lincons0_t * lcons, ap_tcons0_t * tcons);
+/* Search an entry */
+
+pcons0_t *
+shape_pcons_add (pcons0_t * cons);
+/* Add an entry return a pointer to it */
+
+  /* ================================================================== */
+  /* Printing */
+  /* ================================================================== */
 
     void shape_offset_fprint(FILE * stream, int ofs, size_t intdim, size_t dim);
 

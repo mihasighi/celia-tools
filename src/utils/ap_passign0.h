@@ -1,8 +1,8 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / Utilities for Abstract Domains                          */
 /*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
+/*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
 /*                                                                        */
 /*                                                                        */
@@ -24,6 +24,7 @@
 #ifndef AP_PASSIGN0_H_
 #define AP_PASSIGN0_H_
 
+#include "ap_manager.h"
 #include "ap_dimension.h"
 #include "ap_expr0.h"
 #include "uthash.h"
@@ -110,10 +111,41 @@ extern "C" {
         size_t size;
     } passign0_array_t;
 
+  /* ================================================================== */
+  /* Globals */
+  /* ================================================================== */
+
+extern passign0_t *passigns_ht; /* global set (hash table) of ptr constraints */
+   
+  /* ================================================================== */
+  /* Constructors/Destructors */
+  /* ================================================================== */
+
+    void ap_passign0_init(void);
+    /* Init the hash table to NULL */
+
     void shape_passign0_clear(passign0_t * c);
     /* Clear the data constraint in c */
     void shape_passign0_array_clear(passign0_array_t * array);
     /* Clear the constraints of the array, and then the array itself */
+
+/* ===================================================================== */
+/* Global Set Manipulation */
+/* ===================================================================== */
+
+passign0_t *
+shape_passign_search (ap_dim_t lhs,
+                      size_t intdim, size_t ptrdim,
+                      ap_linexpr0_t * lexpr, ap_texpr0_t * texpr);
+/* Search a value in the set using keys lhs, lexpr, and texpr */
+
+passign0_t *
+shape_passign_add (passign0_t * a);
+/* Add a value to the global set */
+
+  /* ================================================================== */
+  /* Printing */
+  /* ================================================================== */
 
     void shape_passign_fdump(FILE * stream, passign0_t * c,
             size_t intdim, size_t ptrdim);

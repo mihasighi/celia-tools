@@ -1,8 +1,8 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / Utilities for Abstract Domains                          */
 /*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
+/*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
 /*                                                                        */
 /*                                                                        */
@@ -23,6 +23,25 @@
 
 
 #include "ap_pcons0.h"
+
+
+  /* ================================================================== */
+  /* Globals */
+  /* ================================================================== */
+
+pcons0_t *pcons_ht; /* global hash table of ptr constraints */
+ap_manager_t *ap_man; /* apron manager used */
+
+void
+ap_pcons0_init (void)
+{
+  pcons_ht = NULL;
+}
+
+  /* ================================================================== */
+  /* Constructors/Destructors */
+  /* ================================================================== */
+
 
 /* To use only when htable of pcons is freed */
 void
@@ -50,6 +69,59 @@ shape_pcons0_array_clear(pcons0_array_t * array) {
     }
 }
 
+/* ====================================================================== */
+/* Global Set Manipulation  */
+/* ====================================================================== */
+
+/* 
+ * Search an entry 
+ */
+pcons0_t *
+shape_pcons_search (ap_lincons0_t * lcons, ap_tcons0_t * tcons)
+{
+  pcons0_t *r, rr;
+  unsigned keylen;
+  /* search in the htable */
+  keylen = offsetof (pcons0_t, hh) - offsetof (pcons0_t, lcons);
+  r = NULL;
+  rr.lcons = lcons;
+  rr.tcons = tcons;
+  HASH_FIND (hh, pcons_ht, &rr.lcons, keylen, r);
+  return r;
+}
+
+/*
+ * Add an entry return a pointer to it
+ */
+pcons0_t *
+shape_pcons_add (pcons0_t * cons)
+{
+  pcons0_t *r;
+  unsigned keylen;
+  /* search in the htable */
+  keylen = offsetof (pcons0_t, hh) - offsetof (pcons0_t, lcons);
+  r = NULL;
+  HASH_FIND (hh, pcons_ht, &cons->lcons, keylen, r);
+  if (!r)
+    {
+      HASH_ADD (hh, pcons_ht, lcons, keylen, cons);
+      HASH_FIND (hh, pcons_ht, &cons->lcons, keylen, r);
+    }
+#ifndef NDEBUG2
+  fprintf (stdout, "\n====shape_pcons_add: ");
+  shape_pcons_fdump (stdout, cons);
+  fprintf (stdout, "\n===returns: ");
+  shape_pcons_fdump (stdout, r);
+  fprintf (stdout, "\n");
+#endif
+
+  return r;
+}
+
+  /* ================================================================== */
+  /* Printing */
+  /* ================================================================== */
+
 void
 shape_dim_fprint(FILE * stream, size_t dim) {
     if (dim == AP_DIM_MAX) // NULL_DIM
@@ -70,7 +142,7 @@ shape_offset_fprint(FILE * stream, int ofs, size_t intdim, size_t dim) {
 
     if (ofs >= 0 && ofs < ((int) intdim)) {
         /* ptr variable with index offset */
-        fprintf(stream, "x%d[x%d]", dim, ofs);
+        fprintf(stream, "x%zu[x%d]", dim, ofs);
     } else if (ofs >= ((int) intdim)) {
         /* ptr variable with field access */
         switch (ofs - intdim) {
@@ -80,7 +152,7 @@ shape_offset_fprint(FILE * stream, int ofs, size_t intdim, size_t dim) {
                 break;
             case OFFSET_PREV: fprintf(stream, " \\prev(");
                 break;
-            default: fprintf(stream, " \\fld%d(", ofs - intdim);
+            default: fprintf(stream, " \\fld%zu(", ofs - intdim);
                 break;
         }
         shape_dim_fprint(stream, dim);

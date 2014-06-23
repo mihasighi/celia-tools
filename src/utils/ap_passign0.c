@@ -24,6 +24,23 @@
 #include "ap_passign0.h"
 #include "ap_linexpr0.h"
 
+  /* ================================================================== */
+  /* Globals */
+  /* ================================================================== */
+
+passign0_t *passigns_ht; /* global hash table of ptr constraints */
+
+void
+ap_passign0_init (void)
+{
+  passigns_ht = NULL;
+}
+
+  /* ================================================================== */
+  /* Constructors/Destructors */
+  /* ================================================================== */
+
+
 /* To use only when htable of passigns is freed */
 void
 shape_passign0_clear(passign0_t * c) {
@@ -50,6 +67,54 @@ shape_passign0_array_clear(passign0_array_t * array) {
     }
 }
 
+/* ===================================================================== */
+/* Global Set Manipulation */
+/* ===================================================================== */
+
+/* Search a value in the htable using keys lhs, lexpr, and texpr */
+passign0_t *
+shape_passign_search (ap_dim_t lhs,
+                      size_t intdim, size_t ptrdim,
+                      ap_linexpr0_t * lexpr, ap_texpr0_t * texpr)
+{
+  passign0_t *r, rr;
+  unsigned keylen;
+  /* search in the htable */
+  keylen = offsetof (passign0_t, hh) - offsetof (passign0_t, lhs);
+  r = NULL;
+  rr.lhs = lhs;
+  rr.intdim = intdim;
+  rr.ptrdim = ptrdim;
+  rr.lexpr = lexpr;
+  rr.texpr = texpr;
+  HASH_FIND (hh, passigns_ht, &rr.lhs, keylen, r);
+
+  return r;
+}
+
+/* Add a value to the htable */
+passign0_t *
+shape_passign_add (passign0_t * a)
+{
+  passign0_t *r;
+  unsigned keylen;
+  /* search in the htable */
+  keylen = offsetof (passign0_t, hh) - offsetof (passign0_t, lhs);
+  r = NULL;
+  HASH_FIND (hh, passigns_ht, &a->lhs, keylen, r);
+  if (!r)
+    {
+      HASH_ADD (hh, passigns_ht, lhs, keylen, a);
+      HASH_FIND (hh, passigns_ht, &a->lhs, keylen, r);
+    }
+  return r;
+}
+
+
+  /* ================================================================== */
+  /* Printing */
+  /* ================================================================== */
+
 void
 shape_passign_fdump(FILE * stream, passign0_t * a,
         size_t intdim, size_t ptrdim) {
@@ -61,7 +126,7 @@ shape_passign_fdump(FILE * stream, passign0_t * a,
     else {
         shape_offset_fprint(stream, a->offx, intdim, a->x);
 
-        fprintf(stream, " :=(kind=%zu) ", a->op);
+        fprintf(stream, " :=(kind=%d) ", (int) a->op);
 
         if (a->op == PA_ASSIGN_INT) {
             ap_linexpr0_fprint(stream, a->info.data.expr, NULL);
@@ -73,7 +138,7 @@ shape_passign_fdump(FILE * stream, passign0_t * a,
             fprintf(stream, "new()"); /* TODO: add size of allocation */
 
         else if (a->op == PA_FREE)
-            fprintf(stream, "free(%zu)", a->x);
+            fprintf(stream, "free(%zu)", (size_t) a->x);
 
         else
             fprintf(stream, "unknown assignment");

@@ -1,8 +1,8 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / Utilities for Abstract Domains                          */
 /*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
+/*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
 /*                                                                        */
 /*                                                                        */
@@ -24,7 +24,8 @@
 #ifndef __APRON2SHAPE_H_
 #define __APRON2SHAPE_H_
 
-#include "shape_manager.h"
+#include "ap_pcons0.h"
+#include "ap_passign0.h"
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
@@ -79,15 +80,13 @@ extern "C"
   /* Expressions and constraints */
   /* ================================================================== */
 
-  pcons0_t *shape_pcons_of_lincons (shape_internal_t * pr, ap_lincons0_t * c,
+  pcons0_t *shape_pcons_of_lincons (ap_lincons0_t * c,
                                     size_t intdim, size_t ptrdim);
-  pcons0_t *shape_pcons_of_tcons (shape_internal_t * pr, ap_tcons0_t * c,
+  pcons0_t *shape_pcons_of_tcons (ap_tcons0_t * c,
                                   size_t intdim, size_t ptrdim);
-  pcons0_array_t *shape_pcons_array_of_lincons_array (shape_internal_t * pr,
-                                                      ap_lincons0_array_t * c,
+  pcons0_array_t *shape_pcons_array_of_lincons_array (ap_lincons0_array_t * c,
                                                       size_t intdim, size_t ptrdim);
-  pcons0_array_t *shape_pcons_array_of_tcons_array (shape_internal_t * pr,
-                                                    ap_tcons0_array_t * c,
+  pcons0_array_t *shape_pcons_array_of_tcons_array (ap_tcons0_array_t * c,
                                                     size_t intdim, size_t ptrdim);
   /*
    * Convert Apron constraints to pointer constraints. In arrays, constraints
@@ -95,8 +94,7 @@ extern "C"
    * REACH*_CONS < NE_CONS < DATA_CONS
    */
 
-  ap_lincons0_t shape_lincons_of_node (shape_internal_t * pr,
-                                       ap_lincons0_t * c, int* offsets,
+  ap_lincons0_t shape_lincons_of_node (ap_lincons0_t * c, int* offsets,
                                        size_t * v2n,
                                        size_t size, size_t intdim, size_t ptrdim);
   /*
@@ -110,17 +108,14 @@ extern "C"
   /* Assignments */
   /* ================================================================== */
 
-  passign0_t *shape_passign_of_linexpr (shape_internal_t * pr,
-                                        ap_dim_t lhs, ap_linexpr0_t * rhs,
+  passign0_t *shape_passign_of_linexpr (ap_dim_t lhs, ap_linexpr0_t * rhs,
                                         size_t intdim, size_t ptrdim);
-  passign0_array_t *shape_passign_of_linexpr_array (shape_internal_t * pr,
-                                                    ap_dim_t * lhs, ap_linexpr0_t ** rhs,
+  passign0_array_t *shape_passign_of_linexpr_array (ap_dim_t * lhs, ap_linexpr0_t ** rhs,
                                                     size_t size, size_t intdim, size_t ptrdim);
-  passign0_t *shape_passign_of_texpr (shape_internal_t * pr, ap_dim_t lhs,
-                                      ap_texpr0_t * rhs, size_t intdim, size_t ptrdim);
+  passign0_t *shape_passign_of_texpr (ap_dim_t lhs, ap_texpr0_t * rhs, 
+                                      size_t intdim, size_t ptrdim);
   passign0_array_t *
-  shape_passign_of_texpr_array (shape_internal_t * pr,
-                                ap_dim_t * lhs, ap_texpr0_t ** rhs,
+  shape_passign_of_texpr_array (ap_dim_t * lhs, ap_texpr0_t ** rhs,
                                 size_t size, size_t intdim, size_t ptrdim);
   /*
    * Convert Apron assignments to pointer assignments
@@ -177,11 +172,11 @@ extern "C"
 
 
   extern const char *exprname[];
-#define RANDOM_PTRDIM(pr,intdim,ptrdim) (intdim + lrand48() % ptrdim)
-#define RANDOM_PTRDIM_OR_NULL(pr,intdim,ptrdim) ((lrand48() % 2 == 0) ? NULL_DIM : RANDOM_PTRDIM(pr,intdim,ptrdim))
-  ap_linexpr0_t *shape_linexpr_random (shape_internal_t * pr, exprmode_t mode,
+#define RANDOM_PTRDIM(intdim,ptrdim) (intdim + lrand48() % ptrdim)
+#define RANDOM_PTRDIM_OR_NULL(intdim,ptrdim) ((lrand48() % 2 == 0) ? NULL_DIM : RANDOM_PTRDIM(intdim,ptrdim))
+  ap_linexpr0_t *shape_linexpr_random (exprmode_t mode,
                                        size_t intdim, size_t ptrdim);
-  ap_texpr0_t *shape_texpr_random (shape_internal_t * pr, exprmode_t mode,
+  ap_texpr0_t *shape_texpr_random (exprmode_t mode,
                                    size_t intdim, size_t ptrdim);
   /* Build radomly Apron expressions useful for Shapes */
 
@@ -216,8 +211,7 @@ extern "C"
   ap_texpr0_t **shape_texpr_merge (size_t ** nodes, size_t size, size_t max);
   /* Build Apron expressions on nodes for the segment abstract domain */
 
-  ap_linexpr0_t *shape_linexpr_of_node (shape_internal_t * pr,
-                                        ap_linexpr0_t * c,
+  ap_linexpr0_t *shape_linexpr_of_node (ap_linexpr0_t * c,
                                         size_t * v2n, size_t size,
                                         size_t intdim, size_t ptrdim);
   /*

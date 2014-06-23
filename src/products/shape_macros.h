@@ -38,8 +38,8 @@ do { if (!(cond)) {                                                   \
     snprintf(buf_,sizeof(buf_),                                       \
              "assertion (%s) failed in %s at %s:%i",                  \
              #cond, __func__, __FILE__, __LINE__);            \
-    ap_manager_raise_exception(pr->man,AP_EXC_INVALID_ARGUMENT,       \
-                               pr->funid,buf_);                       \
+    ap_manager_raise_exception(ap_man,AP_EXC_INVALID_ARGUMENT,       \
+                               AP_FUNID_UNKNOWN,buf_);             \
     fprintf(stdout,"%s\n",buf_); fflush(stdout); \
     action }                                                          \
 } while(0)
@@ -58,8 +58,8 @@ do { if (!(cond)) {                                                   \
     snprintf(buf_,sizeof(buf_),                                 \
              "exception (%s) raised in %s at %s:%i",            \
               msg, __func__, __FILE__, __LINE__);               \
-    ap_manager_raise_exception(pr->man,AP_EXC_NOT_IMPLEMENTED,  \
-                               pr->funid,buf_);                 \
+    ap_manager_raise_exception(ap_man,AP_EXC_NOT_IMPLEMENTED,  \
+                               AP_FUNID_UNKNOWN,buf_);                 \
     fprintf(stdout,"%s\n",buf_); fflush(stdout);  \
     action                                        \
     pr->error_++;                                 \
@@ -75,8 +75,8 @@ do {                                                                  \
              "cannot allocate %s[%lu] for %s in %s at %s:%i",         \
              #t, (long unsigned)(nb), #ptr,                           \
              __func__, __FILE__, __LINE__);                           \
-    ap_manager_raise_exception(pr->man,AP_EXC_OUT_OF_SPACE,           \
-                               pr->funid,buf_);                       \
+    ap_manager_raise_exception(ap_man,AP_EXC_OUT_OF_SPACE,           \
+                               AP_FUNID_UNKNOWN,buf_);                       \
     action }                                                          \
 } while(0)
 
@@ -91,8 +91,8 @@ do {                                                                  \
              "cannot allocate %s[%lu] for %s in %s at %s:%i",         \
              #t, (long unsigned)(nb), #ptr,                           \
              __func__, __FILE__, __LINE__);                           \
-    ap_manager_raise_exception(pr->man,AP_EXC_OUT_OF_SPACE,           \
-                               pr->funid,buf_);                       \
+    ap_manager_raise_exception(ap_man,AP_EXC_OUT_OF_SPACE,           \
+                               AP_FUNID_UNKNOWN,buf_);                       \
     action }                                                          \
 } while(0)
 
@@ -105,8 +105,8 @@ do {                                                                  \
              "cannot allocate %s[%lu] for %s in %s at %s:%i",         \
              #t, (long unsigned)(nb), #ptr,                           \
              __func__, __FILE__, __LINE__);                           \
-    ap_manager_raise_exception(pr->man,AP_EXC_OUT_OF_SPACE,           \
-                               pr->funid,buf_);                       \
+    ap_manager_raise_exception(ap_man,AP_EXC_OUT_OF_SPACE,           \
+                               AP_FUNID_UNKNOWN,buf_);                       \
     action }                                                          \
 } while(0)
 
