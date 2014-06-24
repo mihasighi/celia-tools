@@ -1,8 +1,8 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / SLL Abstract Domain                                     */
 /*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
+/*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 
 #include "hgraph.h"
 #include "hgraph_internal.h"
-#include "shape_macros.h"
+#include "sh_macros.h"
 
 
 /* All closures are in-place. */
@@ -43,17 +43,21 @@
  *          @result is the number of garbage nodes
  */
 size_t
-hgraph_close_garbage (hgraph_internal_t * pr, hgraph_t * a,
-                      ap_dimperm_t * perm, bool cutpoint) /* TODO */
+hgraph_close_garbage (hgraph_internal_t * pr, hgraph_t * a, ap_dimperm_t * perm, bool cutpoint) /* TODO */
 {
   node_info_t *newinfo;
   size_t i, v, ngarbage, newsize;
-  arg_assert (perm && perm->size == a->size, return 0;);
+  arg_assert (perm && perm->size == a->size, return 0;
+    );
+
+  if (pr != pr)                 /* remove gcc warning */
+    return 0;
 
   // compute the newinfo by a hgraph traversal from the cut nodes labeled by variables.
   // init of newinfo
   checked_malloc (newinfo, node_info_t, sizeof (node_info_t), a->size,
-                  return 0;);
+                  return 0;
+    );
   // node 0 is null
   newinfo[0].v = NULL_DIM;
   newinfo[0].nn = 0;
@@ -68,9 +72,7 @@ hgraph_close_garbage (hgraph_internal_t * pr, hgraph_t * a,
   for (v = 0; v < a->ptrdim; v++)
     {
       i = VAR2NODE (a, v);
-      if (i != NODE_T_TOP &&
-          i != NODE_NULL &&
-          newinfo[i].v == NODE_T_TOP)
+      if (i != NODE_T_TOP && i != NODE_NULL && newinfo[i].v == NODE_T_TOP)
         {
           newinfo[i].v = v;
           newinfo[i].nn = 0;
@@ -120,12 +122,11 @@ hgraph_close_garbage (hgraph_internal_t * pr, hgraph_t * a,
         {
           ngarbage++;
           perm->dim[i] = 0;
-          if (cutpoint
-              && newinfo[NODE_NEXT (a, i)].v < a->ptrdim // node accessible from a labeled node
-              && newinfo[NODE_NEXT (a, i)].nn > 0) // in at least one edge
+          if (cutpoint && newinfo[NODE_NEXT (a, i)].v < a->ptrdim       // node accessible from a labeled node
+              && newinfo[NODE_NEXT (a, i)].nn > 0)      // in at least one edge
             {
-              ERROR ("Bad change of environment: not cut-point free graph!",;
-                     );
+              ERROR
+                ("Bad change of environment: not cut-point free graph!",;);
             }
         }
     }
@@ -154,7 +155,8 @@ hgraph_close_anonymous (hgraph_internal_t * pr, hgraph_t * a,
                         size_t ngarbage)
 {
   size_t i, j, v, nv, ns, newsize, maxanon, nanon;
-  arg_assert (perm && perm->size == a->size && anon, return NULL;);
+  arg_assert (perm && perm->size == a->size && anon, return NULL;
+    );
 
   nanon = 0;
 
@@ -181,8 +183,7 @@ hgraph_close_anonymous (hgraph_internal_t * pr, hgraph_t * a,
   // maximal number of anonymous nodes on each path
   maxanon = (pr->max_anon + 1) * pr->segm_anon;
   // consider all cut nodes labeled by ptrvars
-  for (v = 0, i = 0; v < a->ptrdim;
-          v++)
+  for (v = 0, i = 0; v < a->ptrdim; v++)
     {
       // consider that the i^th anonymous path starts from v
       // init anon for this path
@@ -191,7 +192,7 @@ hgraph_close_anonymous (hgraph_internal_t * pr, hgraph_t * a,
       anon->p[i].size = nanon;
       memset (anon->p[i].p, 0, nanon * sizeof (node_t));
       nv = DIM2NODE (a, v);
-      anon->p[i].p[0] = nv; /* changed below to recall old nodes (ap_dim_t) nperm->dim[nv]; */
+      anon->p[i].p[0] = nv;     /* changed below to recall old nodes (ap_dim_t) nperm->dim[nv]; */
       j = 1;
       ns = NODE_NEXT (a, nv);
       while (NODE_VAR (a, ns) == v && prevn[ns] == 1 && nanon >= 1)
@@ -202,7 +203,7 @@ hgraph_close_anonymous (hgraph_internal_t * pr, hgraph_t * a,
           nanon--;
         }
       if (j >= (pr->max_anon + 2))
-        { // at least pr->max_anon anonymous on this path!
+        {                       // at least pr->max_anon anonymous on this path!
           // realloc the array at the good size and set the size (used below)
           anon->p[i].p = realloc (anon->p[i].p, j * sizeof (ap_dim_array_t));
           anon->p[i].size = j;
@@ -214,7 +215,7 @@ hgraph_close_anonymous (hgraph_internal_t * pr, hgraph_t * a,
           anon->p[i].p = NULL;
           anon->p[i].size = 0;
         }
-    } // end for each ptr var
+    }                           // end for each ptr var
   // TODO: add management of anonymous paths starting from anonymous cut nodes
   // i == anon_segm gives the real number of anonymous paths, resize anon->p
   // permutation used to to sorting of nodes after anonymous elimination
@@ -254,7 +255,7 @@ hgraph_close_anonymous (hgraph_internal_t * pr, hgraph_t * a,
           NODE_NEXT (a, nv) = ns;
           if (NODE_VAR (a, ns) == NODE_VAR (a, nv))
             NODE_VAR_NEXT (a, ns) = 1;
-          anon->p[i].p[0] = nperm->dim[nv]; // changed to speak about old nodes
+          anon->p[i].p[0] = nperm->dim[nv];     // changed to speak about old nodes
           // the anonymous nodes of the path are labeled by max
           for (j = 1; j < anon->p[i].size; j++)
             {
@@ -265,12 +266,13 @@ hgraph_close_anonymous (hgraph_internal_t * pr, hgraph_t * a,
               anon->p[i].p[j] = nperm->dim[nj];
               // problem with codee below because sorting does not compose well with perm
               // perm->dim[nperm->dim[nj]] = 0; // perm is updated to eliminate this node
-              perm1->dim[nj] = 0; // eliminate this node in sort
+              perm1->dim[nj] = 0;       // eliminate this node in sort
             }
           nanon += (anon->p[i].size - 1);
         }
 #ifndef NDEBUG2
-      fprintf (stdout, "\n!!!!hgraph_close_anonymous: new hgraph (unsorted)=(");
+      fprintf (stdout,
+               "\n!!!!hgraph_close_anonymous: new hgraph (unsorted)=(");
       hgraph_fdump (stdout, pr->man, a);
       fprintf (stdout, ") with nanon=%zu and perm1=(", nanon);
       ap_dimperm_fprint (stdout, perm1);
@@ -278,7 +280,7 @@ hgraph_close_anonymous (hgraph_internal_t * pr, hgraph_t * a,
 #endif
     }
   // sort a, then all anonymous nodes are put at the end with the garbage
-  hgraph_node_sort (a, 1, perm1); // not perm because perm stores also the initial permutation
+  hgraph_node_sort (a, 1, perm1);       // not perm because perm stores also the initial permutation
   ap_dimperm_compose (perm, perm, perm1);
   ap_dimperm_clear (perm1);
 
@@ -317,7 +319,8 @@ hgraph_close_anonymous1 (hgraph_internal_t * pr, hgraph_t * a,
 {
   node_info_t *newinfo;
   size_t i, j, v, nv, newsize, anon_segm;
-  arg_assert (perm && perm->size == a->size, return;);
+  arg_assert (perm && perm->size == a->size, return;
+    );
 
   // revert perm to put original nodes in anon s
   ap_dimperm_t *nperm = ap_dimperm_alloc (a->size);
@@ -326,7 +329,7 @@ hgraph_close_anonymous1 (hgraph_internal_t * pr, hgraph_t * a,
   // compute cut information
   size_t *prevn = hgraph_node_get_prev (a);
   newsize = (a->size - ngarbage);
-  anon_segm = 0; // number of anonymous segments
+  anon_segm = 0;                // number of anonymous segments
 
   // permutation storing the anonymous information:
   // an anonymous node in an anonymous path is mapped into the head of the path
@@ -335,15 +338,15 @@ hgraph_close_anonymous1 (hgraph_internal_t * pr, hgraph_t * a,
   // anon_orig[i] == true iff i is the beginning of a path of anonymous
   bool *anon_orig = (bool *) malloc (newsize * sizeof (bool));
   // allocate newinfo for non-garbage nodes
-  checked_malloc (newinfo, node_info_t, sizeof (node_info_t), newsize,
-                  return;);
+  checked_malloc (newinfo, node_info_t, sizeof (node_info_t), newsize, return;
+    );
   for (i = 0; i < newsize; i++)
     {
       anon_orig[i] = false;
       newinfo[i] = a->info[a->ptrdim + i];
-      if (NODE_VAR_NEXT (a, i) > pr->max_anon && anons_info->dim[i] == i) // not already set in an anonymous path
-        { // i is in a path with more than pr->max_anon nodes, check if all nodes are anonymous
-          size_t nanon = 0; // number of anonymous from the last cut node
+      if (NODE_VAR_NEXT (a, i) > pr->max_anon && anons_info->dim[i] == i)       // not already set in an anonymous path
+        {                       // i is in a path with more than pr->max_anon nodes, check if all nodes are anonymous
+          size_t nanon = 0;     // number of anonymous from the last cut node
           v = NODE_VAR (a, i);
           nv = VAR2NODE (a, v); // last cut node
           j = NODE_NEXT (a, nv);
@@ -356,9 +359,9 @@ hgraph_close_anonymous1 (hgraph_internal_t * pr, hgraph_t * a,
                   nv = j;
                   nanon = 0;
                 }
-              else // anons_info->dim[j] != j
+              else              // anons_info->dim[j] != j
                 {
-                  nv = anons_info->dim[j]; // TODO: here is not really true, find the first after this anonymous path
+                  nv = anons_info->dim[j];      // TODO: here is not really true, find the first after this anonymous path
                   nanon = 0;
                 }
               j = NODE_NEXT (a, j);
@@ -367,15 +370,15 @@ hgraph_close_anonymous1 (hgraph_internal_t * pr, hgraph_t * a,
           nanon++;
           assert (j == i);
           if (nanon > pr->max_anon)
-            { // the path is built only from anonymous nodes
+            {                   // the path is built only from anonymous nodes
               // set anons_info to map nodes on the anon path to nv
               anon_orig[nv] = true;
               anon_segm++;
               newinfo[nv].s = NODE_NEXT (a, i);
               j = NODE_NEXT (a, nv);
               while (j != i)
-                { // eliminate the anonymous nodes of the path from the graph
-                  newinfo[j].v = NODE_T_TOP; /* max label */
+                {               // eliminate the anonymous nodes of the path from the graph
+                  newinfo[j].v = NODE_T_TOP;    /* max label */
                   newinfo[j].nn = NODE_T_TOP;
                   newinfo[j].s = 0;
                   // set info about its anon path
@@ -383,11 +386,11 @@ hgraph_close_anonymous1 (hgraph_internal_t * pr, hgraph_t * a,
                   perm->dim[nperm->dim[j]] = 0;
                   j = NODE_NEXT (a, j);
                 }
-              newinfo[i].v = NODE_T_TOP; /* max label */
+              newinfo[i].v = NODE_T_TOP;        /* max label */
               newinfo[i].nn = NODE_T_TOP;
               newinfo[i].s = 0;
               anons_info->dim[i] = nv;
-              perm->dim[nperm->dim[i]] = 0; // set to garbage this node in perm!
+              perm->dim[nperm->dim[i]] = 0;     // set to garbage this node in perm!
             }
         }
     }
@@ -410,14 +413,14 @@ hgraph_close_anonymous1 (hgraph_internal_t * pr, hgraph_t * a,
   if (anon_segm > 0)
     {
       anon->p =
-              (ap_dim_array_t *) malloc (anon_segm * sizeof (ap_dim_array_t));
+        (ap_dim_array_t *) malloc (anon_segm * sizeof (ap_dim_array_t));
       nv = 0;
       for (j = 0; j < newsize && nv < anon_segm; j++)
         if (anon_orig[j])
           {
             size_t k;
             anon->p[nv].p =
-                    (ap_dim_t *) malloc ((pr->max_anon + 2) * sizeof (node_t));
+              (ap_dim_t *) malloc ((pr->max_anon + 2) * sizeof (node_t));
             anon->p[nv].p[0] = (ap_dim_t) nperm->dim[j];
             // put nodes in order!
             j = NODE_NEXT (a, nv);
@@ -479,7 +482,8 @@ hgraph_t *
 hgraph_close (hgraph_internal_t * pr, hgraph_t * a, ap_dimperm_t * perm,
               ap_dim_array2_t * anon, bool cutpoint)
 {
-  arg_assert (perm && perm->size == a->size, return NULL;);
+  arg_assert (perm && perm->size == a->size, return NULL;
+    );
 
   size_t ngarbage = hgraph_close_garbage (pr, a, perm, cutpoint);
 
@@ -502,6 +506,10 @@ hgraph_close (hgraph_internal_t * pr, hgraph_t * a, ap_dimperm_t * perm,
 bool
 hgraph_close_incremental (hgraph_t * h, size_t dim, size_t v)
 {
+  if ((h != h)                  /* remove gcc warning */
+      || (dim != dim) || (v != v))
+    return false;
+
   return false;
 }
 
@@ -515,6 +523,10 @@ hgraph_close_incremental (hgraph_t * h, size_t dim, size_t v)
 bool
 hgraph_check_closed (hgraph_t * h, size_t dim)
 {
+  if ((h != h)                  /* remove gcc warning */
+      || (dim != dim))
+    return false;
+
   return false;
 }
 
@@ -527,7 +539,7 @@ hgraph_check_closed (hgraph_t * h, size_t dim)
 
 /* Eliminate anonimous nodes */
 hgraph_t *
-hgraph_closure (ap_manager_t * man, bool destructive, hgraph_t * a)
+hgraph_closure (sh_manager_t * man, bool destructive, hgraph_t * a)
 {
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_CLOSURE, 0);
   if (destructive)

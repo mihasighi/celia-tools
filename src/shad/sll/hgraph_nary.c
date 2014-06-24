@@ -1,10 +1,9 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / SLL Abstract Domain                                     */
 /*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
+/*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -24,7 +23,7 @@
 #include "hgraph.h"
 #include "hgraph_internal.h"
 #include "apron2shape.h"
-#include "shape_macros.h"
+#include "sh_macros.h"
 
 /* ============================================================ */
 /* Meet and Join */
@@ -36,14 +35,13 @@
 
 /* variables to be unified point in both graph to node != NODE_T_TOP */
 hgraph_t *
-hgraph_meet_internal (ap_manager_t * man,
+hgraph_meet_internal (sh_manager_t * man,
                       hgraph_t * a1,
                       hgraph_t * a2,
-                      ap_dimperm_t* perm1,
-                      ap_dimperm_t* perm2)
+                      ap_dimperm_t * perm1, ap_dimperm_t * perm2)
 {
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_MEET, 0);
-  hgraph_t* r = NULL;
+  hgraph_t *r = NULL;
 #ifndef NDEBUG1
   fprintf (stdout, "!!!! hgraph_meet_internal: a1=(");
   hgraph_fdump (stdout, man, a1);
@@ -55,8 +53,8 @@ hgraph_meet_internal (ap_manager_t * man,
   // Step 1: check the shared part and compute the number of nodes shared
   //         the shared part is accessible from variables not NULL in both graphs
   size_t v, n1, n2, lshared;
-  size_t *shared12 = (size_t*) malloc (a1->size * sizeof (size_t));
-  size_t *shared21 = (size_t*) malloc (a2->size * sizeof (size_t));
+  size_t *shared12 = (size_t *) malloc (a1->size * sizeof (size_t));
+  size_t *shared21 = (size_t *) malloc (a2->size * sizeof (size_t));
   memset (shared12, 0, a1->size * sizeof (size_t));
   memset (shared21, 0, a2->size * sizeof (size_t));
   for (v = 0; v < a1->ptrdim; v++)
@@ -106,7 +104,8 @@ hgraph_meet_internal (ap_manager_t * man,
       lshared++;
 
 #ifndef NDEBUG1
-  fprintf (stdout, "!!!! hgraph_meet_internal: (shared=%zu) shared12=(", lshared);
+  fprintf (stdout, "!!!! hgraph_meet_internal: (shared=%zu) shared12=(",
+           lshared);
   for (n1 = 0; n1 < a1->size; n1++)
     fprintf (stdout, " %zu -> %zu\n", n1, shared12[n1]);
   fprintf (stdout, ") and shared21=(");
@@ -117,8 +116,8 @@ hgraph_meet_internal (ap_manager_t * man,
 #endif
 
   // Step 2: build the result by combining graphs
-  size_t newsize = a1->size + a2->size - 1 - lshared; // -1 NODE_NULL is shared!
-  r = hgraph_alloc_internal (pr, newsize, a1->datadim, a1->ptrdim); // vars are all NODE_T_TOP
+  size_t newsize = a1->size + a2->size - 1 - lshared;   // -1 NODE_NULL is shared!
+  r = hgraph_alloc_internal (pr, newsize, a1->datadim, a1->ptrdim);     // vars are all NODE_T_TOP
   ap_dimperm_t nperm1;
   ap_dimperm_t nperm2;
   ap_dimperm_init (&nperm1, newsize);
@@ -149,7 +148,8 @@ hgraph_meet_internal (ap_manager_t * man,
     {
       if (shared12[n1] == 0)
         {
-          node_info_copy (&r->info[r->ptrdim + n2], &a1->info[a1->ptrdim + n1]);
+          node_info_copy (&r->info[r->ptrdim + n2],
+                          &a1->info[a1->ptrdim + n1]);
           nperm1.dim[n1] = n2;
           n2++;
         }
@@ -177,7 +177,8 @@ hgraph_meet_internal (ap_manager_t * man,
       else if (n1 != NODE_T_TOP)
         VAR2NODE (r, v) = nperm1.dim[n1];
       else
-        ERROR ("Bad graphs to unify", return NULL;);
+        ERROR ("Bad graphs to unify", return NULL;
+        );
     }
 
 #ifndef NDEBUG1
@@ -228,9 +229,13 @@ hgraph_meet_exit:
 
 /* TODO: priority 1 */
 hgraph_t *
-hgraph_meet (ap_manager_t * man, bool destructive, hgraph_t * a1,
+hgraph_meet (sh_manager_t * man, bool destructive, hgraph_t * a1,
              hgraph_t * a2)
 {
+  if ((destructive != destructive)      /* remove gcc warning */
+      || (a2 != a2))
+    return NULL;
+
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_MEET, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
@@ -239,9 +244,13 @@ hgraph_meet (ap_manager_t * man, bool destructive, hgraph_t * a1,
 
 /* TODO: priority 1 */
 hgraph_t *
-hgraph_join (ap_manager_t * man, bool destructive, hgraph_t * a1,
+hgraph_join (sh_manager_t * man, bool destructive, hgraph_t * a1,
              hgraph_t * a2)
 {
+  if ((destructive != destructive)      /* remove gcc warning */
+      || (a2 != a2))
+    return NULL;
+
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_JOIN, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
@@ -250,12 +259,11 @@ hgraph_join (ap_manager_t * man, bool destructive, hgraph_t * a1,
 
 /* TODO: priority 1 */
 hgraph_t *
-hgraph_meet_array (ap_manager_t * man, hgraph_t ** tab, size_t size)
+hgraph_meet_array (sh_manager_t * man, hgraph_t ** tab, size_t size)
 {
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_MEET_ARRAY, 0);
-  arg_assert (size > 0, return NULL;
-              );
+    hgraph_init_from_manager (man, AP_FUNID_MEET_ARRAY, 0);
+  arg_assert (size > 0, return NULL;);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return tab[0];
@@ -263,12 +271,11 @@ hgraph_meet_array (ap_manager_t * man, hgraph_t ** tab, size_t size)
 
 /* TODO: priority 1 */
 hgraph_t *
-hgraph_join_array (ap_manager_t * man, hgraph_t ** tab, size_t size)
+hgraph_join_array (sh_manager_t * man, hgraph_t ** tab, size_t size)
 {
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_JOIN_ARRAY, 0);
-  arg_assert (size > 0, return NULL;
-              );
+    hgraph_init_from_manager (man, AP_FUNID_JOIN_ARRAY, 0);
+  arg_assert (size > 0, return NULL;);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return tab[0];
@@ -345,6 +352,9 @@ hgraph_t *
 hgraph_add_set_var (hgraph_internal_t * pr, hgraph_t * a, node_t nsucc,
                     size_t vmin, size_t vmax)
 {
+  if (nsucc != nsucc)           /* remove gcc warning */
+    return NULL;
+
   node_t n;
   ap_dimperm_t perm;
   ap_dimperm_init (&perm, a->size);
@@ -362,6 +372,8 @@ hgraph_t *
 hgraph_copy_set_info (hgraph_internal_t * pr, hgraph_t * a, node_t n,
                       node_t nsucc, size_t v, size_t nn)
 {
+  if (nn != nn)                 /* remove gcc warning */
+    return NULL;
   ap_dimperm_t perm;
   ap_dimperm_init (&perm, a->size);
   hgraph_t *b = hgraph_copy_mem (pr, a);
@@ -390,7 +402,7 @@ hgraph_set_new_succ (hgraph_internal_t * pr, hgraph_t * a, node_t n, size_t v)
   ap_dimperm_t perm;
   ap_dimperm_init (&perm, a->size);
   hgraph_t *b = hgraph_node_add (pr, a, NODE_T_TOP, v, 0, &nnew, &perm);
-  ap_dimperm_clear (&perm); /* to clear old size */
+  ap_dimperm_clear (&perm);     /* to clear old size */
   hgraph_node_set_succ (b, n, nnew, &perm);
   ap_dimperm_clear (&perm);
   return b;
@@ -414,7 +426,7 @@ hgraph_set_new_succ_all (hgraph_internal_t * pr, hgraph_t * a, size_t v1,
         hgraph_node_set_var (b1, n1, v1, &perm);
         hgraph_node_set_succ (b1, n1, n2, &perm);
         ap_dimperm_clear (&perm);
-        hgraph_array_add (pr, r, true, true, b1); /* copy and destroy */
+        hgraph_array_add (pr, r, true, true, b1);       /* copy and destroy */
       }
   }
   hgraph_free_internal (pr, b);
@@ -470,11 +482,9 @@ hgraph_add_between (hgraph_internal_t * pr, hgraph_t * a, size_t vsrc,
 /* Abstract the graph of the disj disjunct of the formula f
  * and return the permutation of nodes generated.
  */
-hgraph_t*
+hgraph_t *
 hgraph_of_formula (hgraph_internal_t * pr,
-                   sh_formula_t* f,
-                   size_t disj,
-                   ap_dimperm_t* perm)
+                   sh_formula_t * f, size_t disj, ap_dimperm_t * perm)
 {
   if (!f || f->form[disj] == NULL)
     return NULL;
@@ -486,21 +496,21 @@ hgraph_of_formula (hgraph_internal_t * pr,
   // the environment is given by
   // - the user vars (f->env)
   // - the node vars (f->form[disj].nodes)
-  size_t nnodes = (f->form[disj]->nodes == NULL) ? 0 : f->form[disj]->nodes->realdim;
+  size_t nnodes =
+    (f->form[disj]->nodes == NULL) ? 0 : f->form[disj]->nodes->realdim;
   size_t nvptr = f->env->realdim;
   size_t nvdata = f->env->intdim;
 
   assert (perm->size == (nnodes + 1));
 
-  hgraph_t* a = hgraph_alloc_internal (pr, nnodes + 1, nvdata, nvptr);
+  hgraph_t *a = hgraph_alloc_internal (pr, nnodes + 1, nvdata, nvptr);
 
   // Step 1: define graph matrix using edge formulas
   size_t i;
   for (i = 0; i < f->form[disj]->length_eform; i++)
     {
       ap_dim_t nsrc = f->form[disj]->eform[i].src + 1;
-      ap_dim_t ndst = (f->form[disj]->eform[i].dst == AP_DIM_MAX) ? NODE_NULL :
-              (f->form[disj]->eform[i].dst + 1); // gives 0 for nilNode
+      ap_dim_t ndst = (f->form[disj]->eform[i].dst == AP_DIM_MAX) ? NODE_NULL : (f->form[disj]->eform[i].dst + 1);      // gives 0 for nilNode
       NODE_NEXT (a, nsrc) = ndst;
     }
 
@@ -510,8 +520,7 @@ hgraph_of_formula (hgraph_internal_t * pr,
     {
       // ptr vars shall start from 0
       ap_dim_t v = DIM2PTR (f->form[disj]->pform[i].var, nvdata);
-      ap_dim_t n = (f->form[disj]->pform[i].node == AP_DIM_MAX) ? NODE_NULL :
-              (f->form[disj]->pform[i].node + 1); // gives 0 for nilNode
+      ap_dim_t n = (f->form[disj]->pform[i].node == AP_DIM_MAX) ? NODE_NULL : (f->form[disj]->pform[i].node + 1);       // gives 0 for nilNode
       VAR2NODE (a, v) = n;
       if (n != NODE_NULL)
         {
@@ -523,7 +532,8 @@ hgraph_of_formula (hgraph_internal_t * pr,
   for (i = 0; i < nvptr; i++)
     {
       ap_dim_t n = VAR2NODE (a, i);
-      if (n == NODE_NULL || n == NODE_T_TOP) continue;
+      if (n == NODE_NULL || n == NODE_T_TOP)
+        continue;
       ap_dim_t ov = NODE_VAR (a, n);
       if (ov != NULL_DIM && i < ov)
         NODE_VAR (a, n) = i;
@@ -541,14 +551,14 @@ hgraph_of_formula (hgraph_internal_t * pr,
     }
   // - warning: if vars without nodes, set to null
   /* not done to be able to do unify
-  for (i = 0; i < nvptr; i++)
-    {
-      ap_dim_t n = VAR2NODE (a, i);
-      if (n == NODE_T_TOP)
-        VAR2NODE (a, i) = NODE_NULL;
-      // TODO: warning
-    }
-  */
+     for (i = 0; i < nvptr; i++)
+     {
+     ap_dim_t n = VAR2NODE (a, i);
+     if (n == NODE_T_TOP)
+     VAR2NODE (a, i) = NODE_NULL;
+     // TODO: warning
+     }
+   */
 
   // Step 4: sort the nodes from position 1, generate perm (for nodes)
 
@@ -571,8 +581,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
    * TODO: remove ap_dimperm_t perm;
    */
   hgraph_t *b;
-  arg_assert (a && c, return NULL;
-              );
+  arg_assert (a && c, return NULL;);
 #ifndef NDEBUG
   fprintf (stdout, "!!!! hgraph_meet_pcons: a = (");
   hgraph_fdump (stdout, pr->man, a);
@@ -582,7 +591,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
 #endif
 
   if (c->type == DATA_CONS)
-    { /* put a in r */
+    {                           /* put a in r */
       r = hgraph_array_make (pr, 1);
       r->p[0] = hgraph_copy_internal (pr, a);
       if (destructive)
@@ -592,8 +601,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
     {
       node_t vx, nx, nnx, vy, ny, nny;
       /* no more than 1 next dereference */
-      if (c->info.ptr.offx != OFFSET_NONE &&
-          c->info.ptr.offy != OFFSET_NONE)
+      if (c->info.ptr.offx != OFFSET_NONE && c->info.ptr.offy != OFFSET_NONE)
         {
           ap_manager_raise_exception (pr->man, AP_EXC_NOT_IMPLEMENTED,
                                       pr->funid, "not implemented");
@@ -601,19 +609,20 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
         }
       vx = DIM2PTR (c->info.ptr.x, a->datadim);
       nx = VAR2NODE (a, vx);
-      nnx = hgraph_node_get_nsucc (a, nx, (c->info.ptr.offx == OFFSET_NONE) ? 0 : 1);
+      nnx =
+        hgraph_node_get_nsucc (a, nx,
+                               (c->info.ptr.offx == OFFSET_NONE) ? 0 : 1);
       vy = DIM2PTR (c->info.ptr.y, a->datadim);
       ny = VAR2NODE (a, vy);
-      nny = hgraph_node_get_nsucc (a, ny, (c->info.ptr.offy == OFFSET_NONE) ? 0 : 1);
-      arg_assert (IS_PTRDIM (vx, a->datadim, a->ptrdim), return NULL;
-                  );
-      arg_assert (IS_PTRDIM (vy, a->datadim, a->ptrdim), return NULL;
-                  );
+      nny =
+        hgraph_node_get_nsucc (a, ny,
+                               (c->info.ptr.offy == OFFSET_NONE) ? 0 : 1);
+      arg_assert (IS_PTRDIM (vx, a->datadim, a->ptrdim), return NULL;);
+      arg_assert (IS_PTRDIM (vy, a->datadim, a->ptrdim), return NULL;);
       if ((nx == 0 && c->info.ptr.offx != OFFSET_NONE)
           || (ny == 0 && c->info.ptr.offy != OFFSET_NONE))
         {
-          ERROR ("Null pointer dereference",;
-                 );
+          ERROR ("Null pointer dereference",;);
           return NULL;
         }
       r = hgraph_array_make (pr, 4);
@@ -625,7 +634,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
               {
                 /* both nodes are defined, check their equality */
                 if (nnx == nny)
-                  hgraph_array_add (pr, r, true, false, a); /* copy, not distroy */
+                  hgraph_array_add (pr, r, true, false, a);     /* copy, not distroy */
                 /* else bottom result, keep NULL */
               }
             else
@@ -646,7 +655,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                     n2 = nx;
                   }
                 b = hgraph_copy_set_succ (pr, a, n1, n2);
-                hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                hgraph_array_add (pr, r, true, true, b);        /* copy and destroy */
                 /*
                  * TODO: remove b = hgraph_copy_mem (pr, a); hgraph_node_set_succ
                  * (b, n1, n2, &perm); ap_dimperm_clear (&perm); hgraph_array_add
@@ -682,7 +691,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                     size_t n;
                     /* case (1) vany->next = vfixed, new node for vany */
                     b = hgraph_add_succ_fixed (pr, a, vany, nfixed);
-                    hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                    hgraph_array_add (pr, r, true, true, b);    /* copy and destroy */
                     /*
                      * TODO: remove b = hgraph_node_add (a, nfixed, vany, 0, &n,
                      * &perm); ap_dimperm_clear (&perm); hgraph_array_add (pr, r,
@@ -695,7 +704,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                       if (hgraph_node_get_succ (a, n) == nfixed)
                         {
                           b = hgraph_copy_set_var (pr, a, n, vany, 0, 0);
-                          hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                          hgraph_array_add (pr, r, true, true, b);      /* copy and destroy */
                           /*
                            * TODO: remove b = hgraph_copy_mem (pr, a);
                            * hgraph_node_set_var (b, n, vany, &perm); ap_dimperm_clear
@@ -706,8 +715,8 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                       else if (hgraph_node_get_succ (a, n) == NODE_T_TOP)
                         {
                           b =
-                                  hgraph_copy_set_info (pr, a, n, nfixed, vany, 0);
-                          hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                            hgraph_copy_set_info (pr, a, n, nfixed, vany, 0);
+                          hgraph_array_add (pr, r, true, true, b);      /* copy and destroy */
                           /*
                            * TODO: remove b = hgraph_copy_mem (pr, a);
                            * hgraph_node_set_var (b, n, vany, &perm);
@@ -722,10 +731,10 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                     }
                   }
                 else if (nnfixed != NODE_T_TOP) /* nextany == 0 */
-                  { /* vfixed[->next] = vany */
+                  {             /* vfixed[->next] = vany */
                     /* set vany to nnfixed */
                     b = hgraph_copy_set_var (pr, a, nnfixed, vany, 0, 0);
-                    hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                    hgraph_array_add (pr, r, true, true, b);    /* copy and destroy */
                     /*
                      * TODO: remove b = hgraph_copy_mem (pr, a); hgraph_node_set_var
                      * (b, nnfixed, vany, &perm); ap_dimperm_clear (&perm);
@@ -739,7 +748,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                     /* case (1): vfixed->next = vany, new node for vany */
                     node_t n;
                     b = hgraph_set_new_succ (pr, a, nfixed, vany);
-                    hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                    hgraph_array_add (pr, r, true, true, b);    /* copy and destroy */
                     /*
                      * TODO: remove b = hgraph_node_add (a, NODE_T_TOP, vany, 0, &n,
                      * &perm); ap_dimperm_clear (&perm); hgraph_node_set_succ (b,
@@ -752,7 +761,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                     hgraph_node_forall (a, n)
                     {
                       b = hgraph_copy_set_info (pr, a, n, nfixed, vany, 0);
-                      hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                      hgraph_array_add (pr, r, true, true, b);  /* copy and destroy */
                       /*
                        * TODO: remove b = hgraph_copy_mem (pr, a); hgraph_node_set_var
                        * (b, n, vany, &perm); hgraph_node_set_succ (b, nfixed, n,
@@ -763,7 +772,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                   }
               }
             else
-              { /* nx == NODE_T_TOP && ny == NODE_T_TOP */
+              {                 /* nx == NODE_T_TOP && ny == NODE_T_TOP */
                 if (c->info.ptr.offx == OFFSET_NONE &&
                     c->info.ptr.offy == OFFSET_NONE)
                   {
@@ -781,7 +790,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                         v2 = vx;
                       }
                     b = hgraph_add_set_var (pr, a, NODE_T_TOP, v1, v2);
-                    hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                    hgraph_array_add (pr, r, true, true, b);    /* copy and destroy */
                     /*
                      * TODO: remove b = hgraph_node_add (a, NODE_T_TOP, v1, 0, &n,
                      * &perm); ap_dimperm_clear (&perm); hgraph_node_set_var (b, n, v2,
@@ -793,7 +802,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                     hgraph_node_forall (a, n)
                     {
                       b = hgraph_copy_set_var (pr, a, n, v1, n, v2);
-                      hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                      hgraph_array_add (pr, r, true, true, b);  /* copy and destroy */
                       /*
                        * TODO: remove b = hgraph_copy_mem (pr, a); hgraph_node_set_var
                        * (b, n, v1, &perm); hgraph_node_set_var (b, n, v2, &perm);
@@ -803,8 +812,8 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                     }
                   }
                 else
-                  { /* nx == NODE_T_TOP && ny == NODE_T_TOP &&
-				 * there is a next */
+                  {             /* nx == NODE_T_TOP && ny == NODE_T_TOP &&
+                                 * there is a next */
 
                     /* v1->next == v2 */
                     size_t v1, v2;
@@ -822,9 +831,9 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                       }
                     /* case (1): v1 == v2 and label a new node */
                     b =
-                            hgraph_add_loop (pr, a, ((v1 <= v2) ? v1 : v2),
-                                             ((v1 < v2) ? v2 : v1));
-                    hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                      hgraph_add_loop (pr, a, ((v1 <= v2) ? v1 : v2),
+                                       ((v1 < v2) ? v2 : v1));
+                    hgraph_array_add (pr, r, true, true, b);    /* copy and destroy */
                     /*
                      * TODO: remove b = hgraph_node_add (a, NODE_T_TOP, ((v1 <= v2) ? v1
                      * : v2), 0, &n, &perm); ap_dimperm_clear (&perm); if (v1 != v2)
@@ -835,7 +844,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                      */
                     /* case (2): v1 != v2 and both label new nodes */
                     b = hgraph_add_edge (pr, a, v1, v2);
-                    hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                    hgraph_array_add (pr, r, true, true, b);    /* copy and destroy */
                     /*
                      * TODO: remove b = hgraph_node_add (a, NODE_T_TOP, v2, 0, &n2,
                      * &perm); ap_dimperm_clear (&perm); b1 = b; b = hgraph_node_add (b1,
@@ -855,8 +864,8 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                             if (n2 == hgraph_node_get_succ (a, n))
                               {
                                 b =
-                                        hgraph_copy_set_var (pr, a, n, v1, n2, v2);
-                                hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                                  hgraph_copy_set_var (pr, a, n, v1, n2, v2);
+                                hgraph_array_add (pr, r, true, true, b);        /* copy and destroy */
                                 /*
                                  * TODO: remove b = hgraph_copy_mem (pr, a);
                                  * hgraph_node_set_var (b, n, v1, &perm); hgraph_node_set_var
@@ -932,7 +941,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                      * hgraph_copy_internal (pr, b)); hgraph_free_internal (pr, b);
                      */
                     b = hgraph_add_between (pr, a, v1, n1, n2);
-                    hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                    hgraph_array_add (pr, r, true, true, b);    /* copy and destroy */
                   }
                 /* else bottom result, so keep NULL */
               }
@@ -940,8 +949,8 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
               if ((nx != NODE_T_TOP && nnx == NODE_T_TOP && nny != NODE_T_TOP)
                   || (ny != NODE_T_TOP && nny == NODE_T_TOP
                       && nnx != NODE_T_TOP))
-              { /* v1->next != v2, v1->next undefined, v2
-				 * fixed */
+              {                 /* v1->next != v2, v1->next undefined, v2
+                                 * fixed */
                 node_t n1, n2;
                 size_t v1, v2;
                 if (nnx == NODE_T_TOP)
@@ -965,7 +974,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                  * hgraph_copy_internal (pr, b)); hgraph_free_internal (pr, b);
                  */
                 b = hgraph_add_set_info (pr, a, NODE_T_TOP, v1, 1);
-                hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                hgraph_array_add (pr, r, true, true, b);        /* copy and destroy */
 
                 /*
                  * case (2): fix v1->next to some existing node, different from
@@ -982,14 +991,14 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                        * b);
                        */
                       b = hgraph_copy_set_var (pr, a, i, v1, 0, 0);
-                      hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                      hgraph_array_add (pr, r, true, true, b);  /* copy and destroy */
                     }
                 }
               }
             else if ((nx == NODE_T_TOP && nny != NODE_T_TOP) ||
                      (ny == NODE_T_TOP && nnx != NODE_T_TOP))
-              { /* case v1 != v2[->next] for v1 not yet fixed
-				 * and v2[->next] fixed */
+              {                 /* case v1 != v2[->next] for v1 not yet fixed
+                                 * and v2[->next] fixed */
                 node_t n1, n2;
                 size_t v1, v2;
                 if (nx == NODE_T_TOP)
@@ -1008,7 +1017,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                   }
                 /* case (1): fix v1 to some new node, so different from n2 */
                 b = hgraph_add_set_info (pr, a, NODE_T_TOP, v1, 0);
-                hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                hgraph_array_add (pr, r, true, true, b);        /* copy and destroy */
                 /*
                  * TODO: remove b = hgraph_node_add (a, NODE_T_TOP, v1, 0, &i, &perm);
                  * ap_dimperm_clear (&perm); hgraph_array_add (pr, r,
@@ -1021,7 +1030,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                   if (n2 != i)
                     {
                       b = hgraph_copy_set_var (pr, a, i, v1, 0, 0);
-                      hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                      hgraph_array_add (pr, r, true, true, b);  /* copy and destroy */
                       /*
                        * TODO: remove b = hgraph_copy_mem (pr, a); hgraph_node_set_var
                        * (b, i, v1, &perm); ap_dimperm_clear (&perm); hgraph_array_add
@@ -1032,8 +1041,8 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                 }
               }
             else
-              { /* TODO: the same cases like for equality,
-				 * but more combinatorial explosion. */
+              {                 /* TODO: the same cases like for equality,
+                                 * but more combinatorial explosion. */
                 ap_manager_raise_exception (pr->man, AP_EXC_NOT_IMPLEMENTED,
                                             pr->funid, "not implemented");
                 return NULL;
@@ -1049,8 +1058,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                 c->info.ptr.offy != OFFSET_NONE)
               {
                 ERROR
-                        ("Not a reachability predicate (no next dereferencing)",;
-                         );
+                  ("Not a reachability predicate (no next dereferencing)",;);
                 return NULL;
               }
             if (nx != NODE_T_TOP && ny != NODE_T_TOP)
@@ -1071,7 +1079,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                 while (ny != NODE_T_TOP && ny != i && j <= 3)
                   {
                     b = hgraph_copy_set_var (pr, a, ny, vy, 0, 0);
-                    hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                    hgraph_array_add (pr, r, true, true, b);    /* copy and destroy */
                     /*
                      * TODO: remove b = hgraph_copy_mem (pr, a); hgraph_node_set_var (b,
                      * ny, vy, &perm); ap_dimperm_clear (&perm); hgraph_array_add (pr, r,
@@ -1090,7 +1098,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                  * ny
                  */
                 b = hgraph_add_set_info (pr, a, ny, vx, 0);
-                hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                hgraph_array_add (pr, r, true, true, b);        /* copy and destroy */
                 /*
                  * TODO: remove b = hgraph_node_add (a, ny, vx, 0, &nx, &perm);
                  * ap_dimperm_clear (&perm); hgraph_array_add (pr, r,
@@ -1107,7 +1115,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                   if (ny == hgraph_node_get_succ (a, i))
                     {
                       b = hgraph_copy_set_var (pr, a, i, vx, 0, 0);
-                      hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                      hgraph_array_add (pr, r, true, true, b);  /* copy and destroy */
                       /*
                        * TODO: remove b = hgraph_copy_mem (pr, a); hgraph_node_set_var
                        * (b, i, vx, &perm); ap_dimperm_clear (&perm); hgraph_array_add
@@ -1133,8 +1141,8 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                     v2 = vx;
                   }
                 /* case (1): x and y are the same new node */
-                b = hgraph_add_loop (pr, a, v1, v2); /* v1 <= v2 */
-                hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                b = hgraph_add_loop (pr, a, v1, v2);    /* v1 <= v2 */
+                hgraph_array_add (pr, r, true, true, b);        /* copy and destroy */
                 /*
                  * TODO: remove b = hgraph_node_add (a, NODE_T_TOP, v1, 0, &i, &perm);
                  * ap_dimperm_clear (&perm); hgraph_node_set_succ (b, i, i, &perm);
@@ -1144,7 +1152,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                  */
                 /* case (2): x and y are different new nodes */
                 b = hgraph_add_edge (pr, a, vx, vy);
-                hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                hgraph_array_add (pr, r, true, true, b);        /* copy and destroy */
                 /*
                  * TODO: remove b = hgraph_node_add (a, NODE_T_TOP, vy, 0, &ny, &perm);
                  * hgraph_t *b1 = b; b = hgraph_node_add (b1, ny, vx, 0, &nx, &perm);
@@ -1187,7 +1195,7 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                         if (ny == hgraph_node_get_succ (a, nx))
                           {
                             b = hgraph_copy_set_var (pr, a, nx, vx, ny, vy);
-                            hgraph_array_add (pr, r, true, true, b); /* copy and destroy */
+                            hgraph_array_add (pr, r, true, true, b);    /* copy and destroy */
                           }
                       }
                     }
@@ -1195,18 +1203,18 @@ hgraph_meet_pcons (hgraph_internal_t * pr, bool destructive, hgraph_t * a,
                 break;
               }
 
-          case ISO_CONS:
+        case ISO_CONS:
             {
               if (nnx != NODE_T_TOP && nny != NODE_T_TOP)
                 {
                   /* both nodes are defined, check their isomorphism */
                   if (hgraph_node_are_iso (pr, a, nnx, nny))
-                    hgraph_array_add (pr, r, true, false, a); /* copy, not distroy */
+                    hgraph_array_add (pr, r, true, false, a);   /* copy, not distroy */
                   /* else bottom result, keep NULL */
                 }
               break;
             }
-          default:
+        default:
             break;
           }
           if (destructive)
@@ -1254,7 +1262,7 @@ hgraph_meet_pcons_array (hgraph_internal_t * pr, bool destructive,
       for (j = 0; j < r->size && r->p[j] != NULL; j++)
         {
           hgraph_array_t *lr =
-                  hgraph_meet_pcons (pr, false, r->p[j], array->p[i]);
+            hgraph_meet_pcons (pr, false, r->p[j], array->p[i]);
           rc = hgraph_array_merge (pr, true, rc, lr);
         }
       hgraph_array_clear (pr, r);
@@ -1268,7 +1276,7 @@ hgraph_meet_pcons_array (hgraph_internal_t * pr, bool destructive,
 }
 
 hgraph_t *
-hgraph_meet_lincons_array (ap_manager_t * man,
+hgraph_meet_lincons_array (sh_manager_t * man,
                            bool destructive, hgraph_t * a,
                            ap_lincons0_array_t * array)
 {
@@ -1281,14 +1289,13 @@ hgraph_meet_lincons_array (ap_manager_t * man,
       pcons0_array_t *arr;
       hgraph_array_t *r;
       hgraph_internal_t *pr =
-              hgraph_init_from_manager (man, AP_FUNID_MEET_LINCONS_ARRAY, 0);
+        hgraph_init_from_manager (man, AP_FUNID_MEET_LINCONS_ARRAY, 0);
       if (!destructive)
         b = hgraph_copy_mem (pr, a);
       else
         b = a;
       /* compute in arr the constraints sorted */
-      arr =
-              shape_pcons_array_of_lincons_array (pr, array, a->datadim, a->ptrdim);
+      arr = shape_pcons_array_of_lincons_array (array, a->datadim, a->ptrdim);
 #ifndef NDEBUG
       printf ("\n========== meet with pcons array:\n");
       shape_pcons_array_fdump (stdout, arr);
@@ -1309,7 +1316,7 @@ hgraph_meet_lincons_array (ap_manager_t * man,
 }
 
 hgraph_t *
-hgraph_meet_tcons_array (ap_manager_t * man,
+hgraph_meet_tcons_array (sh_manager_t * man,
                          bool destructive, hgraph_t * a,
                          ap_tcons0_array_t * array)
 {
@@ -1322,14 +1329,13 @@ hgraph_meet_tcons_array (ap_manager_t * man,
       hgraph_array_t *r;
       pcons0_array_t *arr;
       hgraph_internal_t *pr =
-              hgraph_init_from_manager (man, AP_FUNID_MEET_TCONS_ARRAY, 0);
+        hgraph_init_from_manager (man, AP_FUNID_MEET_TCONS_ARRAY, 0);
       if (!destructive)
         b = hgraph_copy_mem (pr, a);
       else
         b = a;
       /* compute in arr the constraints sorted */
-      arr =
-              shape_pcons_array_of_tcons_array (pr, array, a->datadim, a->ptrdim);
+      arr = shape_pcons_array_of_tcons_array (array, a->datadim, a->ptrdim);
       /* go */
       /* true below means to compute only one element and return it in b */
       r = hgraph_meet_pcons_array (pr, true, b, arr);
@@ -1353,12 +1359,16 @@ hgraph_meet_tcons_array (ap_manager_t * man,
 
 /* NOT IMPLEMENTED */
 hgraph_t *
-hgraph_add_ray_array (ap_manager_t * man,
+hgraph_add_ray_array (sh_manager_t * man,
                       bool destructive, hgraph_t * a,
                       ap_generator0_array_t * array)
 {
+  if ((destructive != destructive)      /* remove gcc warning */
+      || (array != array))
+    return NULL;
+
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_ADD_RAY_ARRAY, 0);
+    hgraph_init_from_manager (man, AP_FUNID_ADD_RAY_ARRAY, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return a;
@@ -1372,12 +1382,11 @@ hgraph_add_ray_array (ap_manager_t * man,
 
 /* TODO: priority 1 */
 hgraph_t *
-hgraph_widening (ap_manager_t * man, hgraph_t * a1, hgraph_t * a2)
+hgraph_widening (sh_manager_t * man, hgraph_t * a1, hgraph_t * a2)
 {
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_WIDENING, 0);
-  arg_assert (a1->ptrdim == a2->ptrdim, return NULL;
-              );
+    hgraph_init_from_manager (man, AP_FUNID_WIDENING, 0);
+  arg_assert (a1->ptrdim == a2->ptrdim, return NULL;);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return a2;
@@ -1385,14 +1394,16 @@ hgraph_widening (ap_manager_t * man, hgraph_t * a1, hgraph_t * a2)
 
 /* TODO: priority 1 */
 hgraph_t *
-hgraph_widening_thresholds (ap_manager_t * man,
+hgraph_widening_thresholds (sh_manager_t * man,
                             hgraph_t * a1, hgraph_t * a2,
                             ap_scalar_t ** array, size_t nb)
 {
+  if (array != array)           /* remove gcc warning */
+    return NULL;
+
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_WIDENING, nb + 1);
-  arg_assert (a1->ptrdim == a2->ptrdim, return NULL;
-              );
+    hgraph_init_from_manager (man, AP_FUNID_WIDENING, nb + 1);
+  arg_assert (a1->ptrdim == a2->ptrdim, return NULL;);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return a2;
@@ -1400,12 +1411,11 @@ hgraph_widening_thresholds (ap_manager_t * man,
 
 /* NOT IMPLEMENTED */
 hgraph_t *
-hgraph_narrowing (ap_manager_t * man, hgraph_t * a1, hgraph_t * a2)
+hgraph_narrowing (sh_manager_t * man, hgraph_t * a1, hgraph_t * a2)
 {
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_WIDENING, 0);
-  arg_assert (a1->ptrdim == a2->ptrdim, return NULL;
-              );
+    hgraph_init_from_manager (man, AP_FUNID_WIDENING, 0);
+  arg_assert (a1->ptrdim == a2->ptrdim, return NULL;);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return a2;

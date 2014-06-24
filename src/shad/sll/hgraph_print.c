@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CELIA Tools / Utilities for Abstract Domains                          */
+/*  CELIA Tools / SLL Abstract Domain                                     */
 /*                                                                        */
 /*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
@@ -32,14 +32,14 @@
 /* ============================================================ */
 
 void
-hgraph_fprint_dot (FILE * stream, hgraph_internal_t *pr,
-                   hgraph_t *a, char **name_of_dim);
+hgraph_fprint_dot (FILE * stream, hgraph_internal_t * pr,
+                   hgraph_t * a, char **name_of_dim);
 void
-hgraph_fprint_dot_reach (FILE * stream, hgraph_internal_t *pr,
-                         hgraph_t *a, char **name_of_dim);
+hgraph_fprint_dot_reach (FILE * stream, hgraph_internal_t * pr,
+                         hgraph_t * a, char **name_of_dim);
 void
-hgraph_fprint_smt (FILE * stream, hgraph_internal_t *pr,
-                   hgraph_t *a, char **name_of_dim);
+hgraph_fprint_smt (FILE * stream, hgraph_internal_t * pr,
+                   hgraph_t * a, char **name_of_dim);
 
 void
 hgraph_fprint (FILE * stream, sh_manager_t * man,
@@ -58,7 +58,7 @@ hgraph_fprintdiff (FILE * stream, sh_manager_t * man,
                    hgraph_t * a1, hgraph_t * a2, char **name_of_dim)
 {
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_FPRINTDIFF, 0);
+    hgraph_init_from_manager (man, AP_FUNID_FPRINTDIFF, 0);
   hgraph_fprint (stream, man, a1, name_of_dim);
   hgraph_fprint (stream, man, a2, name_of_dim);
 }
@@ -67,7 +67,7 @@ void
 hgraph_fdump (FILE * stream, sh_manager_t * man, hgraph_t * a)
 {
   hgraph_internal_t *pr = (man != NULL) ?
-          hgraph_init_from_manager (man, AP_FUNID_FDUMP, 0) : NULL;
+    hgraph_init_from_manager (man, AP_FUNID_FDUMP, 0) : NULL;
   fprintf (stream, "\tnode [shape=Mrecord] ;\n");
   fprintf (stream, "\tlabel=\"hgraph %zu", pr->ushape_number);
   hgraph_fprint_dot_reach (stream, pr, a, NULL);
@@ -110,9 +110,9 @@ inline void
 hgraph_fprint_dot_alone (FILE * stream, sh_manager_t * man,
                          hgraph_t * a, char **name_of_dim, char *name)
 {
-  if (man != man) /* remove gcc warning */
+  if (man != man)               /* remove gcc warning */
     return;
-    
+
   size_t i, j;
   /* print graph name */
   fprintf (stream, "digraph %s {\n", name);
@@ -120,7 +120,8 @@ hgraph_fprint_dot_alone (FILE * stream, sh_manager_t * man,
    * print cut nodes (in boxed) with label information, print edges for
    * each node
    */
-  if (!name_of_dim) shape_init_name_of_dim (a->datadim, a->ptrdim);
+  if (!name_of_dim)
+    shape_init_name_of_dim (a->datadim, a->ptrdim);
   for (i = 0; i < a->size; i++)
     {
       fprintf (stream, "n%zu -> n%zu;\n", i, NODE_NEXT (a, i));
@@ -143,7 +144,7 @@ hgraph_fprint_dot_alone (FILE * stream, sh_manager_t * man,
 }
 
 void
-hgraph_fprint_dot_reach (FILE * stream, hgraph_internal_t* pr,
+hgraph_fprint_dot_reach (FILE * stream, hgraph_internal_t * pr,
                          hgraph_t * a, char **name_of_dim)
 {
   size_t i, j;
@@ -159,7 +160,8 @@ hgraph_fprint_dot_reach (FILE * stream, hgraph_internal_t* pr,
     }
 
   /* collect variable labeling */
-  unsigned int * ptrvar = (unsigned int *) malloc (a->size * sizeof (unsigned int));
+  unsigned int *ptrvar =
+    (unsigned int *) malloc (a->size * sizeof (unsigned int));
   memset (ptrvar, 0, a->size * sizeof (unsigned int));
   for (i = 0; i < a->ptrdim; i++)
     {
@@ -185,8 +187,7 @@ hgraph_fprint_dot_reach (FILE * stream, hgraph_internal_t* pr,
         fprintf (stream, " TOP | [ ");
       else if (name_of_dim)
         fprintf (stream, " %s^(%zu) | [ ",
-                 name_of_dim[a->datadim + v],
-                 NODE_VAR_NEXT (a, i));
+                 name_of_dim[a->datadim + v], NODE_VAR_NEXT (a, i));
       else
         fprintf (stream, " x%zu^(%zu) | [ ",
                  a->datadim + v, NODE_VAR_NEXT (a, i));
@@ -213,7 +214,7 @@ hgraph_fprint_dot_reach (FILE * stream, hgraph_internal_t* pr,
 }
 
 void
-hgraph_fprint_dot (FILE * stream, hgraph_internal_t *pr,
+hgraph_fprint_dot (FILE * stream, hgraph_internal_t * pr,
                    hgraph_t * a, char **name_of_dim)
 {
   fprintf (stream, "\tnode [shape=Mrecord] ;\n");
@@ -227,12 +228,12 @@ hgraph_fprint_dot (FILE * stream, hgraph_internal_t *pr,
 }
 
 void
-hgraph_fprint_smt (FILE * stream, hgraph_internal_t* pr,
+hgraph_fprint_smt (FILE * stream, hgraph_internal_t * pr,
                    hgraph_t * a, char **name_of_dim)
 {
-  if (pr != pr) /* remove gcc warning */
+  if (pr != pr)                 /* remove gcc warning */
     return;
-    
+
   size_t i, j;
 
   if (!a->info)
@@ -286,16 +287,16 @@ hgraph_fprint_smt (FILE * stream, hgraph_internal_t* pr,
 ap_membuf_t
 hgraph_serialize_raw (sh_manager_t * man, hgraph_t * a)
 {
-    
+
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_SERIALIZE_RAW, 0);
+    hgraph_init_from_manager (man, AP_FUNID_SERIALIZE_RAW, 0);
   ap_membuf_t buf;
   buf.size = 0;
   buf.ptr = NULL;
   sh_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
-  if (a != a) /* remove gcc warning */
-    return buf; 
+  if (a != a)                   /* remove gcc warning */
+    return buf;
 
   return buf;
 }
@@ -306,11 +307,11 @@ hgraph_serialize_raw (sh_manager_t * man, hgraph_t * a)
 hgraph_t *
 hgraph_deserialize_raw (sh_manager_t * man, void *ptr, size_t * size)
 {
-  if ((size != size) || (ptr != ptr)) /* remove gcc warning */
-    return NULL; 
-    
+  if ((size != size) || (ptr != ptr))   /* remove gcc warning */
+    return NULL;
+
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_DESERIALIZE_RAW, 0);
+    hgraph_init_from_manager (man, AP_FUNID_DESERIALIZE_RAW, 0);
   sh_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return NULL;

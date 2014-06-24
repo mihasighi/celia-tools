@@ -62,7 +62,7 @@ struct _shape_internal_t
 
   /* manager of the segment domains */
   size_t size_scons;
-  ap_manager_t **man_scons;	/* array of scons_size managers */
+  ap_manager_t **man_scons;     /* array of scons_size managers */
   size_t man_mset;              /* position of the mset manager/constraint */
   size_t man_ucons;             /* position of the ucons manager/constraint */
 
@@ -101,7 +101,7 @@ typedef struct _shape_internal_t shape_internal_t;
 static inline sh_internal_t *
 sh_init_from_manager (sh_manager_t * man, ap_funid_t id, size_t size)
 {
-  if (size != size) /* remove gcc warning */
+  if (size != size)             /* remove gcc warning */
     return NULL;
 
   sh_internal_t *pr = (sh_internal_t *) man->internal;
@@ -121,4 +121,3 @@ sh_init_from_manager (sh_manager_t * man, ap_funid_t id, size_t size)
 /* *INDENT-ON* */
 
 #endif /* __SH_MANAGER_H */
-

@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CELIA Tools / Utilities for Abstract Domains                          */
+/*  CELIA Tools / SLL Abstract Domain                                     */
 /*                                                                        */
 /*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */

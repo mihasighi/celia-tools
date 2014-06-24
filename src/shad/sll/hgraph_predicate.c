@@ -1,8 +1,8 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / SLL Abstract Domain                                     */
 /*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
+/*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
 /*                                                                        */
 /*                                                                        */
@@ -24,7 +24,7 @@
 #include "hgraph.h"
 #include "hgraph_internal.h"
 #include "apron2shape.h"
-#include "shape_macros.h"
+#include "sh_macros.h"
 #include "ap_generic.h"
 
 
@@ -38,10 +38,10 @@
  * bottom value is the graph with no nodes
  */
 bool
-hgraph_is_bottom (ap_manager_t * man, hgraph_t * a)
+hgraph_is_bottom (sh_manager_t * man, hgraph_t * a)
 {
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_IS_BOTTOM, 0);
+    hgraph_init_from_manager (man, AP_FUNID_IS_BOTTOM, 0);
   return (!a || a->size == 0) ? true : false;
 }
 
@@ -51,7 +51,7 @@ hgraph_is_bottom (ap_manager_t * man, hgraph_t * a)
  * mapped ont it?
  */
 bool
-hgraph_is_top (ap_manager_t * man, hgraph_t * a)
+hgraph_is_top (sh_manager_t * man, hgraph_t * a)
 {
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_IS_TOP, 0);
   size_t i;
@@ -72,10 +72,10 @@ hgraph_is_equal (hgraph_t * a, hgraph_t * b)
    * representation of hgraphs
    */
   bool r = (a->size == b->size) && (a->ptrdim == b->ptrdim) &&
-          (a->datadim == b->datadim);
+    (a->datadim == b->datadim);
   r = r &&
-          (memcmp (a->info, b->info, (a->ptrdim + a->size) * sizeof (node_info_t))
-           == 0);
+    (memcmp (a->info, b->info, (a->ptrdim + a->size) * sizeof (node_info_t))
+     == 0);
   return r;
 }
 
@@ -104,7 +104,7 @@ hgraph_is_lt (hgraph_t * a, hgraph_t * b)
   for (i = 0; i < a->size; i++)
     {
       if (hgraph_node_is_cut (a, i) == false)
-        break; /* end of cut nodes */
+        break;                  /* end of cut nodes */
       if (hgraph_node_get_succ_cut (a, i, &na) !=
           hgraph_node_get_succ_cut (b, i, &nb))
         return false;
@@ -136,15 +136,14 @@ hgraph_cmp (hgraph_t * a, hgraph_t * b)
 }
 
 bool
-hgraph_is_leq (ap_manager_t * man, hgraph_t * a1, hgraph_t * a2)
+hgraph_is_leq (sh_manager_t * man, hgraph_t * a1, hgraph_t * a2)
 {
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_IS_LEQ, 0);
   if (a1 == NULL || (a2 == NULL && hgraph_is_bottom (man, a1)))
     return true;
   if (a2 == NULL)
     return false;
-  arg_assert (a1->ptrdim == a2->ptrdim, return false;
-              );
+  arg_assert (a1->ptrdim == a2->ptrdim, return false;);
   if (hgraph_is_bottom (man, a1) || hgraph_is_top (man, a2))
     return true;
   if ((hgraph_is_bottom (man, a2) && !hgraph_is_bottom (man, a1)) ||
@@ -154,7 +153,7 @@ hgraph_is_leq (ap_manager_t * man, hgraph_t * a1, hgraph_t * a2)
 }
 
 bool
-hgraph_is_eq (ap_manager_t * man, hgraph_t * a1, hgraph_t * a2)
+hgraph_is_eq (sh_manager_t * man, hgraph_t * a1, hgraph_t * a2)
 {
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_IS_EQ, 0);
 
@@ -177,10 +176,13 @@ hgraph_is_eq (ap_manager_t * man, hgraph_t * a1, hgraph_t * a2)
  * computed in perm2 (of size a2->size).
  */
 bool
-hgraph_is_spec (ap_manager_t * man,
-                hgraph_t * a1, hgraph_t * a2, ap_dimperm_t* perm2)
+hgraph_is_spec (sh_manager_t * man,
+                hgraph_t * a1, hgraph_t * a2, ap_dimperm_t * perm2)
 {
-  hgraph_t* r = NULL;
+  if (man != man)               /* remove gcc warning */
+    return false;
+
+  hgraph_t *r = NULL;
 #ifndef NDEBUG1
   fprintf (stdout, "!!!! hgraph_is_spec: a1=(");
   hgraph_fdump (stdout, man, a1);
@@ -193,13 +195,14 @@ hgraph_is_spec (ap_manager_t * man,
   // build the mapping to nodes in a1
   bool ok = true;
   size_t v, n1, n2;
-  size_t *map12 = (size_t*) malloc (a1->size * sizeof (size_t));
-  size_t *map21 = (size_t*) malloc (a2->size * sizeof (size_t));
+  size_t *map12 = (size_t *) malloc (a1->size * sizeof (size_t));
+  size_t *map21 = (size_t *) malloc (a2->size * sizeof (size_t));
   memset (map12, 0, a1->size * sizeof (size_t));
   memset (map21, 0, a2->size * sizeof (size_t));
   for (v = 0; (v < a1->ptrdim) && ok; v++)
     {
-      if (VAR2NODE (a2, v) == NODE_T_TOP) continue;
+      if (VAR2NODE (a2, v) == NODE_T_TOP)
+        continue;
       // else
 #ifndef NDEBUG1
       fprintf (stdout, "!!!! hgraph_is_spec: vars x%zu\n", v);
@@ -218,19 +221,21 @@ hgraph_is_spec (ap_manager_t * man,
           else if (map21[n2] != 0)
             {
               ok = (map21[n2] == n1);
-              isEnd = true; /* already seen or error */
+              isEnd = true;     /* already seen or error */
             }
           else if (map12[n1] != 0)
             {
               ok = (map12[n1] == n2);
-              isEnd = true; /* already seen  or error */
+              isEnd = true;     /* already seen  or error */
             }
           else
             {
               map21[n2] = n1;
               map12[n1] = n2;
 #ifndef NDEBUG1
-              fprintf (stdout, "!!!! hgraph_is_spec: maps n%zu (a2) to n%zu (a1)\n", n2, n1);
+              fprintf (stdout,
+                       "!!!! hgraph_is_spec: maps n%zu (a2) to n%zu (a1)\n",
+                       n2, n1);
               fflush (stdout);
 #endif
               n1 = NODE_NEXT (a1, n1);
@@ -252,7 +257,7 @@ hgraph_is_spec (ap_manager_t * man,
 #endif
 
   if (ok)
-    { // there is a mapping from a2 to a subgraph of a1
+    {                           // there is a mapping from a2 to a subgraph of a1
       // Step 2: build perm2
       ap_dimperm_init (perm2, a1->size);
       ap_dimperm_set_id (perm2);
@@ -263,9 +268,10 @@ hgraph_is_spec (ap_manager_t * man,
       for (; n2 < a1->size; n2++)
         {
           // find next node not mapped in a2
-          while ((n1 < a1->size) && (map12[n1] != 0)) n1++;
+          while ((n1 < a1->size) && (map12[n1] != 0))
+            n1++;
           perm2->dim[n2] = n1;
-	  map12[n1] = n2;
+          map12[n1] = n2;
           n1++;
         }
 #ifndef NDEBUG1
@@ -284,9 +290,11 @@ hgraph_is_spec (ap_manager_t * man,
 bool
 hgraph_sat_pcons (hgraph_internal_t * pr, hgraph_t * a, pcons0_t * c)
 {
+  if (pr != pr)                 /* remove gcc warning */
+    return false;
+
   bool r = false;
-  arg_assert (a && c, return false;
-              );
+  arg_assert (a && c, return false;);
   if (c->type == DATA_CONS)
     return false;
   node_t nx = VAR2NODE (a, DIM2PTR (c->info.ptr.x, a->datadim));
@@ -325,7 +333,7 @@ hgraph_is_closed (hgraph_internal_t * pr, hgraph_t * a)
   if (a)
     {
       for (i = 1, n = 0; i < a->size; i++)
-        if (NODE_VAR (a, i) != NODE_T_TOP && // not a garbage
+        if (NODE_VAR (a, i) != NODE_T_TOP &&    // not a garbage
             NODE_VAR_NEXT (a, i) != NODE_T_TOP &&
             NODE_VAR_NEXT (a, i) > pr->max_anon)
           {
@@ -344,14 +352,13 @@ hgraph_is_closed (hgraph_internal_t * pr, hgraph_t * a)
  * between pointer variables, e.g., x = y, in the assert statements.
  */
 bool
-hgraph_sat_lincons (ap_manager_t * man, hgraph_t * a, ap_lincons0_t * lincons)
+hgraph_sat_lincons (sh_manager_t * man, hgraph_t * a, ap_lincons0_t * lincons)
 {
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_SAT_LINCONS, 0);
+    hgraph_init_from_manager (man, AP_FUNID_SAT_LINCONS, 0);
   if (hgraph_is_bottom (man, a))
     return false;
-  pcons0_t * pcons =
-          shape_pcons_of_lincons (pr, lincons, a->datadim, a->ptrdim);
+  pcons0_t *pcons = shape_pcons_of_lincons (lincons, a->datadim, a->ptrdim);
 
   return hgraph_sat_pcons (pr, a, pcons);
   /* pcons are hashed, so no free of pcons here */
@@ -362,13 +369,13 @@ hgraph_sat_lincons (ap_manager_t * man, hgraph_t * a, ap_lincons0_t * lincons)
  * pointer variables, e.g., x*next = y, in the assert statements.
  */
 bool
-hgraph_sat_tcons (ap_manager_t * man, hgraph_t * a, ap_tcons0_t * cons)
+hgraph_sat_tcons (sh_manager_t * man, hgraph_t * a, ap_tcons0_t * cons)
 {
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_SAT_TCONS, 0);
+    hgraph_init_from_manager (man, AP_FUNID_SAT_TCONS, 0);
   if (hgraph_is_bottom (man, a))
     return false;
-  pcons0_t * pcons = shape_pcons_of_tcons (pr, cons, a->datadim, a->ptrdim);
+  pcons0_t *pcons = shape_pcons_of_tcons (cons, a->datadim, a->ptrdim);
 
   return hgraph_sat_pcons (pr, a, pcons);
   /* pcons are hashed, so no free of pcons here */
@@ -376,26 +383,32 @@ hgraph_sat_tcons (ap_manager_t * man, hgraph_t * a, ap_tcons0_t * cons)
 
 /* NOT IMPLEMENTED */
 bool
-hgraph_sat_interval (ap_manager_t * man, hgraph_t * a,
+hgraph_sat_interval (sh_manager_t * man, hgraph_t * a,
                      ap_dim_t dim, ap_interval_t * i)
 {
+  if ((a != a)                  /* remove gcc warning */
+      || (dim != dim) || (i != i))
+    return false;
+
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_SAT_INTERVAL, 0);
-  arg_assert (dim < a->ptrdim, return false;
-              );
+    hgraph_init_from_manager (man, AP_FUNID_SAT_INTERVAL, 0);
+  arg_assert (dim < a->ptrdim, return false;);
 
   return true;
 }
 
 bool
-hgraph_is_dimension_unconstrained (ap_manager_t * man, hgraph_t * a,
+hgraph_is_dimension_unconstrained (sh_manager_t * man, hgraph_t * a,
                                    ap_dim_t dim)
 {
+  if ((a != a)                  /* remove gcc warning */
+      || (dim != dim))
+    return false;
+
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_IS_DIMENSION_UNCONSTRAINED, 0);
+    hgraph_init_from_manager (man, AP_FUNID_IS_DIMENSION_UNCONSTRAINED, 0);
   size_t pdim = REAL2PTR_DIM (pr, dim);
-  arg_assert (pdim < a->ptrdim, return false;
-              );
+  arg_assert (pdim < a->ptrdim, return false;);
   /* bottom constraints all dimensions */
   if (a->size == 0)
     return false;
@@ -420,10 +433,14 @@ hgraph_is_dimension_unconstrained (ap_manager_t * man, hgraph_t * a,
 
 /* NOT IMPLEMENTED */
 ap_interval_t *
-hgraph_bound_linexpr (ap_manager_t * man, hgraph_t * a, ap_linexpr0_t * expr)
+hgraph_bound_linexpr (sh_manager_t * man, hgraph_t * a, ap_linexpr0_t * expr)
 {
+  if ((a != a)                  /* remove gcc warning */
+      || (expr != expr))
+    return NULL;
+
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_BOUND_LINEXPR, 0);
+    hgraph_init_from_manager (man, AP_FUNID_BOUND_LINEXPR, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
 
@@ -432,10 +449,14 @@ hgraph_bound_linexpr (ap_manager_t * man, hgraph_t * a, ap_linexpr0_t * expr)
 
 /* NOT IMPLEMENTED */
 ap_interval_t *
-hgraph_bound_texpr (ap_manager_t * man, hgraph_t * a, ap_texpr0_t * expr)
+hgraph_bound_texpr (sh_manager_t * man, hgraph_t * a, ap_texpr0_t * expr)
 {
+  if ((a != a)                  /* remove gcc warning */
+      || (expr != expr))
+    return NULL;
+
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_BOUND_TEXPR, 0);
+    hgraph_init_from_manager (man, AP_FUNID_BOUND_TEXPR, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
 
@@ -444,10 +465,14 @@ hgraph_bound_texpr (ap_manager_t * man, hgraph_t * a, ap_texpr0_t * expr)
 
 /* NOT IMPLEMENTED */
 ap_interval_t *
-hgraph_bound_dimension (ap_manager_t * man, hgraph_t * a, ap_dim_t dim)
+hgraph_bound_dimension (sh_manager_t * man, hgraph_t * a, ap_dim_t dim)
 {
+  if ((a != a)                  /* remove gcc warning */
+      || (dim != dim))
+    return NULL;
+
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_BOUND_DIMENSION, 0);
+    hgraph_init_from_manager (man, AP_FUNID_BOUND_DIMENSION, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
 
@@ -456,20 +481,23 @@ hgraph_bound_dimension (ap_manager_t * man, hgraph_t * a, ap_dim_t dim)
 
 /* NOT IMPLEMENTED */
 ap_lincons0_array_t
-hgraph_to_lincons_array (ap_manager_t * man, hgraph_t * a)
+hgraph_to_lincons_array (sh_manager_t * man, hgraph_t * a)
 {
   ap_lincons0_array_t ar;
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_TO_LINCONS_ARRAY, 0);
+    hgraph_init_from_manager (man, AP_FUNID_TO_LINCONS_ARRAY, 0);
   ar = ap_lincons0_array_make (1);
   ar.p[0] = ap_lincons0_make_unsat ();
+
+  if (a != a)
+    return ar;
 
   return ar;
 }
 
 /* NOT IMPLEMENTED */
 ap_tcons0_array_t
-hgraph_to_tcons_array (ap_manager_t * man, hgraph_t * a)
+hgraph_to_tcons_array (sh_manager_t * man, hgraph_t * a)
 {
 
   return ap_generic_to_tcons_array (man, a);
@@ -477,8 +505,11 @@ hgraph_to_tcons_array (ap_manager_t * man, hgraph_t * a)
 
 /* NOT IMPLEMENTED */
 ap_interval_t **
-hgraph_to_box (ap_manager_t * man, hgraph_t * a)
+hgraph_to_box (sh_manager_t * man, hgraph_t * a)
 {
+  if (a != a)                   /* remove gcc warning */
+    return NULL;
+
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_TO_BOX, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
@@ -488,10 +519,13 @@ hgraph_to_box (ap_manager_t * man, hgraph_t * a)
 
 /* NOT IMPLEMENTED */
 ap_generator0_array_t
-hgraph_to_generator_array (ap_manager_t * man, hgraph_t * a)
+hgraph_to_generator_array (sh_manager_t * man, hgraph_t * a)
 {
+  if (a != a)                   /* remove gcc warning */
+    return ap_generator0_array_make (0);
+
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_TO_GENERATOR_ARRAY, 0);
+    hgraph_init_from_manager (man, AP_FUNID_TO_GENERATOR_ARRAY, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return ap_generator0_array_make (0);

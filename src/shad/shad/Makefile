@@ -51,18 +51,9 @@ OCAMLINC = \
 # Files
 #---------------------------------------
 
-ADOM_CCSOURCES = adom_print.c adom_transfer.c adom_closure.c adom_nary.c \
-	adom_representation.c adom_predicate.c adom_resize.c
+CCSOURCES = 
 
-ADOM_CCINC = adom.h adom_internal.h adom_fun.h 
-
-HGRAPH_CCSOURCES = $(subst adom,hgraph,$(ADOM_CCSOURCES))
-
-HGRAPH_CCINC = $(subst adom,hgraph,$(ADOM_CCINC))
-
-CCSOURCES = $(HGRAPH_CCSOURCES) 
-
-CCINC = $(HGRAPH_CCINC) 
+CCINC = sh_manager.h
 
 # trigers a whole recompilation
 #DEPS = $(APRON_CCINC)/ap_abstract0.h

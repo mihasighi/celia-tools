@@ -1,8 +1,8 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / SLL Abstract Domain                                     */
 /*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
+/*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,7 @@
 #include "hgraph.h"
 #include "hgraph_internal.h"
 #include "apron2shape.h"
-#include "shape_macros.h"
+#include "sh_macros.h"
 
 
 /* ********************************************************************** */
@@ -44,10 +44,12 @@
   /* Global Set Management */
   /* ============================================================ */
 
-hgraph_t* hgraphs_ht; /* global set (hash table) of hgraphs */
+hgraph_t *hgraphs_ht;           /* global set (hash table) of hgraphs */
 
 /* Intialization */
-void hgraph_init(void) {
+void
+hgraph_init (void)
+{
   hgraphs_ht = NULL;
 }
 
@@ -66,8 +68,7 @@ void hgraph_init(void) {
  * NULL to node 0
  */
 void
-node_init_v2n (hgraph_internal_t * pr, node_info_t * info, size_t ptrdim,
-               node_t n)
+node_init_v2n (node_info_t * info, size_t ptrdim, node_t n)
 {
   size_t i;
   memset (info, 0, (ptrdim) * sizeof (node_info_t));
@@ -76,8 +77,7 @@ node_init_v2n (hgraph_internal_t * pr, node_info_t * info, size_t ptrdim,
 }
 
 void
-node_info_init (hgraph_internal_t * pr, node_info_t * info, size_t ptrdim,
-                size_t size)
+node_info_init (node_info_t * info, size_t ptrdim, size_t size)
 {
   size_t i;
   for (i = 0; i < size; i++)
@@ -110,7 +110,7 @@ hgraph_alloc_null (hgraph_internal_t * pr, size_t datadim, size_t ptrdim)
   r = hgraph_alloc_internal (pr, 1, datadim, ptrdim);
   // make ptr vars to point to node null (0)
   memset (r->info, 0, ptrdim * sizeof (node_info_t));
-  node_info_init (pr, r->info, ptrdim, 1);
+  node_info_init (r->info, ptrdim, 1);
   r->closed = true;
   return r;
 }
@@ -124,21 +124,22 @@ hgraph_t *
 hgraph_alloc_internal (hgraph_internal_t * pr, size_t size,
                        size_t datadim, size_t ptrdim)
 {
+  if (pr != pr)                 /* remove gcc warning */
+    return NULL;
   hgraph_t *r;
   checked_malloc (r, hgraph_t,
                   (sizeof (hgraph_t) +
-                   (ptrdim + size) * sizeof (node_info_t)), 1, return NULL;
-                  );
+                   (ptrdim + size) * sizeof (node_info_t)), 1, return NULL;);
   r->closed = false;
   r->size = size;
   r->ptrdim = ptrdim;
   r->datadim = datadim;
   memset (r->info, 0, (ptrdim + size) * sizeof (node_info_t));
   // set ptr vars to point anywhere (NODE_T_TOP)
-  node_init_v2n (pr, r->info, ptrdim, NODE_T_TOP);
+  node_init_v2n (r->info, ptrdim, NODE_T_TOP);
   // set nodes to undefined variable values except node 0
   // DO NOT COMMENT: node_info_init sets important info for NULL
-  node_info_init (pr, r->info, ptrdim, size);
+  node_info_init (r->info, ptrdim, size);
   return r;
 }
 
@@ -155,7 +156,7 @@ hgraph_make (hgraph_internal_t * pr, size_t code, size_t datadim,
   size_t i;
   switch (code)
     {
-    case 0: /* x--> null */
+    case 0:                    /* x--> null */
       {
         a = hgraph_alloc_internal (pr, 2, datadim, ptrdim);
         /* set node 1 to x  */
@@ -168,8 +169,8 @@ hgraph_make (hgraph_internal_t * pr, size_t code, size_t datadim,
           VAR2NODE (a, i) = NODE_NULL;
         break;
       }
-    case 1: /* x-->y-->null and all other ptr vars to
-				 * null */
+    case 1:                    /* x-->y-->null and all other ptr vars to
+                                 * null */
       {
         a = hgraph_alloc_internal (pr, 3, datadim, ptrdim);
         /* set node 1 to x */
@@ -188,7 +189,7 @@ hgraph_make (hgraph_internal_t * pr, size_t code, size_t datadim,
             VAR2NODE (a, i) = NODE_NULL;
         break;
       }
-    case 2: /* x--> null and y --> _null */
+    case 2:                    /* x--> null and y --> _null */
       {
         a = hgraph_alloc_internal (pr, 3, datadim, ptrdim);
         /* set node 1 to x  */
@@ -207,7 +208,7 @@ hgraph_make (hgraph_internal_t * pr, size_t code, size_t datadim,
             VAR2NODE (a, i) = NODE_NULL;
         break;
       }
-    case 3: /* x--> null and y --> null and z --> null */
+    case 3:                    /* x--> null and y --> null and z --> null */
       {
         a = hgraph_alloc_internal (pr, 4, datadim, ptrdim);
         /* set node 1 to x  */
@@ -231,8 +232,8 @@ hgraph_make (hgraph_internal_t * pr, size_t code, size_t datadim,
             VAR2NODE (a, i) = NODE_NULL;
         break;
       }
-    case 4: /* x--> null and x==y and all other ptr vars
-				 * to null */
+    case 4:                    /* x--> null and x==y and all other ptr vars
+                                 * to null */
       {
         a = hgraph_alloc_internal (pr, 2, datadim, ptrdim);
         /* set node 1 to x  */
@@ -269,10 +270,9 @@ hgraph_random (hgraph_internal_t * pr, size_t size, size_t datadim,
    * already fixed by alloc_internal to 0, program ptr vars are fixed by
    * alloc_internal to size!
    */
-  for (j = 0, i = 1, ncut = 1; j < ptrdim;
-          j++)
+  for (j = 0, i = 1, ncut = 1; j < ptrdim; j++)
     {
-      VAR2NODE (a, j) = NODE_NULL; /* put all prg ptr vars to null */
+      VAR2NODE (a, j) = NODE_NULL;      /* put all prg ptr vars to null */
       if (i < size && lrand48 () % 10 > 1)
         {
           /* map node i to variable j */
@@ -297,7 +297,7 @@ hgraph_random (hgraph_internal_t * pr, size_t size, size_t datadim,
               pi = i;
               i++;
             }
-          NODE_NEXT (a, pi) = 0; /* last node to null */
+          NODE_NEXT (a, pi) = 0;        /* last node to null */
         }
     }
   /*
@@ -343,6 +343,8 @@ hgraph_random (hgraph_internal_t * pr, size_t size, size_t datadim,
 inline void
 hgraph_free_mem (hgraph_internal_t * pr, hgraph_t * a)
 {
+  if (pr != pr)                 /* remove gcc warning */
+    return;
   if (a)
     free (a);
 }
@@ -357,11 +359,11 @@ hgraph_free_internal (hgraph_internal_t * pr, hgraph_t * a)
     {
       /* search in the htable */
       keylen =
-              offsetof (hgraph_t,
-                        info) + (a->ptrdim + a->size) * sizeof (node_info_t) -
-              offsetof (hgraph_t, size);
+        offsetof (hgraph_t,
+                  info) + (a->ptrdim + a->size) * sizeof (node_info_t) -
+        offsetof (hgraph_t, size);
       r = NULL;
-      HASH_FIND (hh, pr->hgraphs, &a->size, keylen, r);
+      HASH_FIND (hh, hgraphs_ht, &a->size, keylen, r);
       if (!r || r != a)
         hgraph_free_mem (pr, a);
     }
@@ -386,8 +388,7 @@ hgraph_check (hgraph_internal_t * pr, hgraph_t * a)
   size_t i;
   if (!a)
     {
-      ERROR ("graph null!",;
-             );
+      ERROR ("graph null!",;);
       return '!';
     }
 
@@ -396,8 +397,7 @@ hgraph_check (hgraph_internal_t * pr, hgraph_t * a)
    */
   if ((i = hgraph_node_is_sorted (a)) < a->size)
     {
-      ERROR ("invalid graph: sorted nodes",;
-             );
+      ERROR ("invalid graph: sorted nodes",;);
       fprintf (stderr,
                "node %zu (v=%zu,nn=%zu) > node %zu (v=%zu,nn=%zu)\n",
                i, NODE_VAR (a, i), NODE_VAR_NEXT (a, i),
@@ -418,8 +418,7 @@ hgraph_check (hgraph_internal_t * pr, hgraph_t * a)
           for (j = 0; j < NODE_VAR (a, i); j++)
             if (VAR2NODE (a, j) == i)
               {
-                ERROR ("invalid graph: cut",;
-                       );
+                ERROR ("invalid graph: cut",;);
                 fprintf (stderr,
                          "cut node %zu, labeled by %zu, also labeled by %zu\n",
                          i, NODE_VAR (a, i), j);
@@ -428,8 +427,7 @@ hgraph_check (hgraph_internal_t * pr, hgraph_t * a)
         }
       else if (NODE_VAR_NEXT (a, i) > 0 && NODE_VAR (a, i) == NULL_DIM)
         {
-          ERROR ("invalid graph: null",;
-                 );
+          ERROR ("invalid graph: null",;);
           return '!';
         }
       else if (NODE_VAR (a, i) != NULL_DIM)
@@ -441,8 +439,7 @@ hgraph_check (hgraph_internal_t * pr, hgraph_t * a)
             ncut = NODE_NEXT (a, ncut);
           if (ncut != i)
             {
-              ERROR ("invalid graph: scut",;
-                     );
+              ERROR ("invalid graph: scut",;);
               return '!';
             }
         }
@@ -456,8 +453,7 @@ hgraph_check (hgraph_internal_t * pr, hgraph_t * a)
           n++;
       if (n && !(n % pr->segm_anon))
         {
-          ERROR ("invalid closure",;
-                 );
+          ERROR ("invalid closure",;);
           return 'c';
         }
     }
@@ -468,20 +464,23 @@ hgraph_check (hgraph_internal_t * pr, hgraph_t * a)
 bool
 hgraph_isequal_internal (hgraph_internal_t * pr, hgraph_t * a, hgraph_t * b)
 {
+  if (pr != pr)                 /* remove gcc warning */
+    return false;
+
   hgraph_t *ra, *rb;
   unsigned keylen_a, keylen_b;
   /* search in the htable */
   keylen_a =
-          offsetof (hgraph_t,
-                    info) + (a->ptrdim + a->size) * sizeof (node_info_t) -
-          offsetof (hgraph_t, size);
+    offsetof (hgraph_t,
+              info) + (a->ptrdim + a->size) * sizeof (node_info_t) -
+    offsetof (hgraph_t, size);
   keylen_b =
-          offsetof (hgraph_t,
-                    info) + (b->ptrdim + b->size) * sizeof (node_info_t) -
-          offsetof (hgraph_t, size);
+    offsetof (hgraph_t,
+              info) + (b->ptrdim + b->size) * sizeof (node_info_t) -
+    offsetof (hgraph_t, size);
   ra = rb = NULL;
-  HASH_FIND (hh, pr->hgraphs, &a->size, keylen_a, ra);
-  HASH_FIND (hh, pr->hgraphs, &b->size, keylen_b, rb);
+  HASH_FIND (hh, hgraphs_ht, &a->size, keylen_a, ra);
+  HASH_FIND (hh, hgraphs_ht, &b->size, keylen_b, rb);
   if (ra == rb)
     return true;
   return false;
@@ -519,23 +518,27 @@ hgraph_copy_mem (hgraph_internal_t * pr, hgraph_t * a)
 hgraph_t *
 hgraph_copy_internal (hgraph_internal_t * pr, hgraph_t * a)
 {
-  hgraph_t *r;
-  unsigned keylen;
+  if (pr != pr)                 /* remove gcc warning */
+    return NULL;
+
   if (!a)
     return NULL;
 
+  hgraph_t *r;
+  unsigned keylen;
+
   /* search in the htable */
   keylen =
-          offsetof (hgraph_t,
-                    info) + (a->ptrdim + a->size) * sizeof (node_info_t) -
-          offsetof (hgraph_t, size);
+    offsetof (hgraph_t,
+              info) + (a->ptrdim + a->size) * sizeof (node_info_t) -
+    offsetof (hgraph_t, size);
   r = NULL;
-  HASH_FIND (hh, pr->hgraphs, &a->size, keylen, r);
+  HASH_FIND (hh, hgraphs_ht, &a->size, keylen, r);
   if (!r)
     {
       /* put a in htable */
-      HASH_ADD (hh, pr->hgraphs, size, keylen, a);
-      HASH_FIND (hh, pr->hgraphs, &a->size, keylen, r);
+      HASH_ADD (hh, hgraphs_ht, size, keylen, a);
+      HASH_FIND (hh, hgraphs_ht, &a->size, keylen, r);
     }
   return r;
 }
@@ -543,13 +546,16 @@ hgraph_copy_internal (hgraph_internal_t * pr, hgraph_t * a)
 hgraph_array_t *
 hgraph_array_make (hgraph_internal_t * pr, size_t size)
 {
+  if (pr != pr)                 /* remove gcc warning */
+    return NULL;
+
   hgraph_array_t *r;
   size_t i;
-  checked_malloc (r, hgraph_array_t, sizeof (hgraph_array_t), 1, return NULL;
-                  );
+  checked_malloc (r, hgraph_array_t, sizeof (hgraph_array_t), 1,
+                  return NULL;);
   r->size = size;
   r->p =
-          (size == 0) ? NULL : (hgraph_t **) malloc (size * sizeof (hgraph_t *));
+    (size == 0) ? NULL : (hgraph_t **) malloc (size * sizeof (hgraph_t *));
   for (i = 0; i < size; i++)
     r->p[i] = NULL;
   return r;
@@ -769,8 +775,7 @@ bool
 hgraph_node_is_cut (hgraph_t * a, node_t n)
 {
   if (n < a->size
-      && (NODE_VAR (a, n) < a->ptrdim || n == 0)
-      && NODE_VAR_NEXT (a, n) == 0)
+      && (NODE_VAR (a, n) < a->ptrdim || n == 0) && NODE_VAR_NEXT (a, n) == 0)
     return true;
   return false;
 }
@@ -779,6 +784,9 @@ hgraph_node_is_cut (hgraph_t * a, node_t n)
 inline bool
 hgraph_node_is_used (hgraph_t * a, node_t n)
 {
+  if ((a != a)                  /* remove gcc warning */
+      || (n != n))
+    return false;
   return true;
 }
 
@@ -810,9 +818,7 @@ hgraph_node_is_lt (node_info_t * a, node_info_t * b)
   // because nodes folded shall be ordered.
   // if (a->nn < b->nn || (a->nn == b->nn && a->v < b->v))
   // Then use lexicographic ordering on (v,nn).
-  if ((a->v == NULL_DIM)
-      || (a->v < b->v)
-      || (a->v == b->v && a->nn < b->nn))
+  if ((a->v == NULL_DIM) || (a->v < b->v) || (a->v == b->v && a->nn < b->nn))
     return true;
   else
     return false;
@@ -830,12 +836,16 @@ hgraph_node_is_sorted (hgraph_t * a)
 }
 
 bool
-hgraph_node_are_iso (hgraph_internal_t * pr, hgraph_t * a, node_t n1, node_t n2)
+hgraph_node_are_iso (hgraph_internal_t * pr, hgraph_t * a, node_t n1,
+                     node_t n2)
 {
+  if (pr != pr)                 /* remove gcc warning */
+    return false;
+
   bool result = true;
   node_t nn1, nn2;
   // arrays of mapping between nodes visited from n1 and n2
-  size_t * visited = (size_t*) malloc (a->size * sizeof (size_t));
+  size_t *visited = (size_t *) malloc (a->size * sizeof (size_t));
   memset (visited, 0, a->size * sizeof (size_t));
   nn1 = n1;
   nn2 = n2;
@@ -845,8 +855,7 @@ hgraph_node_are_iso (hgraph_internal_t * pr, hgraph_t * a, node_t n1, node_t n2)
       nn1 = NODE_NEXT (a, nn1);
       nn2 = NODE_NEXT (a, nn2);
     }
-  while (nn1 != NODE_NULL && nn2 != NODE_NULL
-         && nn1 != nn2 /* for graphs disjoints?? */
+  while (nn1 != NODE_NULL && nn2 != NODE_NULL && nn1 != nn2     /* for graphs disjoints?? */
          && visited[nn1] != nn2);
   if (visited[nn1] != nn2)
     result = false;
@@ -870,7 +879,8 @@ hgraph_node_add (hgraph_internal_t * pr, hgraph_t * a, node_t s, size_t v,
   i = hgraph_node_get_position (a, nn, v);
   /* test that the new node can be added */
 #ifndef NDEBUG1
-  fprintf (stdout, "!!!! hgraph_node_add: position to insert i=%zu for (x%zu,nn=%zu)\n",
+  fprintf (stdout,
+           "!!!! hgraph_node_add: position to insert i=%zu for (x%zu,nn=%zu)\n",
            i, v, nn);
   fflush (stdout);
 #endif
@@ -885,10 +895,10 @@ hgraph_node_add (hgraph_internal_t * pr, hgraph_t * a, node_t s, size_t v,
     {
       /* copy j-1 into j */
       NODE_NEXT (r, j) =
-              (NODE_NEXT (a, j - 1) < i) ? NODE_NEXT (a,
-                                                      j - 1) : (NODE_NEXT (a,
-                                                                           j - 1) +
-                                                                1);
+        (NODE_NEXT (a, j - 1) < i) ? NODE_NEXT (a,
+                                                j - 1) : (NODE_NEXT (a,
+                                                                     j - 1) +
+                                                          1);
       NODE_VAR (r, j) = NODE_VAR (a, j - 1);
       NODE_VAR_NEXT (r, j) = (NODE_VAR (a, j - 1) == v
                               && NODE_VAR_NEXT (a,
@@ -933,13 +943,14 @@ hgraph_node_expand (hgraph_internal_t * pr, hgraph_t * a, node_t n,
   /* resize a->info to a->size+1 */
   r = hgraph_resize (pr, a, a->size + 1);
   /* set info about the new node */
-  i = a->size; // node added
-  n_succ = NODE_NEXT (a, n); // succ of n in the old graph
+  i = a->size;                  // node added
+  n_succ = NODE_NEXT (a, n);    // succ of n in the old graph
   NODE_NEXT (r, n) = i;
   NODE_NEXT (r, i) = n_succ;
   NODE_VAR (r, i) = v;
   NODE_VAR_NEXT (r, i) = nn;
-  if (nn == 0) VAR2NODE (r, v) = i;
+  if (nn == 0)
+    VAR2NODE (r, v) = i;
   if (NODE_VAR_NEXT (r, n_succ) != 0)
     {
       NODE_VAR (r, n_succ) = v;
@@ -1167,21 +1178,21 @@ hgraph_resize (hgraph_internal_t * pr, hgraph_t * a, size_t size)
 /* ============================================================ */
 
 hgraph_t *
-hgraph_copy (ap_manager_t * man, hgraph_t * a)
+hgraph_copy (sh_manager_t * man, hgraph_t * a)
 {
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_COPY, 0);
   return hgraph_copy_internal (pr, a);
 }
 
 void
-hgraph_free (ap_manager_t * man, hgraph_t * a)
+hgraph_free (sh_manager_t * man, hgraph_t * a)
 {
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_FREE, 0);
   hgraph_free_internal (pr, a);
 }
 
 size_t
-hgraph_size (ap_manager_t * man, hgraph_t * a)
+hgraph_size (sh_manager_t * man, hgraph_t * a)
 {
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_ASIZE, 0);
   return sizeof (hgraph_t) + (a->ptrdim + a->size) * sizeof (node_info_t);
@@ -1196,20 +1207,22 @@ hgraph_size (ap_manager_t * man, hgraph_t * a)
 
 /* Eliminate anonymous nodes */
 void
-hgraph_minimize (ap_manager_t * man, hgraph_t * a)
+hgraph_minimize (sh_manager_t * man, hgraph_t * a)
 {
+  if (a != a)                   /* remove gcc warning */
+    return;
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_MINIMIZE, 0);
+    hgraph_init_from_manager (man, AP_FUNID_MINIMIZE, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
 }
 
 /* Put to NULL all ptr vars on labeling TOP */
 void
-hgraph_canonicalize (ap_manager_t * man, hgraph_t * a)
+hgraph_canonicalize (sh_manager_t * man, hgraph_t * a)
 {
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_CANONICALIZE, 0);
+    hgraph_init_from_manager (man, AP_FUNID_CANONICALIZE, 0);
   size_t v;
   for (v = 0; v < a->ptrdim; v++)
     if (VAR2NODE (a, v) == NODE_T_TOP)
@@ -1219,8 +1232,11 @@ hgraph_canonicalize (ap_manager_t * man, hgraph_t * a)
 
 /* TODO: priority 0 */
 int
-hgraph_hash (ap_manager_t * man, hgraph_t * a)
+hgraph_hash (sh_manager_t * man, hgraph_t * a)
 {
+  if (a != a)                   /* remove gcc warning */
+    return 0;
+
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_HASH, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
@@ -1229,20 +1245,27 @@ hgraph_hash (ap_manager_t * man, hgraph_t * a)
 
 /* NOT IMPLEMENTED: do nothing */
 void
-hgraph_approximate (ap_manager_t * man, hgraph_t * a, int algorithm)
+hgraph_approximate (sh_manager_t * man, hgraph_t * a, int algorithm)
 {
+  if ((a != a)                  /* remove gcc warning */
+      || (algorithm != algorithm))
+    return;
+
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_APPROXIMATE, 0);
+    hgraph_init_from_manager (man, AP_FUNID_APPROXIMATE, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
 }
 
 /* TODO: priority 3 */
 bool
-hgraph_is_minimal (ap_manager_t * man, hgraph_t * a)
+hgraph_is_minimal (sh_manager_t * man, hgraph_t * a)
 {
+  if (a != a)                   /* remove gcc warning */
+    return false;
+
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_CANONICALIZE, 0);
+    hgraph_init_from_manager (man, AP_FUNID_CANONICALIZE, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return true;
@@ -1250,10 +1273,13 @@ hgraph_is_minimal (ap_manager_t * man, hgraph_t * a)
 
 /* TODO: priority 3 */
 bool
-hgraph_is_canonical (ap_manager_t * man, hgraph_t * a)
+hgraph_is_canonical (sh_manager_t * man, hgraph_t * a)
 {
+  if (a != a)                   /* remove gcc warning */
+    return false;
+
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_CANONICALIZE, 0);
+    hgraph_init_from_manager (man, AP_FUNID_CANONICALIZE, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return true;
@@ -1266,11 +1292,11 @@ hgraph_is_canonical (ap_manager_t * man, hgraph_t * a)
 /* ============================================================ */
 
 hgraph_t *
-hgraph_bottom (ap_manager_t * man, size_t intdim, size_t realdim)
+hgraph_bottom (sh_manager_t * man, size_t intdim, size_t realdim)
 {
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_BOTTOM, 0);
   hgraph_t *r =
-          hgraph_alloc_internal (pr, 0, intdim, REAL2PTR_DIM (pr, realdim));
+    hgraph_alloc_internal (pr, 0, intdim, REAL2PTR_DIM (pr, realdim));
   return r;
 }
 
@@ -1279,7 +1305,7 @@ hgraph_bottom (ap_manager_t * man, size_t intdim, size_t realdim)
  * outside this node.
  */
 hgraph_t *
-hgraph_top (ap_manager_t * man, size_t intdim, size_t realdim)
+hgraph_top (sh_manager_t * man, size_t intdim, size_t realdim)
 {
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_TOP, 0);
   hgraph_t *r = hgraph_copy_internal (pr,
@@ -1291,9 +1317,13 @@ hgraph_top (ap_manager_t * man, size_t intdim, size_t realdim)
 
 /* put constraints on data variables */
 hgraph_t *
-hgraph_of_box (ap_manager_t * man, size_t intdim, size_t realdim,
+hgraph_of_box (sh_manager_t * man, size_t intdim, size_t realdim,
                ap_interval_t ** t)
 {
+  if ((intdim != intdim)        /* remove gcc warning */
+      || (realdim != realdim) || (t != t))
+    return NULL;
+
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_OF_BOX, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
@@ -1307,10 +1337,10 @@ hgraph_of_box (ap_manager_t * man, size_t intdim, size_t realdim,
 /* ============================================================ */
 
 ap_dimension_t
-hgraph_dimension (ap_manager_t * man, hgraph_t * a)
+hgraph_dimension (sh_manager_t * man, hgraph_t * a)
 {
   hgraph_internal_t *pr =
-          hgraph_init_from_manager (man, AP_FUNID_DIMENSION, 0);
+    hgraph_init_from_manager (man, AP_FUNID_DIMENSION, 0);
   ap_dimension_t r;
   r.intdim = a->datadim;
   r.realdim = PTR2REAL_DIM (pr, a->ptrdim);
@@ -1327,24 +1357,20 @@ void
 hgraph_internal_free (hgraph_internal_t * pr)
 {
   /* TODO: free htable */
-  pr->hgraphs = NULL;
-  pr->pcons = NULL;
-  pr->passigns = NULL;
+  hgraphs_ht = NULL;
   free (pr);
 }
 
-ap_manager_t *
+sh_manager_t *
 hgraph_manager_alloc (void)
 {
   size_t i;
-  ap_manager_t *man;
+  sh_manager_t *man;
   hgraph_internal_t *pr;
 
   pr = (hgraph_internal_t *) malloc (sizeof (hgraph_internal_t));
   assert (pr);
-  pr->hgraphs = NULL;
-  pr->pcons = NULL;
-  pr->passigns = NULL;
+  hgraphs_ht = NULL;
 
   pr->size_scons = 0;
   pr->man_scons = NULL;
@@ -1379,7 +1405,7 @@ hgraph_manager_alloc (void)
   man->funptr[AP_FUNID_IS_LEQ] = &hgraph_is_leq;
   man->funptr[AP_FUNID_IS_EQ] = &hgraph_is_eq;
   man->funptr[AP_FUNID_IS_DIMENSION_UNCONSTRAINED] =
-          &hgraph_is_dimension_unconstrained;
+    &hgraph_is_dimension_unconstrained;
   man->funptr[AP_FUNID_SAT_INTERVAL] = &hgraph_sat_interval;
   man->funptr[AP_FUNID_SAT_LINCONS] = &hgraph_sat_lincons;
   man->funptr[AP_FUNID_SAT_TCONS] = &hgraph_sat_tcons;
@@ -1399,10 +1425,10 @@ hgraph_manager_alloc (void)
   man->funptr[AP_FUNID_ADD_RAY_ARRAY] = &hgraph_add_ray_array;
   man->funptr[AP_FUNID_ASSIGN_LINEXPR_ARRAY] = &hgraph_assign_linexpr_array;
   man->funptr[AP_FUNID_SUBSTITUTE_LINEXPR_ARRAY] =
-          &hgraph_substitute_linexpr_array;
+    &hgraph_substitute_linexpr_array;
   man->funptr[AP_FUNID_ASSIGN_TEXPR_ARRAY] = &hgraph_assign_texpr_array;
   man->funptr[AP_FUNID_SUBSTITUTE_TEXPR_ARRAY] =
-          &hgraph_substitute_texpr_array;
+    &hgraph_substitute_texpr_array;
   man->funptr[AP_FUNID_ADD_DIMENSIONS] = &hgraph_add_dimensions;
   man->funptr[AP_FUNID_REMOVE_DIMENSIONS] = &hgraph_remove_dimensions;
   man->funptr[AP_FUNID_PERMUTE_DIMENSIONS] = &hgraph_permute_dimensions;
@@ -1425,7 +1451,7 @@ hgraph_of_abstract0 (ap_abstract0_t * a)
 }
 
 ap_abstract0_t *
-abstract0_of_hgraph (ap_manager_t * man, hgraph_t * a)
+abstract0_of_hgraph (sh_manager_t * man, hgraph_t * a)
 {
   ap_abstract0_t *r = malloc (sizeof (ap_abstract0_t));
   assert (r);
