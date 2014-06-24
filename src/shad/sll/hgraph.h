@@ -1,8 +1,8 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / Utilities for Abstract Domains                          */
 /*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
+/*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
 /*                                                                        */
 /*                                                                        */
@@ -30,11 +30,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "ap_coeff.h"
-#include "ap_dimension.h"
-#include "ap_expr0.h"
-#include "ap_manager.h"
-#include "ap_abstract0.h"
+#include "sh_manager.h"
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
@@ -43,8 +39,9 @@ extern          "C"
 #endif
   /* *INDENT-ON* */
 
-ap_manager_t *hgraph_manager_alloc (void);
-  /* Creates a new manager for the hgraph library. */
+sh_manager_t *hgraph_manager_alloc (void);
+  /* Creates a new manager for the hgraph library. 
+   * @see hgraph_representation.c */
 
   /* ============================================================ */
   /* Supplementary functions & options, not in the APRON manager. */

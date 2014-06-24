@@ -1,8 +1,8 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / Utilities for Abstract Domains                          */
 /*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
+/*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
 /*                                                                        */
 /*                                                                        */
@@ -21,18 +21,15 @@
 /**************************************************************************/
 
 
-#ifndef SHAPE_MANAGER_H_
-#define SHAPE_MANAGER_H_
+#ifndef __SH_MANAGER_H
+#define __SH_MANAGER_H
 
-#include "hgraph_fun.h"
-#include "shape_fun.h"
-#include "ap_pcons0.h"
-#include "ap_passign0.h"
+
 #include "ap_manager.h"
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
-extern          "C"
+extern "C"
 {
 #endif
   /* *INDENT-ON* */
@@ -41,9 +38,17 @@ extern          "C"
   /* Manager */
   /* ********************************************************************** */
 
+/* For the moment, reuse the APRON manager */
+#define sh_manager_t     ap_manager_t
+#define sh_abstract0_t   ap_abstract0_t
+
+#define sh_manager_raise_exception     ap_manager_raise_exception
+
   /* ============================================================ */
   /* Internal Representation */
   /* ============================================================ */
+
+#define sh_internal_t     shape_internal_t
 
   /* manager-local data specific to shapes */
 struct _shape_internal_t
@@ -76,10 +81,13 @@ struct _shape_internal_t
   /* approximate meet for hgraphs */
   int meet_algo;
 
+  /* counts shapes */
+  size_t ushape_number;
+
   /* TODO: other data */
 
   /* back-pointer */
-  ap_manager_t *man;
+  sh_manager_t *man;
 };
 
 typedef struct _shape_internal_t shape_internal_t;
@@ -90,10 +98,13 @@ typedef struct _shape_internal_t shape_internal_t;
   /* ============================================================ */
 
   /* called by each function to setup and get manager-local data */
-static inline shape_internal_t *
-shape_init_from_manager (ap_manager_t * man, ap_funid_t id, size_t size)
+static inline sh_internal_t *
+sh_init_from_manager (sh_manager_t * man, ap_funid_t id, size_t size)
 {
-  shape_internal_t *pr = (shape_internal_t *) man->internal;
+  if (size != size) /* remove gcc warning */
+    return NULL;
+
+  sh_internal_t *pr = (sh_internal_t *) man->internal;
   pr->funid = id;
   pr->funopt = man->option.funopt + id;
   man->result.flag_exact = man->result.flag_best = true;
@@ -109,5 +120,5 @@ shape_init_from_manager (ap_manager_t * man, ap_funid_t id, size_t size)
 #endif
 /* *INDENT-ON* */
 
+#endif /* __SH_MANAGER_H */
 
-#endif /* SHAPE_MANAGER_H_ */

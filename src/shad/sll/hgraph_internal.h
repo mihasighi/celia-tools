@@ -1,8 +1,8 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / Utilities for Abstract Domains                          */
 /*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
+/*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
 /*                                                                        */
 /*                                                                        */
@@ -26,10 +26,10 @@
 
 #include "uthash.h"
 #include "hgraph_fun.h"
-#include "shape_manager.h"
-#include "shape_options.h"
+//#include "shape_manager.h"
+//#include "shape_options.h"
 #include "apron2shape.h"
-#include "shad.h"
+//#include "shad.h"
 
 
 /* *INDENT-OFF* */
@@ -112,8 +112,17 @@ extern "C"
   } hgraph_array_t;
 
 
-#define hgraph_init_from_manager(man,id,size)  ((hgraph_internal_t*) shape_init_from_manager(man,id,size))
+#define hgraph_init_from_manager(man,id,size)  ((hgraph_internal_t*) sh_init_from_manager(man,id,size))
 
+
+  /* ============================================================ */
+  /* Global Set Management */
+  /* ============================================================ */
+
+extern hgraph_t* hgraphs_ht; /* global set (hash table) of hgraphs */
+
+void hgraph_init(void);
+  /* Intialization */
 
   /* ============================================================ */
   /* Internal Management */
@@ -267,11 +276,12 @@ extern "C"
   /* Version of meet used for unify */
   bool hgraph_is_spec (ap_manager_t * man,
                        hgraph_t * a1, hgraph_t * a2, ap_dimperm_t* perm2);
-
+  /*
   hgraph_t*
   hgraph_of_formula (hgraph_internal_t * pr,
                      sh_formula_t* f, size_t disj,
                      ap_dimperm_t* perm);
+  */
   /* Abstract the graph of the shadformula and return the permutation */
 
   /* ============================================================ */

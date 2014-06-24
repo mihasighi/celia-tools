@@ -1,8 +1,8 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / Utilities for Abstract Domains                          */
 /*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
+/*  Copyright (C) 2009-2014                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */
 /*                                                                        */
 /*                                                                        */
@@ -36,13 +36,13 @@ hgraph_fprint_dot (FILE * stream, hgraph_internal_t *pr,
                    hgraph_t *a, char **name_of_dim);
 void
 hgraph_fprint_dot_reach (FILE * stream, hgraph_internal_t *pr,
-                         hgraph_t *a, char **name_of_dim, char *name);
+                         hgraph_t *a, char **name_of_dim);
 void
 hgraph_fprint_smt (FILE * stream, hgraph_internal_t *pr,
                    hgraph_t *a, char **name_of_dim);
 
 void
-hgraph_fprint (FILE * stream, ap_manager_t * man,
+hgraph_fprint (FILE * stream, sh_manager_t * man,
                hgraph_t * a, char **name_of_dim)
 {
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_FPRINT, 0);
@@ -54,7 +54,7 @@ hgraph_fprint (FILE * stream, ap_manager_t * man,
 }
 
 void
-hgraph_fprintdiff (FILE * stream, ap_manager_t * man,
+hgraph_fprintdiff (FILE * stream, sh_manager_t * man,
                    hgraph_t * a1, hgraph_t * a2, char **name_of_dim)
 {
   hgraph_internal_t *pr =
@@ -64,13 +64,13 @@ hgraph_fprintdiff (FILE * stream, ap_manager_t * man,
 }
 
 void
-hgraph_fdump (FILE * stream, ap_manager_t * man, hgraph_t * a)
+hgraph_fdump (FILE * stream, sh_manager_t * man, hgraph_t * a)
 {
   hgraph_internal_t *pr = (man != NULL) ?
           hgraph_init_from_manager (man, AP_FUNID_FDUMP, 0) : NULL;
   fprintf (stream, "\tnode [shape=Mrecord] ;\n");
-  fprintf (stream, "\tlabel=\"hgraph %zu", ushape_number);
-  hgraph_fprint_dot_reach (stream, pr, a, NULL, "hgraph");
+  fprintf (stream, "\tlabel=\"hgraph %zu", pr->ushape_number);
+  hgraph_fprint_dot_reach (stream, pr, a, NULL);
 }
 
 /* Get more informations about the htable */
@@ -79,12 +79,12 @@ hgraph_fdump_internal (FILE * stream, hgraph_internal_t * pr, hgraph_t * a)
 {
   /* print some hash informations */
   fprintf (stream, "\n\tHGraphs table of size %d\n",
-           HASH_CNT (hh, pr->hgraphs));
+           HASH_CNT (hh, hgraphs_ht));
   hgraph_fdump (stream, pr->man, a);
 }
 
 void
-hgraph_array_fdump (FILE * stream, ap_manager_t * man, hgraph_array_t * a)
+hgraph_array_fdump (FILE * stream, sh_manager_t * man, hgraph_array_t * a)
 {
   if (!a)
     fprintf (stream, "EMPTY ARRAY");
@@ -107,9 +107,12 @@ hgraph_array_fdump (FILE * stream, ap_manager_t * man, hgraph_array_t * a)
 /* ============================================================ */
 
 inline void
-hgraph_fprint_dot_alone (FILE * stream, ap_manager_t * man,
+hgraph_fprint_dot_alone (FILE * stream, sh_manager_t * man,
                          hgraph_t * a, char **name_of_dim, char *name)
 {
+  if (man != man) /* remove gcc warning */
+    return;
+    
   size_t i, j;
   /* print graph name */
   fprintf (stream, "digraph %s {\n", name);
@@ -141,7 +144,7 @@ hgraph_fprint_dot_alone (FILE * stream, ap_manager_t * man,
 
 void
 hgraph_fprint_dot_reach (FILE * stream, hgraph_internal_t* pr,
-                         hgraph_t * a, char **name_of_dim, char *name)
+                         hgraph_t * a, char **name_of_dim)
 {
   size_t i, j;
   unsigned int bs;
@@ -175,7 +178,7 @@ hgraph_fprint_dot_reach (FILE * stream, hgraph_internal_t* pr,
     {
       size_t v = NODE_VAR (a, i);
       fprintf (stream, "\th_%zu_n%zu [label=\" n%zu%s | ",
-               ushape_number, i, i, (i == 0) ? "(#)" : "");
+               pr->ushape_number, i, i, (i == 0) ? "(#)" : "");
       if (i == 0)
         fprintf (stream, " NULL | [ ");
       else if (v >= a->ptrdim)
@@ -205,7 +208,7 @@ hgraph_fprint_dot_reach (FILE * stream, hgraph_internal_t* pr,
   fprintf (stream, "\t/* succ matrix */\n");
   for (i = 0; i < a->size; i++)
     fprintf (stream, "\th_%zu_n%zu -> h_%zu_n%zu;\n",
-             ushape_number, i, ushape_number, NODE_NEXT (a, i));
+             pr->ushape_number, i, pr->ushape_number, NODE_NEXT (a, i));
 
 }
 
@@ -214,19 +217,22 @@ hgraph_fprint_dot (FILE * stream, hgraph_internal_t *pr,
                    hgraph_t * a, char **name_of_dim)
 {
   fprintf (stream, "\tnode [shape=Mrecord] ;\n");
-  fprintf (stream, "\tlabel=\"hgraph %zu", ushape_number);
+  fprintf (stream, "\tlabel=\"hgraph %zu", pr->ushape_number);
   if (hgraph_is_bottom (pr->man, a))
     fprintf (stream, " bottom\" ;\n");
   else if (hgraph_is_top (pr->man, a))
     fprintf (stream, " top\" ;\n");
   else
-    hgraph_fprint_dot_reach (stream, pr, a, name_of_dim, "hgraph");
+    hgraph_fprint_dot_reach (stream, pr, a, name_of_dim);
 }
 
 void
 hgraph_fprint_smt (FILE * stream, hgraph_internal_t* pr,
                    hgraph_t * a, char **name_of_dim)
 {
+  if (pr != pr) /* remove gcc warning */
+    return;
+    
   size_t i, j;
 
   if (!a->info)
@@ -278,15 +284,19 @@ hgraph_fprint_smt (FILE * stream, hgraph_internal_t* pr,
 
 /* NOT IMPLEMENTED: do nothing */
 ap_membuf_t
-hgraph_serialize_raw (ap_manager_t * man, hgraph_t * a)
+hgraph_serialize_raw (sh_manager_t * man, hgraph_t * a)
 {
+    
   hgraph_internal_t *pr =
           hgraph_init_from_manager (man, AP_FUNID_SERIALIZE_RAW, 0);
   ap_membuf_t buf;
   buf.size = 0;
   buf.ptr = NULL;
-  ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
+  sh_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
+  if (a != a) /* remove gcc warning */
+    return buf; 
+
   return buf;
 }
 
@@ -294,11 +304,14 @@ hgraph_serialize_raw (ap_manager_t * man, hgraph_t * a)
 
 /* NOT IMPLEMENTED: do nothing */
 hgraph_t *
-hgraph_deserialize_raw (ap_manager_t * man, void *ptr, size_t * size)
+hgraph_deserialize_raw (sh_manager_t * man, void *ptr, size_t * size)
 {
+  if ((size != size) || (ptr != ptr)) /* remove gcc warning */
+    return NULL; 
+    
   hgraph_internal_t *pr =
           hgraph_init_from_manager (man, AP_FUNID_DESERIALIZE_RAW, 0);
-  ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
+  sh_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return NULL;
 }
