@@ -18,9 +18,9 @@
 #define __UCONS_INTERNAL_H_
 
 #include "uthash.h"
-#include "shape_options.h"
-#include "shape_macros.h"
-#include "shape_manager.h"
+#include "sh_options.h"
+#include "sh_macros.h"
+#include "sh_manager.h"
 #include "ucons_fun.h"
 
 

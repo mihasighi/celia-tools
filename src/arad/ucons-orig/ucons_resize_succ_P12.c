@@ -8,7 +8,7 @@
 #include "ucons.h"
 #include "ucons_fun.h"
 #include "ucons_internal.h"
-#include "shape_macros.h"
+#include "sh_macros.h"
 #include "apron2shape.h"
 
 

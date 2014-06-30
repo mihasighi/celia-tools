@@ -27,7 +27,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "shape_macros.h"
+#include "sh_macros.h"
 #include "ucons.h"
 #include "ucons_internal.h"
 #include "ap_generic.h"

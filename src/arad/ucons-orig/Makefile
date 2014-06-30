@@ -37,10 +37,12 @@ ICFLAGS = \
 -I$(CAML_PREFIX)/lib/ocaml \
 -I$(CAMLIDL_PREFIX)/lib/ocaml \
 -I$(MLGMPIDL_PREFIX)/include \
--I$(APRON_PREFIX)/include \
--I$(APRON_PREFIX)/lib \
--I$(SHAD_PREFIX)/include \
--I$(SMTLIB2_PREFIX)
+-I$(APRON_CCINC) \
+-I$(APRON_OCINC) \
+-I$(PREFIX)/utils \
+-I$(PREFIX)/shad/shad \
+-I$(PREFIX)/slad
+
 
 # Caml
 OCAMLINC = \

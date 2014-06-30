@@ -29,7 +29,7 @@
 #include "ucons_internal.h"
 #include "ucons_fun.h"
 #include "apron2shape.h"
-#include "shape_macros.h"
+#include "sh_macros.h"
 #include "ap_generic.h"
 
 /* ============================================================ */

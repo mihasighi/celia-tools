@@ -65,7 +65,7 @@ ucons_meet_lincons (ucons_internal_t * pr, bool destructive,
 	ap_coeff_t *coeff = NULL;
 	ap_constyp_t op = lcons->constyp;
 
-	kind = OFFSET_OTHER;		/* unknown */
+	kind = OFFSET_NONE;		/* unknown */
 	if (lcons->scalar)
 	{
 		if (!ap_scalar_cmp_int (lcons->scalar, OFFSET_DATA))
@@ -80,7 +80,7 @@ ucons_meet_lincons (ucons_internal_t * pr, bool destructive,
 			if(op == AP_CONS_EQ || op == AP_CONS_EQMOD)
 			{
 				eqstruct = true;
-				kind = OFFSET_OTHER;
+				kind = OFFSET_NONE;
 			}
 			else
 				assert (0);

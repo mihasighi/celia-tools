@@ -24,7 +24,6 @@
 #ifndef __APRON2SMTLIB_H_
 #define __APRON2SMTLIB_H_
 
-#include "shape_manager.h"
 #include "apron2shape.h"
 #include "ap_linexpr0.h"
 #include "ap_lincons0.h"
