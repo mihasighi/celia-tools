@@ -32,7 +32,7 @@
 #include "ap_generic.h"
 #include "ap_linexpr0.h"
 #include "ap_pcons0.h"
-#include "shad.h"
+#include "shad.h" // Warning: commented out temporary!
 
 
 /* ============================================================ */
@@ -161,7 +161,9 @@ ucons_meet_lincons (ucons_internal_t * pr, bool destructive,
 
       /* do the meet */
       r = ucons_copy_internal (pr, a);
-      r = ucons_meet_formula (pr, r, sh_crt, (size_t) code);
+      // Warning: commented out temporary
+      // r = ucons_meet_formula (pr, r, sh_crt, (size_t) code); 
+      r = ucons_meet_formula (pr, r, NULL, (size_t) code); 
 
       /* free allocated memory */
       /* NONE */

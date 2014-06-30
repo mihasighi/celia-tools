@@ -31,6 +31,9 @@
 #include "apron2shape.h"
 #include "apron2smtlib.h"
 
+// Warning: added temporary
+size_t ushape_number = 0;
+
 /* ============================================================ */
 /* Printing */
 
