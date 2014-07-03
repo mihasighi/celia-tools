@@ -98,4 +98,11 @@ typedef enum
 /* for pretty printer */
 extern size_t ushape_number;
 
+bool sh_print_is_dot (void);
+bool sh_print_is_smtlib (void);
+bool sh_print_is_acsl (void);
+void sh_print_set_dot (void);
+void sh_print_set_smtlib (void);
+void sh_print_set_acsl (void);
+
 #endif /* __SHAPE_OPTIONS_H_ */

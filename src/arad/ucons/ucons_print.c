@@ -52,11 +52,14 @@ ucons_fprint (FILE * stream, ap_manager_t * man, ucons_t * a,
               char **name_of_dim)
 {
   ucons_internal_t *pr = ucons_init_from_manager (man, AP_FUNID_FPRINT, 0);
-  bool isdot = shape_get_print ();
-  if (isdot)
+  if (sh_print_is_dot ())
     ucons_fprint_dot (stream, pr, a, name_of_dim);
-  else
+  else if (sh_print_is_smtlib ())
     ucons_fprint_smt (stream, pr, a, name_of_dim);
+  else if (sh_print_is_acsl ())
+    ucons_fprint_smt (stream, pr, a, name_of_dim); // TODO
+  else
+    assert (0);
 }
 
 void

@@ -207,7 +207,7 @@ shape_offsets_fprint (FILE * stream, int *offsets, size_t intdim,
                       size_t ptrdim)
 {
 #ifndef NDEBUG
-  fprintf (stdout, "\n====shape_offsets_fprint: dim=(%d)\n", ptrdim);
+  fprintf (stdout, "\n====shape_offsets_fprint: dim=(%zu)\n", ptrdim);
 #endif
   if (offsets == NULL)
     fprintf (stream, " [NULL offsets]\n");

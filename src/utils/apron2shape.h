@@ -242,9 +242,6 @@ bool shape_dimperm_is_id (ap_dimperm_t * p);
 #define MAX_SEGM_DIM  20
 void shape_init_name_of_dim (size_t intdim, size_t segmdim);
 char *shape_name_of_dim (size_t dim);
-bool shape_get_print (void);
-void shape_set_print_dot (void);
-void shape_set_print_smt (void);
 
   /* *INDENT-OFF* */
 #ifdef __cplusplus

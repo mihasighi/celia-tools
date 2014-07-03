@@ -9,7 +9,7 @@
 
 include Makefile.config
 
-PREFIX = ../
+PREFIX = ../..
 
 # C include and lib directories
 INCDIR = $(PREFIX)/include
@@ -102,27 +102,11 @@ clean:
 mostlyclean: clean
 	/bin/rm -fr *_caml.c *.mli
 
-#TODO: (un)install other dynlib also
 install:
-	$(INSTALLd) $(INCDIR) $(INCDIR)/shape $(LIBDIR) $(BINDIR)
-	$(INSTALL) shape.h $(INCDIR)
-	$(INSTALL) $(CCINC) $(INCDIR)/shape
-	for i in libshape*.* libshape*_debug.* libshape_caml.* shape.idl; do \
-		if test -f $$i; then $(INSTALL) $$i $(LIBDIR); fi; \
-	done
-	for i in shapetest?? shapetop?? shaperun??; do \
-		if test -f $$i; then $(INSTALL) $$i $(BINDIR); fi; \
-	done
-	for i in shape.mli shape.cmi shape.cma shape.cmxa shape.a; do \
-		if test -f $$i; then $(INSTALL) $$i $(LIBDIR); fi; \
-	done
+	mv libap2sh*.* $(LIBDIR)
 
 uninstall:
-	/bin/rm -fr $(INCDIR)/shape
-	/bin/rm -f $(BINDIR)/shapetest?? $(BINDIR)/shapetop?? $(BINDIR)/shaperun??
-	/bin/rm -f $(LIBDIR)/libshape*.* $(LIBDIR)/libshape*_debug.* $(LIBDIR)/libshape_caml.a
-	/bin/rm -f $(LIBDIR)/shape.mli $(LIBDIR)/shape.cmi $(LIBDIR)/shape.idl $(LIBDIR)/shape.cma $(LIBDIR)/shape.cmxa $(LIBDIR)/shape.a
-	/bin/rm -f Makefile.depend
+	/bin/rm -fr $(LIBDIR)/libap2sh.*
 
 distclean: uninstall
 	/bin/rm -f Makefile.depend

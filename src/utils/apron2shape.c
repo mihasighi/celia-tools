@@ -2325,22 +2325,41 @@ shape_init_name_of_dim (size_t intdim, size_t segmdim)
     }
 }
 
-bool shape_print_dot = 1;       //true;
+uint sh_print_format = 1; // dot
 
-inline bool
-shape_get_print (void)
+bool
+sh_print_is_dot (void)
 {
-  return shape_print_dot;
+  return sh_print_format == 1;
 }
 
-inline void
-shape_set_print_dot ()
+bool
+sh_print_is_smtlib (void)
 {
-  shape_print_dot = true;
+  return sh_print_format == 2;
 }
 
-inline void
-shape_set_print_smt ()
+bool
+sh_print_is_acsl (void)
 {
-  shape_print_dot = false;
+  return sh_print_format == 3;
 }
+
+void
+sh_print_set_dot (void)
+{
+  sh_print_format = 1;
+}
+
+void
+sh_print_set_smtlib (void)
+{
+  sh_print_format = 2;
+}
+
+void
+sh_print_set_acsl (void)
+{
+  sh_print_format = 3;
+}
+

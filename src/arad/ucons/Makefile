@@ -9,8 +9,7 @@
 
 include ./Makefile.config
 
-PREFIX = ../..
-SHAD_PREFIX = ../../shad
+PREFIX = ../../..
 
 # C include and lib directories
 INCDIR = $(PREFIX)/include
@@ -39,9 +38,9 @@ ICFLAGS = \
 -I$(MLGMPIDL_PREFIX)/include \
 -I$(APRON_CCINC) \
 -I$(APRON_OCINC) \
--I$(PREFIX)/utils \
--I$(PREFIX)/shad/shad \
--I$(PREFIX)/slad
+-I$(PREFIX)/src/utils \
+-I$(PREFIX)/src/shad/shad \
+-I$(PREFIX)/src/slad
 
 
 # Caml
@@ -109,21 +108,10 @@ mostlyclean: clean
 
 #TODO: (un)install other dynlib also
 install:
-	$(INSTALLd) $(INCDIR) $(INCDIR)/shape $(LIBDIR) $(BINDIR)
-	$(INSTALL) shape.h $(INCDIR)
-	$(INSTALL) $(CCINC) $(INCDIR)/shape
-	for i in libshape*.* libshape*_debug.* libshape_caml.* shape.idl; do \
-		if test -f $$i; then $(INSTALL) $$i $(LIBDIR); fi; \
-	done
-	for i in shapetest?? shapetop?? shaperun??; do \
-		if test -f $$i; then $(INSTALL) $$i $(BINDIR); fi; \
-	done
-	for i in shape.mli shape.cmi shape.cma shape.cmxa shape.a; do \
-		if test -f $$i; then $(INSTALL) $$i $(LIBDIR); fi; \
-	done
+	mv libucons*.* $(LIBDIR)
 
 uninstall:
-	/bin/rm -fr $(INCDIR)/lib/libucons*.a
+	/bin/rm -fr $(LIBDIR)/libucons*.a
 
 distclean: uninstall
 	/bin/rm -f Makefile.depend
@@ -153,7 +141,7 @@ SHARED_LIBS = $(APRON_LIBS) \
 LDFLAGS = -L$(GMP_PREFIX)/lib \
 	-L$(MPFR_PREFIX)/lib \
 	-L$(APRON_PREFIX)/lib \
-	-L$(SHAD_PREFIX)/lib
+	-L$(LIBDIR)/lib
 
 # ucons_*
 #
