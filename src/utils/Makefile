@@ -48,9 +48,9 @@ OCAMLINC = \
 # Files
 #---------------------------------------
 
-AP2SH_CCSOURCES = ap_pcons0.c ap_passign0.c apron2shape.c apron2smtlib.c
+AP2SH_CCSOURCES = ap_pcons0.c ap_passign0.c apron2shape.c apron2smtlib.c apron2acsl.c
 
-AP2SH_CCINC = apron2shape.h ap_pcons0.h ap_passign0.h apron2smtlib.h
+AP2SH_CCINC = apron2shape.h ap_pcons0.h ap_passign0.h apron2smtlib.h apron2acsl.h
 
 CCSOURCES = $(AP2SH_CCSOURCES) 
 
