@@ -316,8 +316,9 @@ ap_dimension_to_acsl (size_t size, size_t datadim, size_t segmdim,
   for (i = 0; i < segmdim; i++)
     {
       char *n =
-        (name_of_dim) ? name_of_dim[datadim +
-                                    i] : shape_name_of_dim (datadim + i);
+        (name_of_dim) ? 
+        name_of_dim[datadim + i] : 
+        shape_name_of_dim (datadim + i);
       size_t lsize = strlen (n);
       // data of n
       dname[datadim + i] = (char *) malloc ((lsize + 11) * sizeof (char));

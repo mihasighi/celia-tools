@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / LSUM Abstract Domain                                    */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -33,14 +29,13 @@
 /* ============================================================ */
 
 
-/*
- * TODO: priority 1 What it is here closure? - put in the set form - close
- * all the units
- */
-
+/* NOT IMPLEMENTED */
 bool
-lsum_close (lsum_t * g, size_t dim)
+lsum_close (lsum_t * a, size_t dim)
 {
+  if ((a != a) || (dim != dim))
+    return true;                /* to remove warning on unused parameter */
+
   return false;
 }
 
@@ -49,15 +44,13 @@ lsum_close (lsum_t * g, size_t dim)
 /* Incremental Closure */
 /* ============================================================ */
 
-/*
- * TODO: priority 1
- *
- * ?? time. ?? space.
- */
-
+/* NOT IMPLEMENTED */
 bool
-lsum_close_incremental (lsum_t * m, size_t dim, size_t v)
+lsum_close_incremental (lsum_t * a, size_t dim, size_t v)
 {
+  if ((a != a) || (v != v) || (dim != dim))
+    return true;                /* to remove warning on unused parameter */
+
   return false;
 }
 
@@ -66,10 +59,13 @@ lsum_close_incremental (lsum_t * m, size_t dim, size_t v)
 /* Sanity Check */
 /* ============================================================ */
 
-/* TODO: priority 1 */
+/* NOT IMPLEMENTED */
 bool
-lsum_check_closed (lsum_t * m, size_t dim)
+lsum_check_closed (lsum_t * a, size_t dim)
 {
+  if ((a != a) || (dim != dim))
+    return true;                /* to remove warning on unused parameter */
+
   return false;
 }
 

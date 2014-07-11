@@ -20,17 +20,20 @@
 
 #include "ucons.h"
 #include "ucons_internal.h"
+#include "apron2shape.h"
 
 /*
  * Unit test of the printing procedure for ucons domain.
- * Test of ucons_fprint.
  * 
+ * Test of ucons_fprint_smt 
+ * with build_const_1.
+ *  
  */
 
 int
 main (void) {
 
-  /* Initilisation des valeurs du test */
+  /* Initilisation of test values */
   ap_manager_t* man_ucons = ucons_manager_alloc();
   ucons_internal_t* pr = ucons_init_from_manager (man_ucons, AP_FUNID_FPRINT, 0);
   
@@ -41,7 +44,8 @@ main (void) {
   
   /* Call the tested method */
   char* nameofdim[] = { "i", "j", "T1", "T2" };
-  ucons_fprint(stdout, man_ucons, a, nameofdim);
+  shape_set_print_smt();
+  ucons_fprint(stdout,man_ucons, a, nameofdim);
   
   return 0;
 }

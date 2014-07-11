@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / LSUM Abstract Domain                                    */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -20,13 +16,17 @@
 /*                                                                        */
 /**************************************************************************/
 
+/*
+ * Private definitions, access to internal structures and algorithms.
+ * Use with care.
+ */
 
-#ifndef __LSUM_INTERNAL_H_
-#define __LSUM_INTERNAL_H_
+#ifndef LSUM_INTERNAL_H_
+#define LSUM_INTERNAL_H_
 
-#include "shape_options.h"
-#include "lsum_fun.h"
+#include "sh_options.h"
 #include "shad.h"
+#include "lsum_fun.h"
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
@@ -44,26 +44,26 @@ extern "C"
   /* ============================================================ */
 
   /* manager-local data specific to universal constraints */
-  struct _lsum_internal_t
-  {
-    /* current function */
-    ap_funid_t funid;
+struct _lsum_internal_t
+{
+  /* current function */
+  ap_funid_t funid;
 
-    /* local parameters for current function */
-    ap_funopt_t *funopt;
+  /* local parameters for current function */
+  ap_funopt_t *funopt;
 
-    /* manager of the length domain */
-    ap_manager_t *man_lcons;
+  /* manager of the length domain */
+  ap_manager_t *man_lcons;
 
-    /* manager of the data domain */
-    ap_manager_t *man_dcons;
+  /* manager of the data domain */
+  ap_manager_t *man_dcons;
 
-    /* count errors */
-    int error_;
+  /* count errors */
+  int error_;
 
-    /* back-pointer */
-    ap_manager_t *man;
-  };
+  /* back-pointer */
+  ap_manager_t *man;
+};
 
 
   /* ============================================================ */
@@ -77,16 +77,19 @@ extern "C"
    */
 
   /* called by each function to setup and get manager-local data */
-  static inline lsum_internal_t *
-  lsum_init_from_manager (ap_manager_t * man, ap_funid_t id, size_t size)
-  {
-    lsum_internal_t *pr = (lsum_internal_t *) man->internal;
-    pr->funid = id;
-    pr->funopt = man->option.funopt + id;
-    man->result.flag_exact = man->result.flag_best = true;
+static inline lsum_internal_t *
+lsum_init_from_manager (ap_manager_t * man, ap_funid_t id, size_t size)
+{
+  lsum_internal_t *pr = (lsum_internal_t *) man->internal;
+  pr->funid = id;
+  pr->funopt = man->option.funopt + id;
+  man->result.flag_exact = man->result.flag_best = true;
 
-    return pr;
-  }
+  if (size != size)
+    return NULL;                /* to remove warning */
+
+  return pr;
+}
 
 
   /* ********************************************************************** */
@@ -104,33 +107,25 @@ extern "C"
    * So we have a product domain on lcons /\ dcons
    */
 
-  struct _lsum_t
-  {
-    size_t datadim; /* number of scalar data variables (length and data) */
-    size_t segmdim; /* number of segments represented */
-    void *dcons; /* constraint on data of dimension
-				 * datadim + 3 segmdim */
-  };
+struct _lsum_t
+{
+  size_t datadim;               /* number of scalar data variables (length and data) */
+  size_t segmdim;               /* number of segments represented */
+  void *dcons;                  /* constraint on data of dimension
+                                 * datadim + 3 segmdim */
+};
 
 
   /* ============================================================ */
   /* Internal Management */
   /* ============================================================ */
 
-  lsum_t *lsum_alloc_internal (lsum_internal_t * pr, size_t intdim,
-                               size_t realdim);
-  lsum_t *lsum_alloc_top (lsum_internal_t * pr, size_t intdim, size_t realdim);
-  void lsum_free_internal (lsum_internal_t * pr, lsum_t * a);
-  lsum_t *lsum_copy_internal (lsum_internal_t * pr, lsum_t * a);
+lsum_t *lsum_alloc_internal (lsum_internal_t * pr, size_t intdim,
+                             size_t realdim);
+lsum_t *lsum_alloc_top (lsum_internal_t * pr, size_t intdim, size_t realdim);
+void lsum_free_internal (lsum_internal_t * pr, lsum_t * a);
+lsum_t *lsum_copy_internal (lsum_internal_t * pr, lsum_t * a);
 
-
-  /* ============================================================ */
-  /* Extensions */
-  /* ============================================================ */
-
-  lsum_t* lsum_meet_formula (lsum_internal_t* pr, lsum_t* a,
-                             sh_formula_t* f, size_t disj);
-  /* Meets with a constraint from an SL3 disjunct. */
 
   /* *INDENT-OFF* */
 #ifdef __cplusplus
@@ -141,4 +136,4 @@ extern "C"
 
 
 
-#endif /* __LSUM_INTERNAL_H_ */
+#endif /* LSUM_INTERNAL_H_ */

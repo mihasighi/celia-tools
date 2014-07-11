@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / UCONS Abstract Domain                                   */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -21,13 +17,6 @@
 /**************************************************************************/
 
 
-/*
- * ucons_resize_succ_P12.c
- *
- * CINV Library / Shape Domain    
- *  Created on: Jan 20, 2011
- *      Author: cezara
- */
 #include "uthash.h"
 #include "ucons.h"
 #include "ucons_fun.h"

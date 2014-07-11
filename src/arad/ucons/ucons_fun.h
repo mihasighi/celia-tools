@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / UCONS Abstract Domain                                   */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -155,10 +151,6 @@ extern "C"
   /*
    * Dump the test a1 ==> a2 in the SMT-LIB format
    */
-
-  //void
-  //pattern_key_fprint (FILE * stream, ucons_internal_t *pr, pattern_key_t * a,
-  //              char **name_of_dim);
 
   /* ============================================================ */
   /* I.4 Serialization */

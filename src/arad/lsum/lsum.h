@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / LSUM Abstract Domain                                    */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -21,8 +17,8 @@
 /**************************************************************************/
 
 
-#ifndef __LSUM_H_
-#define __LSUM_H_
+#ifndef LSUM_H_
+#define LSUM_H_
 
 /* dependencies */
 
@@ -58,4 +54,4 @@ ap_manager_t *lsum_manager_alloc (void);
 #endif
 /* *INDENT-ON* */
 
-#endif /* __LSUM_H_ */
+#endif /* LSUM_H_ */

@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / UCONS Abstract Domain                                   */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -43,7 +39,7 @@
  * Used in ucons_resize.
  */
 bool
-is_pattern_inst (ucons_internal_t * pr, ucons_t *r, pattern_key_t *p)
+is_pattern_inst (ucons_internal_t * pr, ucons_t * r, pattern_key_t * p)
 {
 
   size_t type = p->type;
@@ -122,9 +118,8 @@ ucons_is_top (ap_manager_t * man, ucons_t * a)
   bool res = a && ap_abstract0_is_top (pr->man_dcons, a->econs);
 
   // for each P=>U with P not empty, U shall be top
-  for (pattern_t *s = a->udcons; s != NULL && res; s = s->hh.next)
-    res = (s->dcons != NULL) &&
-    ap_abstract0_is_top (pr->man_dcons, s->dcons);
+  for (pattern_t * s = a->udcons; s != NULL && res; s = s->hh.next)
+    res = (s->dcons != NULL) && ap_abstract0_is_top (pr->man_dcons, s->dcons);
 
   return res;
 }
@@ -169,14 +164,14 @@ ucons_is_leq (ap_manager_t * man, ucons_t * a1, ucons_t * a2)
 
   // SYNTACTICAL TEST STARTS HERE
   // variable used to store saturations of a1
-  ucons_t* a1s = ucons_copy_internal (pr, a1);
+  ucons_t *a1s = ucons_copy_internal (pr, a1);
   // variable used in the saturation to store nodes already saturated
-  bool* nsat = NULL;
+  bool *nsat = NULL;
 
   if (option_sat)
     {
       // initialize nodes saturated
-      nsat = (bool*) malloc (sizeof (bool) * a2->segmentdim);
+      nsat = (bool *) malloc (sizeof (bool) * a2->segmentdim);
       for (size_t i = 0; i < a2->segmentdim; i++)
         nsat[i] = false;
       // saturate existentials
@@ -187,7 +182,8 @@ ucons_is_leq (ap_manager_t * man, ucons_t * a1, ucons_t * a2)
   if (!ap_abstract0_is_leq (pr->man_dcons, a1s->econs, a2->econs))
     {
 #ifndef NDEBUG
-      fprintf (stdout, "\n@@@@ ucons_is_leq: exists not leq, return false.\n");
+      fprintf (stdout,
+               "\n@@@@ ucons_is_leq: exists not leq, return false.\n");
       fflush (stdout);
 #endif
       res = false;
@@ -199,12 +195,13 @@ ucons_is_leq (ap_manager_t * man, ucons_t * a1, ucons_t * a2)
   //     or (2) s1 == null(top) and [(2a) s1(E) ==> length(n)<length(P) or
   //                                 (2b) s1(E) ==> length(n)>= length(P) and
   //                                      sat(s1(U)) <= s2(U)]
-  for (pattern_t* s2 = a2->udcons; s2 != NULL; s2 = s2->hh.next)
+  for (pattern_t * s2 = a2->udcons; s2 != NULL; s2 = s2->hh.next)
     {
-      pattern_t* s1;
+      pattern_t *s1;
       size_t u_seg = pr->PI[s2->key.type].u_seg;
       size_t e_seg = pr->PI[s2->key.type].e_seg;
-      unsigned keylen = (u_seg + e_seg) * sizeof (size_t) + sizeof (pattern_key_t);
+      unsigned keylen =
+        (u_seg + e_seg) * sizeof (size_t) + sizeof (pattern_key_t);
       HASH_FIND (hh, a1s->udcons, &s2->key.type, keylen, s1);
       // for saturation 
       bool dosat = option_sat;
@@ -218,7 +215,7 @@ ucons_is_leq (ap_manager_t * man, ucons_t * a1, ucons_t * a2)
         }
       // The test
       if (s1 != NULL)
-        { // a1s contains some constraint for this pattern pr->PI[s2->key.type]
+        {                       // a1s contains some constraint for this pattern pr->PI[s2->key.type]
           if (ap_abstract0_is_leq (pr->man_dcons, s1->dcons, s2->dcons))
             {
               // inclusion satisfied, go to another s2 pattern
@@ -230,7 +227,8 @@ ucons_is_leq (ap_manager_t * man, ucons_t * a1, ucons_t * a2)
             {
               // nothing can be done to obtain entailment
 #ifndef NDEBUG2
-              fprintf (stdout, "\n@@@@ ucons_is_leq: (1) returns false for pattern type %zu, ",
+              fprintf (stdout,
+                       "\n@@@@ ucons_is_leq: (1) returns false for pattern type %zu, ",
                        s2->key.type);
               fprintf (stdout, "nodes: ");
               for (size_t i = 0; i < u_seg; i++)
@@ -247,7 +245,7 @@ ucons_is_leq (ap_manager_t * man, ucons_t * a1, ucons_t * a2)
             }
           // else, saturation at the end
         }
-      else // s1 == NULL
+      else                      // s1 == NULL
         {
           // i.e., a1s does not contain a constraint for this pattern pr->PI[s2->key.type]
           // Then only if the pattern is instantiable 
@@ -259,15 +257,18 @@ ucons_is_leq (ap_manager_t * man, ucons_t * a1, ucons_t * a2)
 
           for (size_t i = 0; i < u_seg && sat_pattern; i++)
             {
-              ap_linexpr0_t* linexpr = ap_linexpr0_alloc (AP_LINEXPR_DENSE,
-                                                          a1->datadim + 2 * a1->segmentdim);
+              ap_linexpr0_t *linexpr = ap_linexpr0_alloc (AP_LINEXPR_DENSE,
+                                                          a1->datadim +
+                                                          2 * a1->segmentdim);
               ap_linexpr0_set_cst_scalar_int (linexpr, len);
               ap_linexpr0_set_coeff_scalar_int (linexpr,
                                                 a1->datadim + a1->segmentdim +
                                                 s2->key.segments[i], -1);
-              ap_lincons0_t cons = ap_lincons0_make (AP_CONS_SUPEQ, linexpr, NULL);
-              sat_pattern = !ap_abstract0_sat_lincons (pr->man_dcons, a1s->econs, &cons);
-              ap_lincons0_clear (&cons); // free also linexpr
+              ap_lincons0_t cons =
+                ap_lincons0_make (AP_CONS_SUPEQ, linexpr, NULL);
+              sat_pattern =
+                !ap_abstract0_sat_lincons (pr->man_dcons, a1s->econs, &cons);
+              ap_lincons0_clear (&cons);        // free also linexpr
             }
 
           if (sat_pattern && !ap_abstract0_is_top (pr->man_dcons, s2->dcons))
@@ -277,15 +278,18 @@ ucons_is_leq (ap_manager_t * man, ucons_t * a1, ucons_t * a2)
               if (!dosat)
                 {
 #ifndef NDEBUG2
-                  fprintf (stdout, "\n@@@@ ucons_is_leq: (2) returns false for pattern type %zu, ",
+                  fprintf (stdout,
+                           "\n@@@@ ucons_is_leq: (2) returns false for pattern type %zu, ",
                            s2->key.type);
                   fprintf (stdout, "nodes: ");
                   for (size_t i = 0; i < u_seg; i++)
                     fprintf (stdout, "n%zu, ", s2->key.segments[i]);
                   fprintf (stdout, "\n\t have length > %d in E1 = (", len);
-                  ap_abstract0_fprint (stdout, pr->man_dcons, a1s->econs, NULL);
+                  ap_abstract0_fprint (stdout, pr->man_dcons, a1s->econs,
+                                       NULL);
                   fprintf (stdout, "\n\t\t) and U1 = (top) while U2 = (");
-                  ap_abstract0_fprint (stdout, pr->man_dcons, s2->dcons, NULL);
+                  ap_abstract0_fprint (stdout, pr->man_dcons, s2->dcons,
+                                       NULL);
                   fprintf (stdout, "\n\t\t)\n");
                   fflush (stdout);
 #endif
@@ -295,7 +299,7 @@ ucons_is_leq (ap_manager_t * man, ucons_t * a1, ucons_t * a2)
               // else, see saturation and the end
             }
           else
-            { // good, the test succeded for this pattern, continue
+            {                   // good, the test succeded for this pattern, continue
               continue;
             }
         }
@@ -303,7 +307,7 @@ ucons_is_leq (ap_manager_t * man, ucons_t * a1, ucons_t * a2)
       if (dosat)
         {
           // SATURATE a1s for nodes involved in the pattern
-          ucons_t* aux = ucons_saturation (pr, a1s, s2->key.segments, u_seg);
+          ucons_t *aux = ucons_saturation (pr, a1s, s2->key.segments, u_seg);
           ucons_free_internal (pr, a1s);
           a1s = aux;
           HASH_FIND (hh, a1s->udcons, &s2->key.type, keylen, s1);
@@ -316,7 +320,8 @@ ucons_is_leq (ap_manager_t * man, ucons_t * a1, ucons_t * a2)
           else
             {
 #ifndef NDEBUG2
-              fprintf (stdout, "\n@@@@ ucons_is_leq: (3) returns false (after saturation) for pattern type %zu, ",
+              fprintf (stdout,
+                       "\n@@@@ ucons_is_leq: (3) returns false (after saturation) for pattern type %zu, ",
                        s2->key.type);
               fprintf (stdout, "nodes: ");
               for (size_t i = 0; i < u_seg; i++)
@@ -334,12 +339,13 @@ ucons_is_leq (ap_manager_t * man, ucons_t * a1, ucons_t * a2)
               res = false;
               goto ucons_is_leq_return;
             }
-        } // saturation done
+        }                       // saturation done
     }
 ucons_is_leq_return:
   // free allocated memory
   ucons_free_internal (pr, a1s);
-  if (nsat) free (nsat);
+  if (nsat)
+    free (nsat);
 
 #ifndef NDEBUG2
   fprintf (stdout, "\n@@@@ ucons_is_leq: returns %zu\n", res);
@@ -382,7 +388,7 @@ ucons_sat_lincons (ap_manager_t * man, ucons_t * a, ap_lincons0_t * lincons)
 {
 
   ucons_internal_t *pr =
-          ucons_init_from_manager (man, AP_FUNID_SAT_LINCONS, 0);
+    ucons_init_from_manager (man, AP_FUNID_SAT_LINCONS, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return true;
@@ -409,7 +415,7 @@ ucons_sat_interval (ap_manager_t * man, ucons_t * a,
 {
 
   ucons_internal_t *pr =
-          ucons_init_from_manager (man, AP_FUNID_SAT_INTERVAL, 0);
+    ucons_init_from_manager (man, AP_FUNID_SAT_INTERVAL, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return true;
@@ -422,7 +428,7 @@ ucons_is_dimension_unconstrained (ap_manager_t * man, ucons_t * a,
 {
 
   ucons_internal_t *pr =
-          ucons_init_from_manager (man, AP_FUNID_IS_DIMENSION_UNCONSTRAINED, 0);
+    ucons_init_from_manager (man, AP_FUNID_IS_DIMENSION_UNCONSTRAINED, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return false;
@@ -438,7 +444,7 @@ ucons_bound_linexpr (ap_manager_t * man, ucons_t * a, ap_linexpr0_t * expr)
 {
 
   ucons_internal_t *pr =
-          ucons_init_from_manager (man, AP_FUNID_BOUND_LINEXPR, 0);
+    ucons_init_from_manager (man, AP_FUNID_BOUND_LINEXPR, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return NULL;
@@ -450,7 +456,7 @@ ucons_bound_texpr (ap_manager_t * man, ucons_t * a, ap_texpr0_t * expr)
 {
 
   ucons_internal_t *pr =
-          ucons_init_from_manager (man, AP_FUNID_BOUND_TEXPR, 0);
+    ucons_init_from_manager (man, AP_FUNID_BOUND_TEXPR, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return NULL;
@@ -462,7 +468,7 @@ ucons_bound_dimension (ap_manager_t * man, ucons_t * a, ap_dim_t dim)
 {
 
   ucons_internal_t *pr =
-          ucons_init_from_manager (man, AP_FUNID_BOUND_DIMENSION, 0);
+    ucons_init_from_manager (man, AP_FUNID_BOUND_DIMENSION, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return NULL;
@@ -475,7 +481,7 @@ ucons_to_lincons_array (ap_manager_t * man, ucons_t * a)
 
   ap_lincons0_array_t ar;
   ucons_internal_t *pr =
-          ucons_init_from_manager (man, AP_FUNID_TO_LINCONS_ARRAY, 0);
+    ucons_init_from_manager (man, AP_FUNID_TO_LINCONS_ARRAY, 0);
   ar = ap_lincons0_array_make (1);
   ar.p[0] = ap_lincons0_make_unsat ();
   return ar;
@@ -505,7 +511,7 @@ ap_generator0_array_t
 ucons_to_generator_array (ap_manager_t * man, ucons_t * a)
 {
   ucons_internal_t *pr =
-          ucons_init_from_manager (man, AP_FUNID_TO_GENERATOR_ARRAY, 0);
+    ucons_init_from_manager (man, AP_FUNID_TO_GENERATOR_ARRAY, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return ap_generator0_array_make (0);

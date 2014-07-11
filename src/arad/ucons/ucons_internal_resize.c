@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
+/*  CELIA Tools / UCONS Abstract Domain                                   */
 /*                                                                        */
 /*  Copyright (C) 2009-2011                                               */
 /*    LIAFA (University of Paris Diderot and CNRS)                        */

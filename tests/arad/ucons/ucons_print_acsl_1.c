@@ -17,31 +17,36 @@
  * for more details (enclosed in the file LICENSE).   
  * 
  **********************************************************************/
-
+ 
 #include "ucons.h"
 #include "ucons_internal.h"
+#include "apron2shape.h"
 
 /*
  * Unit test of the printing procedure for ucons domain.
- * Test of ucons_fprint.
  * 
+ * Test of ucons_fprint_acsl 
+ * with build_const_2.
+ *  
  */
 
 int
 main (void) {
 
-  /* Initilisation des valeurs du test */
+  /* Initilisation of test values */
   ap_manager_t* man_ucons = ucons_manager_alloc();
   ucons_internal_t* pr = ucons_init_from_manager (man_ucons, AP_FUNID_FPRINT, 0);
   
-  ucons_t* a = ucons_top (man_ucons, 2, 2);
+  ucons_t* a = ucons_top (man_ucons, 2,1);
   ap_linexpr0_t* lexpr = ap_linexpr0_alloc(AP_LINEXPR_DENSE, 4);
-  ap_linexpr0_set_coeff_scalar_int(lexpr, 2, 1);
-  a = build_const_1(pr, a, lexpr);
+  ap_linexpr0_set_coeff_scalar_int(lexpr, 2, 3);
+  a = build_const_2(pr, a, lexpr);//Type of build_const 'assertion.c'
   
   /* Call the tested method */
-  char* nameofdim[] = { "i", "j", "T1", "T2" };
-  ucons_fprint(stdout, man_ucons, a, nameofdim);
+  char* nameofdim[] = { "i","j","T1","T2"};
+  
+  sh_print_set_acsl();
+  ucons_fprint(stdout,man_ucons, a, nameofdim);
   
   return 0;
 }
