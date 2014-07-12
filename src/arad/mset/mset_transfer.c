@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / MSET Abstract Domain                                    */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -37,8 +33,8 @@
  * @code{expr} is over a->datadim+a->segmdim
  */
 void
-mset_strengthen_assign (mset_internal_t *pr,
-                        mset_t *a, ap_dim_t d, ap_linexpr0_t *expr)
+mset_strengthen_assign (mset_internal_t * pr,
+                        mset_t * a, ap_dim_t d, ap_linexpr0_t * expr)
 {
   /* Heuristic 1: expr contain only one element e.
    * Assign ms(d) with ms(e)
@@ -65,7 +61,7 @@ mset_strengthen_assign (mset_internal_t *pr,
       }
   }
   coeff = NULL;
-  coeff = ap_linexpr0_cstref (expr); // do not free coeff
+  coeff = ap_linexpr0_cstref (expr);    // do not free coeff
   if (nelem == 1 && ap_coeff_zero (coeff))
     {
       coeff = NULL;
@@ -75,11 +71,12 @@ mset_strengthen_assign (mset_internal_t *pr,
         {
           // is the good case
           // Step 1.2: propagate the equality to the mset
-          ap_linexpr0_t* lexpr = ap_linexpr0_copy (expr);
-          ap_linexpr0_realloc (lexpr, DATA_DIM (a->datadim, 0) + 2 * a->segmdim);
+          ap_linexpr0_t *lexpr = ap_linexpr0_copy (expr);
+          ap_linexpr0_realloc (lexpr,
+                               DATA_DIM (a->datadim, 0) + 2 * a->segmdim);
           a->mscons =
-                  ap_abstract0_assign_linexpr (pr->man_mscons, true, a->mscons, d, lexpr,
-                                               NULL);
+            ap_abstract0_assign_linexpr (pr->man_mscons, true, a->mscons, d,
+                                         lexpr, NULL);
           ap_linexpr0_free (lexpr);
 #ifndef NDEBUG2
           fprintf (stdout, "\n++++mset_strengthen_assign: returns (");
@@ -95,15 +92,14 @@ mset_strengthen_assign (mset_internal_t *pr,
     {
       // if not heuristics applies, assign to undetermined value
       a->mscons = ap_abstract0_forget_array (pr->man_mscons, true,
-                                             a->mscons,
-                                             &d, 1, false);
+                                             a->mscons, &d, 1, false);
     }
 
 }
 
 void
-mset_strengthen_substitute (mset_internal_t *pr,
-                            mset_t *a, ap_dim_t d, ap_linexpr0_t *expr)
+mset_strengthen_substitute (mset_internal_t * pr,
+                            mset_t * a, ap_dim_t d, ap_linexpr0_t * expr)
 {
   /* Heuristic 1: expr contain only one element e.
    * Assign ms(d) with ms(e)
@@ -115,7 +111,8 @@ mset_strengthen_substitute (mset_internal_t *pr,
   size_t i;
   ap_dim_t dim;
 #ifndef NDEBUG2
-  fprintf (stdout, "\n++++mset_strengthen_substitute: with substitution (%d)=(", d);
+  fprintf (stdout,
+           "\n++++mset_strengthen_substitute: with substitution (%d)=(", d);
   ap_linexpr0_fprint (stdout, expr, NULL);
   fprintf (stdout, ")\n");
   fflush (stdout);
@@ -130,7 +127,7 @@ mset_strengthen_substitute (mset_internal_t *pr,
       }
   }
   coeff = NULL;
-  coeff = ap_linexpr0_cstref (expr); // do not free coeff
+  coeff = ap_linexpr0_cstref (expr);    // do not free coeff
   if (nelem == 1 && ap_coeff_zero (coeff))
     {
       coeff = NULL;
@@ -140,11 +137,12 @@ mset_strengthen_substitute (mset_internal_t *pr,
         {
           // is the good case
           // Step 1.2: propagate the equality to the mset
-          ap_linexpr0_t* lexpr = ap_linexpr0_copy (expr);
-          ap_linexpr0_realloc (lexpr, DATA_DIM (a->datadim, 0) + 2 * a->segmdim);
+          ap_linexpr0_t *lexpr = ap_linexpr0_copy (expr);
+          ap_linexpr0_realloc (lexpr,
+                               DATA_DIM (a->datadim, 0) + 2 * a->segmdim);
           a->mscons =
-                  ap_abstract0_substitute_linexpr (pr->man_mscons, true, a->mscons, d, lexpr,
-                                                   NULL);
+            ap_abstract0_substitute_linexpr (pr->man_mscons, true, a->mscons,
+                                             d, lexpr, NULL);
           ap_linexpr0_free (lexpr);
 #ifndef NDEBUG2
           fprintf (stdout, "\n++++mset_strengthen_substitute: returns (");
@@ -160,8 +158,7 @@ mset_strengthen_substitute (mset_internal_t *pr,
     {
       // if not heuristics applies, assign to undetermined value
       a->mscons = ap_abstract0_forget_array (pr->man_mscons, true,
-                                             a->mscons,
-                                             &d, 1, false);
+                                             a->mscons, &d, 1, false);
     }
 
 }
@@ -177,9 +174,9 @@ mset_strengthen_substitute (mset_internal_t *pr,
  * Meets a with the disjunct disj of f.
  * In place (modifies a).
  */
-mset_t*
-mset_meet_formula (mset_internal_t* pr, mset_t* a,
-                   sh_formula_t* f, size_t disj)
+mset_t *
+mset_meet_formula (mset_internal_t * pr, mset_t * a,
+                   sh_formula_t * f, size_t disj)
 {
   // check dimensions
   size_t datadim = f->env->intdim;
@@ -188,7 +185,7 @@ mset_meet_formula (mset_internal_t* pr, mset_t* a,
     return NULL;
 
   // initialize the result to top
-  mset_t* r = a;
+  mset_t *r = a;
 
   // go through the data constraints
   // select those which can be dealt by this domain
@@ -203,22 +200,24 @@ mset_meet_formula (mset_internal_t* pr, mset_t* a,
       sh_dataform_t df = f->form[disj]->dform[i];
       // build the array of linear constraints from the linear term of df
       ap_lincons0_array_t arr = ap_lincons0_array_make (1);
-      ap_linexpr0_t* lexpr = ap_linexpr0_alloc (AP_LINEXPR_DENSE, datadim + 2 * segmdim);
-      sh_linterm_t* ti = df.p;
+      ap_linexpr0_t *lexpr =
+        ap_linexpr0_alloc (AP_LINEXPR_DENSE, datadim + 2 * segmdim);
+      sh_linterm_t *ti = df.p;
       for (ti = df.p; ti != NULL; ti = ti->next)
         {
           // compute the dimension corresponding to this term
           ap_dim_t dim;
           switch (ti->t.funid)
             {
-            case SH_F_SYMBOL: // may be only intdim
-              dim = ti->t.p0; // ok dimension already computed
+            case SH_F_SYMBOL:  // may be only intdim
+              dim = ti->t.p0;   // ok dimension already computed
               break;
-            case SH_F_LEN: // parameter is node but not nilNode!
+            case SH_F_LEN:     // parameter is node but not nilNode!
               if (ismset)
                 {
 #ifndef NDEBUG1
-                  fprintf (stdout, "====mset_of_formula: error mixing length and mset\n");
+                  fprintf (stdout,
+                           "====mset_of_formula: error mixing length and mset\n");
                   fflush (stdout);
 #endif
                   goto end_of_dataform;
@@ -226,11 +225,12 @@ mset_meet_formula (mset_internal_t* pr, mset_t* a,
               isdata = true;
               dim = datadim + segmdim + (ti->t.p0 + 1);
               break;
-            case SH_F_DATA: // the second parameter is supposed to be 0!
+            case SH_F_DATA:    // the second parameter is supposed to be 0!
               if (ti->t.p1 != AP_DIM_MAX)
                 {
 #ifndef NDEBUG1
-                  fprintf (stdout, "====mset_of_formula: error for data(%d,%d!=AP_DIM_MAX)\n",
+                  fprintf (stdout,
+                           "====mset_of_formula: error for data(%d,%d!=AP_DIM_MAX)\n",
                            ti->t.p0, ti->t.p1);
                   fflush (stdout);
 #endif
@@ -239,7 +239,8 @@ mset_meet_formula (mset_internal_t* pr, mset_t* a,
               if (ismset)
                 {
 #ifndef NDEBUG1
-                  fprintf (stdout, "====mset_of_formula: error mixing data and mset\n");
+                  fprintf (stdout,
+                           "====mset_of_formula: error mixing data and mset\n");
                   fflush (stdout);
 #endif
                   goto end_of_dataform;
@@ -247,11 +248,12 @@ mset_meet_formula (mset_internal_t* pr, mset_t* a,
               isdata = true;
               dim = datadim + ti->t.p0 + 1;
               break;
-            case SH_F_MSET: // parameter is node but not nilNode!
+            case SH_F_MSET:    // parameter is node but not nilNode!
               if (isdata)
                 {
 #ifndef NDEBUG1
-                  fprintf (stdout, "====mset_of_formula: error mixing mset and data\n");
+                  fprintf (stdout,
+                           "====mset_of_formula: error mixing mset and data\n");
                   fflush (stdout);
 #endif
                   goto end_of_dataform;
@@ -263,9 +265,10 @@ mset_meet_formula (mset_internal_t* pr, mset_t* a,
                 ap_coeff_set_scalar_int (&lexpr->p.coeff[dim], ti->coeff);
               dim = datadim + segmdim + ti->t.p0 + 1;
               break;
-            default: /* not dealt, break the for loop */
+            default:           /* not dealt, break the for loop */
 #ifndef NDEBUG1
-              fprintf (stdout, "====mset_of_formula: constraint not dealt (SUM)\n");
+              fprintf (stdout,
+                       "====mset_of_formula: constraint not dealt (SUM)\n");
               fflush (stdout);
 #endif
               goto end_of_dataform;
@@ -277,11 +280,15 @@ mset_meet_formula (mset_internal_t* pr, mset_t* a,
       ap_linexpr0_set_cst_scalar_int (lexpr, df.cst);
       arr.p[0] = ap_lincons0_make (df.constyp, lexpr, NULL);
       if (isdata)
-        r->dcons = ap_abstract0_meet_lincons_array (pr->man_dcons, true, r->dcons, &arr);
+        r->dcons =
+          ap_abstract0_meet_lincons_array (pr->man_dcons, true, r->dcons,
+                                           &arr);
       if (ismset)
-        r->mscons = ap_abstract0_meet_lincons_array (pr->man_dcons, true, r->mscons, &arr);
-end_of_dataform:
-      ap_lincons0_array_clear (&arr); // free also lexpr
+        r->mscons =
+          ap_abstract0_meet_lincons_array (pr->man_dcons, true, r->mscons,
+                                           &arr);
+    end_of_dataform:
+      ap_lincons0_array_clear (&arr);   // free also lexpr
     }
 
   return r;
@@ -293,16 +300,14 @@ end_of_dataform:
 
 /* Internal functions used by mset_meet_lincons.
  */
-void mset_meet_mset_fill (mset_internal_t * pr,
-			  size_t datadim, size_t segmdim,
-			  ap_lincons0_t * lcons, offset_t kind, 
-			  ap_lincons0_array_t* arr);
+void mset_meet_mset_fill (size_t datadim, size_t segmdim,
+                          ap_lincons0_t * lcons, offset_t kind,
+                          ap_lincons0_array_t * arr);
 
-void mset_meet_equals_fill (mset_internal_t * pr,
-			    size_t datadim, size_t segmdim,
-			    ap_lincons0_t * lcons,
-			    ap_lincons0_array_t* arrd,
-			    ap_lincons0_array_t* arrm);
+void mset_meet_equals_fill (size_t datadim, size_t segmdim,
+                            ap_lincons0_t * lcons,
+                            ap_lincons0_array_t * arrd,
+                            ap_lincons0_array_t * arrm);
 
 /* The constraint has size a->datadim+a->segmdim.
  * Encoding of constraints:
@@ -318,7 +323,8 @@ mset_meet_lincons (mset_internal_t * pr, bool destructive,
 {
 #ifndef NDEBUG1
   fprintf (stdout, "====mset_meet_lincons: with lincons=(");
-  if (lcons) ap_lincons0_fprint (stdout, lcons, NULL);
+  if (lcons)
+    ap_lincons0_fprint (stdout, lcons, NULL);
   fprintf (stdout, ") \n and offset (lcons->scalar): ");
   ap_scalar_fprint (stdout, lcons->scalar);
   fprintf (stdout, "\n on a=(");
@@ -328,21 +334,21 @@ mset_meet_lincons (mset_internal_t * pr, bool destructive,
 #endif
   ap_constyp_t op = lcons->constyp;
   mset_t *r = NULL;
-  int kind = OFFSET_NONE; /* unknown */
+  int kind = OFFSET_NONE;       /* unknown */
   bool eqstruct = false;
 
   /* init r to a */
-  r = mset_copy_internal(pr, a);
+  r = mset_copy_internal (pr, a);
 
   /* Analyze the kind of constraint stored in lcons->scalar */
   if (lcons->scalar)
     {
       if (!ap_scalar_cmp_int (lcons->scalar, a->datadim + OFFSET_DATA))
-        kind = OFFSET_DATA; /* data */
+        kind = OFFSET_DATA;     /* data */
       else if (!ap_scalar_cmp_int (lcons->scalar, OFFSET_MSET))
-        kind = OFFSET_MSET; /* MSET */
+        kind = OFFSET_MSET;     /* MSET */
       else if (!ap_scalar_cmp_int (lcons->scalar, OFFSET_LEN))
-        kind = OFFSET_LEN; /* len */
+        kind = OFFSET_LEN;      /* len */
       else if (!ap_scalar_cmp_int (lcons->scalar, OFFSET_SUM) ||
                !ap_scalar_cmp_int (lcons->scalar, OFFSET_UCONS))
         goto return_meet_lincons;
@@ -358,20 +364,19 @@ mset_meet_lincons (mset_internal_t * pr, bool destructive,
     }
 
 #ifndef NDEBUG1
-  fprintf (stdout, "==== mset_meet_lincons: kind %d, eqstruct=%d \n", 
-	   kind, eqstruct);
+  fprintf (stdout, "==== mset_meet_lincons: kind %d, eqstruct=%d \n",
+           kind, eqstruct);
 #endif
 
   /* For SL3 constraints, call specific function */
   if (kind == OFFSET_SL3)
     {
-      ap_coeff_t* coeff = ap_linexpr0_cstref (lcons->linexpr0);
+      ap_coeff_t *coeff = ap_linexpr0_cstref (lcons->linexpr0);
       double code;
       ap_double_set_scalar (&code, coeff->val.scalar, GMP_RNDN);
 
       /* do the meet */
-      r = mset_meet_formula (pr, r,
-                             sh_crt, (size_t) code);
+      r = mset_meet_formula (pr, r, sh_crt, (size_t) code);
 
       /* free allocated memory */
       /* NONE */
@@ -387,18 +392,20 @@ mset_meet_lincons (mset_internal_t * pr, bool destructive,
   if (kind == OFFSET_LEN || kind == OFFSET_DATA)
     {
       /* interpret the constraint */
-      ap_lincons0_array_t arr = ap_lincons0_array_make(1);
-      mset_meet_mset_fill (pr, a->datadim, a->segmdim, lcons, kind, &arr);
+      ap_lincons0_array_t arr = ap_lincons0_array_make (1);
+      mset_meet_mset_fill (a->datadim, a->segmdim, lcons, kind, &arr);
 
       /* do the meet */
-      
-      r->dcons = ap_abstract0_meet_lincons_array (pr->man_dcons, true, r->dcons, &arr);
+
+      r->dcons =
+        ap_abstract0_meet_lincons_array (pr->man_dcons, true, r->dcons, &arr);
 
 #ifndef NDEBUG1
-      fprintf (stdout, "====mset_meet_lincons: builds kind=%d retuns (", kind);
-#endif       
+      fprintf (stdout, "====mset_meet_lincons: builds kind=%d retuns (",
+               kind);
+#endif
       /* free the allocated memory */
-      ap_lincons0_array_clear (&arr); 
+      ap_lincons0_array_clear (&arr);
 
       goto return_meet_lincons;
     }
@@ -407,44 +414,53 @@ mset_meet_lincons (mset_internal_t * pr, bool destructive,
   if (kind == OFFSET_MSET)
     {
       /* interpret the constraint */
-      ap_lincons0_array_t arr = ap_lincons0_array_make(1);
-      mset_meet_mset_fill (pr, a->datadim, a->segmdim, lcons, kind, &arr);
+      ap_lincons0_array_t arr = ap_lincons0_array_make (1);
+      mset_meet_mset_fill (a->datadim, a->segmdim, lcons, kind, &arr);
 
       /* do the meet */
-      r->mscons = ap_abstract0_meet_lincons_array (pr->man_mscons, true, r->mscons, &arr);
+      r->mscons =
+        ap_abstract0_meet_lincons_array (pr->man_mscons, true, r->mscons,
+                                         &arr);
 
 #ifndef NDEBUG1
-      fprintf (stdout, "====mset_meet_lincons: builds kind=%d returns (", kind);
-#endif       
+      fprintf (stdout, "====mset_meet_lincons: builds kind=%d returns (",
+               kind);
+#endif
       /* free the allocated memory */
-      ap_lincons0_array_clear (&arr); 
+      ap_lincons0_array_clear (&arr);
 
       goto return_meet_lincons;
     }
 
 
   /* For structural equality constraints */
-  if (kind == OFFSET_NONE && eqstruct) {
-    /* detect the dimension for equality, since
-     * if dim < a->datadim, then only 1 constraint
-     * otherwise there are 2 constraints (data, len) and 1 constraint on mset
-     */
-    /* interpret the constraint */
-    ap_lincons0_array_t arrd = ap_lincons0_array_make(1);
-    ap_lincons0_array_t arrm = ap_lincons0_array_make(1);
-    mset_meet_equals_fill (pr, a->datadim, a->segmdim, lcons, &arrd, &arrm);
+  if (kind == OFFSET_NONE && eqstruct)
+    {
+      /* detect the dimension for equality, since
+       * if dim < a->datadim, then only 1 constraint
+       * otherwise there are 2 constraints (data, len) and 1 constraint on mset
+       */
+      /* interpret the constraint */
+      ap_lincons0_array_t arrd = ap_lincons0_array_make (1);
+      ap_lincons0_array_t arrm = ap_lincons0_array_make (1);
+      mset_meet_equals_fill (a->datadim, a->segmdim, lcons, &arrd, &arrm);
 
-    /* do the meet */
-    r->dcons = ap_abstract0_meet_lincons_array (pr->man_dcons, true, r->dcons, &arrd);
-    r->mscons = ap_abstract0_meet_lincons_array (pr->man_mscons, true, r->mscons, &arrm);
+      /* do the meet */
+      r->dcons =
+        ap_abstract0_meet_lincons_array (pr->man_dcons, true, r->dcons,
+                                         &arrd);
+      r->mscons =
+        ap_abstract0_meet_lincons_array (pr->man_mscons, true, r->mscons,
+                                         &arrm);
 
 #ifndef NDEBUG1
-    fprintf (stdout, "====mset_meet_lincons: builds kind=%d returns (", kind);
-#endif       
-    /* free the allocated memory */
-    ap_lincons0_array_clear (&arrd); 
-    ap_lincons0_array_clear (&arrm); 
-  }
+      fprintf (stdout, "====mset_meet_lincons: builds kind=%d returns (",
+               kind);
+#endif
+      /* free the allocated memory */
+      ap_lincons0_array_clear (&arrd);
+      ap_lincons0_array_clear (&arrm);
+    }
 
 return_meet_lincons:
   if (destructive)
@@ -462,10 +478,9 @@ return_meet_lincons:
  * Build the constraint for the kind.
  */
 void
-mset_meet_mset_fill (mset_internal_t * pr,
-		     size_t datadim, size_t segmdim,
-		     ap_lincons0_t* lcons, offset_t kind,
-		     ap_lincons0_array_t* arr)
+mset_meet_mset_fill (size_t datadim, size_t segmdim,
+                     ap_lincons0_t * lcons, offset_t kind,
+                     ap_lincons0_array_t * arr)
 {
 
   assert (lcons && ((kind >= OFFSET_LEN) || (kind == OFFSET_SUM)));
@@ -475,25 +490,26 @@ mset_meet_mset_fill (mset_internal_t * pr,
    * or
    * datadim + segmdim (mshd(n)) + segmdim (mstl(n))
    */
-  ap_linexpr0_t* lexpr = ap_linexpr0_alloc (AP_LINEXPR_DENSE, datadim + 2 * segmdim);
+  ap_linexpr0_t *lexpr =
+    ap_linexpr0_alloc (AP_LINEXPR_DENSE, datadim + 2 * segmdim);
   size_t i, dim;
   ap_coeff_t *coeff = NULL;
 
   ap_linexpr0_ForeachLinterm (lcons->linexpr0, i, dim, coeff)
-    {
-      if (coeff && !ap_coeff_zero (coeff))
-	{
-	  if (dim < datadim)
-	    ap_coeff_set (&lexpr->p.coeff[dim], coeff);
-	  else
-	    { 
-	      if (kind == OFFSET_DATA || kind == OFFSET_MSET) 
-		ap_coeff_set (&lexpr->p.coeff[dim], coeff);
-	      if (kind == OFFSET_LEN || kind == OFFSET_MSET) 
-		ap_coeff_set (&lexpr->p.coeff[dim + segmdim], coeff);
-	    }
-	}
-    }
+  {
+    if (coeff && !ap_coeff_zero (coeff))
+      {
+        if (dim < datadim)
+          ap_coeff_set (&lexpr->p.coeff[dim], coeff);
+        else
+          {
+            if (kind == OFFSET_DATA || kind == OFFSET_MSET)
+              ap_coeff_set (&lexpr->p.coeff[dim], coeff);
+            if (kind == OFFSET_LEN || kind == OFFSET_MSET)
+              ap_coeff_set (&lexpr->p.coeff[dim + segmdim], coeff);
+          }
+      }
+  }
   coeff = NULL;
 
   coeff = ap_linexpr0_cstref (lcons->linexpr0);
@@ -518,30 +534,29 @@ mset_meet_mset_fill (mset_internal_t * pr,
 
 #ifndef NDEBUG1
   fprintf (stdout, "====mset_meet_mset_fill: kind=%d, lexpr=(", kind);
-  if (lexpr) ap_linexpr0_fprint (stdout, lexpr, NULL);
+  if (lexpr)
+    ap_linexpr0_fprint (stdout, lexpr, NULL);
   fprintf (stdout, ") op=%d \n", op);
   fflush (stdout);
 #endif
 
-  arr->p[0]=ap_lincons0_make (op, lexpr, NULL);
+  arr->p[0] = ap_lincons0_make (op, lexpr, NULL);
 }
 
 /**
  * Builds an array of equality constraints from lcons. 
  */
 void
-mset_meet_equals_fill (mset_internal_t * pr,
-		       size_t datadim, size_t segmdim,
-		       ap_lincons0_t * lcons, 
-		       ap_lincons0_array_t* arrd,
-		       ap_lincons0_array_t* arrm)
+mset_meet_equals_fill (size_t datadim, size_t segmdim,
+                       ap_lincons0_t * lcons,
+                       ap_lincons0_array_t * arrd, ap_lincons0_array_t * arrm)
 {
-  assert (arrd != NULL && arrd->size == 1 );
-  assert (arrm != NULL && arrm->size == 1 );
+  assert (arrd != NULL && arrd->size == 1);
+  assert (arrm != NULL && arrm->size == 1);
 
   /* compute the dimension */
   size_t sz_found = 0;
-  ap_dim_t eqdim[2] = {0, 0};
+  ap_dim_t eqdim[2] = { 0, 0 };
   size_t i, dim;
   ap_coeff_t *coeff = NULL;
 
@@ -549,61 +564,72 @@ mset_meet_equals_fill (mset_internal_t * pr,
   {
     if (coeff && !ap_coeff_zero (coeff))
       {
-        if (sz_found < 2) {
-	  eqdim[sz_found] = dim;
-	  sz_found ++;
-	}
-	else {
-	  assert (0); 
-	}
+        if (sz_found < 2)
+          {
+            eqdim[sz_found] = dim;
+            sz_found++;
+          }
+        else
+          {
+            assert (0);
+          }
       }
   }
   coeff = NULL;
 
-  if (eqdim[0] < datadim) 
+  if (eqdim[0] < datadim)
     {
       /* put constraint on arrd and arm */
       arrd->p[0].constyp = AP_CONS_EQ;
-      arrd->p[0].linexpr0 = ap_linexpr0_alloc (AP_LINEXPR_DENSE, datadim + 2 * segmdim);
+      arrd->p[0].linexpr0 =
+        ap_linexpr0_alloc (AP_LINEXPR_DENSE, datadim + 2 * segmdim);
       arrd->p[0].scalar = NULL;
       ap_linexpr0_set_coeff_scalar_int (arrd->p[0].linexpr0, eqdim[0], 1);
       ap_linexpr0_set_cst_scalar_int (arrd->p[0].linexpr0, 0);
       ap_linexpr0_set_coeff_scalar_int (arrd->p[0].linexpr0, eqdim[1], -1);
       /* constraint in arrm */
       arrm->p[0].constyp = AP_CONS_EQ;
-      arrm->p[0].linexpr0 = ap_linexpr0_alloc (AP_LINEXPR_DENSE, datadim + 2 * segmdim);
+      arrm->p[0].linexpr0 =
+        ap_linexpr0_alloc (AP_LINEXPR_DENSE, datadim + 2 * segmdim);
       arrm->p[0].scalar = NULL;
       ap_linexpr0_set_coeff_scalar_int (arrm->p[0].linexpr0, eqdim[0], 1);
       ap_linexpr0_set_cst_scalar_int (arrm->p[0].linexpr0, 0);
       ap_linexpr0_set_coeff_scalar_int (arrm->p[0].linexpr0, eqdim[1], -1);
     }
-  else 
+  else
     {
-      assert ((eqdim[0] < (datadim + segmdim)) && (eqdim[1] < (datadim + segmdim)));
-      /* put equality of head and length in arrd */ 
-      ap_lincons0_array_resize(arrd,2);
-      for (size_t i = 0; i < 2; i++) {
-	/* data, len */
-	arrd->p[i].constyp = AP_CONS_EQ;
-	arrd->p[i].linexpr0 = ap_linexpr0_alloc (AP_LINEXPR_DENSE, datadim + 2 * segmdim);
-	arrd->p[i].scalar = NULL;
-	ap_linexpr0_set_coeff_scalar_int (arrd->p[i].linexpr0, eqdim[0], 1);
-	ap_linexpr0_set_cst_scalar_int (arrd->p[i].linexpr0, 0);
-	ap_linexpr0_set_coeff_scalar_int (arrd->p[i].linexpr0, eqdim[1], -1);
-	eqdim[0] += segmdim;
-	eqdim[1] += segmdim;
-      }
+      assert ((eqdim[0] < (datadim + segmdim))
+              && (eqdim[1] < (datadim + segmdim)));
+      /* put equality of head and length in arrd */
+      ap_lincons0_array_resize (arrd, 2);
+      for (size_t i = 0; i < 2; i++)
+        {
+          /* data, len */
+          arrd->p[i].constyp = AP_CONS_EQ;
+          arrd->p[i].linexpr0 =
+            ap_linexpr0_alloc (AP_LINEXPR_DENSE, datadim + 2 * segmdim);
+          arrd->p[i].scalar = NULL;
+          ap_linexpr0_set_coeff_scalar_int (arrd->p[i].linexpr0, eqdim[0], 1);
+          ap_linexpr0_set_cst_scalar_int (arrd->p[i].linexpr0, 0);
+          ap_linexpr0_set_coeff_scalar_int (arrd->p[i].linexpr0, eqdim[1],
+                                            -1);
+          eqdim[0] += segmdim;
+          eqdim[1] += segmdim;
+        }
       eqdim[0] -= segmdim;
       eqdim[1] -= segmdim;
-      /* put equality of mshd and mstl in arrm */ 
+      /* put equality of mshd and mstl in arrm */
       arrm->p[0].constyp = AP_CONS_EQ;
-      arrm->p[0].linexpr0 = ap_linexpr0_alloc (AP_LINEXPR_DENSE, datadim + 2 * segmdim);
+      arrm->p[0].linexpr0 =
+        ap_linexpr0_alloc (AP_LINEXPR_DENSE, datadim + 2 * segmdim);
       arrm->p[0].scalar = NULL;
       ap_linexpr0_set_coeff_scalar_int (arrm->p[0].linexpr0, eqdim[0], 1);
-      ap_linexpr0_set_coeff_scalar_int (arrm->p[0].linexpr0, eqdim[0] + segmdim, 1);
+      ap_linexpr0_set_coeff_scalar_int (arrm->p[0].linexpr0,
+                                        eqdim[0] + segmdim, 1);
       ap_linexpr0_set_cst_scalar_int (arrm->p[0].linexpr0, 0);
       ap_linexpr0_set_coeff_scalar_int (arrm->p[0].linexpr0, eqdim[1], -1);
-      ap_linexpr0_set_coeff_scalar_int (arrm->p[0].linexpr0, eqdim[1] + segmdim, -1);
+      ap_linexpr0_set_coeff_scalar_int (arrm->p[0].linexpr0,
+                                        eqdim[1] + segmdim, -1);
     }
 
 #ifndef NDEBUG1
@@ -628,7 +654,7 @@ mset_meet_lincons_array (ap_manager_t * man,
                          ap_lincons0_array_t * array)
 {
   mset_internal_t *pr =
-          mset_init_from_manager (man, AP_FUNID_MEET_LINCONS_ARRAY, 0);
+    mset_init_from_manager (man, AP_FUNID_MEET_LINCONS_ARRAY, 0);
   if (!a)
     return NULL;
   if (!array || array->size == 0 || !array->p)
@@ -650,18 +676,20 @@ mset_meet_lincons_array (ap_manager_t * man,
   return r;
 }
 
-/* TODO: priority 0 */
-
-/* not used */
+/* NOT IMPLEMENTED */
 mset_t *
 mset_meet_tcons_array (ap_manager_t * man,
                        bool destructive, mset_t * a,
                        ap_tcons0_array_t * array)
 {
   mset_internal_t *pr =
-          mset_init_from_manager (man, AP_FUNID_MEET_LINCONS_ARRAY, 0);
+    mset_init_from_manager (man, AP_FUNID_MEET_LINCONS_ARRAY, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
+
+  if ((destructive != destructive) || (array != array))
+    return NULL;                /* to remove warning on unused parameter */
+
   return a;
 }
 
@@ -672,9 +700,13 @@ mset_add_ray_array (ap_manager_t * man,
                     ap_generator0_array_t * array)
 {
   mset_internal_t *pr =
-          mset_init_from_manager (man, AP_FUNID_ADD_RAY_ARRAY, 0);
+    mset_init_from_manager (man, AP_FUNID_ADD_RAY_ARRAY, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
+
+  if ((destructive != destructive) || (array != array))
+    return NULL;                /* to remove warning on unused parameter */
+
   return a;
 }
 
@@ -691,13 +723,15 @@ mset_assign_linexpr (ap_manager_t * man,
                      ap_dim_t d, ap_linexpr0_t * expr, mset_t * dest)
 {
   mset_internal_t *pr =
-          mset_init_from_manager (man, AP_FUNID_ASSIGN_LINEXPR_ARRAY, 0);
-  if (!a)
+    mset_init_from_manager (man, AP_FUNID_ASSIGN_LINEXPR_ARRAY, 0);
+  if (!a || (dest != dest))     /* to remove warning on unused parameter */
     return NULL;
+
   assert (expr && ap_linexpr0_size (expr) == (a->datadim + a->segmdim) &&
           d < (a->datadim + a->segmdim) && !dest);
+
   mset_t *r = mset_alloc_internal (pr, a->datadim, a->segmdim);
-  ap_linexpr0_t* lexpr = ap_linexpr0_copy (expr);
+  ap_linexpr0_t *lexpr = ap_linexpr0_copy (expr);
   ap_linexpr0_realloc (lexpr, a->datadim + 2 * a->segmdim);
 #ifndef NDEBUG
   fprintf (stdout, "\n====mset_assign_linexpr to dcons %d:=", d);
@@ -705,8 +739,8 @@ mset_assign_linexpr (ap_manager_t * man,
   fprintf (stdout, "\n");
 #endif
   r->dcons =
-          ap_abstract0_assign_linexpr (pr->man_dcons, false, a->dcons, d, lexpr,
-                                       NULL);
+    ap_abstract0_assign_linexpr (pr->man_dcons, false, a->dcons, d, lexpr,
+                                 NULL);
 #ifndef NDEBUG
   fprintf (stdout, "\n====mset_assign_linexpr returns ");
   ap_abstract0_fprint (stdout, pr->man_dcons, r->dcons, NULL);
@@ -722,8 +756,6 @@ mset_assign_linexpr (ap_manager_t * man,
   return r;
 }
 
-/* TODO: priority 0 */
-
 /* used for pre-image computation */
 mset_t *
 mset_substitute_linexpr (ap_manager_t * man,
@@ -731,13 +763,13 @@ mset_substitute_linexpr (ap_manager_t * man,
                          ap_dim_t d, ap_linexpr0_t * expr, mset_t * dest)
 {
   mset_internal_t *pr =
-          mset_init_from_manager (man, AP_FUNID_SUBSTITUTE_LINEXPR_ARRAY, 0);
+    mset_init_from_manager (man, AP_FUNID_SUBSTITUTE_LINEXPR_ARRAY, 0);
   if (!a)
     return NULL;
   assert (expr && ap_linexpr0_size (expr) == (a->datadim + a->segmdim) &&
           d < (a->datadim + a->segmdim));
   mset_t *r = mset_alloc_internal (pr, a->datadim, a->segmdim);
-  ap_linexpr0_t* lexpr = ap_linexpr0_copy (expr);
+  ap_linexpr0_t *lexpr = ap_linexpr0_copy (expr);
   ap_linexpr0_realloc (lexpr, a->datadim + 2 * a->segmdim);
 #ifndef NDEBUG
   fprintf (stdout, "\n====mset_substitute_linexpr to dcons %d:=", d);
@@ -745,8 +777,8 @@ mset_substitute_linexpr (ap_manager_t * man,
   fprintf (stdout, "\n");
 #endif
   r->dcons =
-          ap_abstract0_substitute_linexpr (pr->man_dcons, false, a->dcons, d, lexpr,
-                                           NULL);
+    ap_abstract0_substitute_linexpr (pr->man_dcons, false, a->dcons, d, lexpr,
+                                     NULL);
 #ifndef NDEBUG
   fprintf (stdout, "\n====mset_substitute_linexpr returns ");
   ap_abstract0_fprint (stdout, pr->man_dcons, r->dcons, NULL);
@@ -769,9 +801,8 @@ mset_substitute_linexpr (ap_manager_t * man,
   return r;
 }
 
-/* TODO: priority 0 */
 
-/* not used */
+/* NOT IMPLEMENTED */
 mset_t *
 mset_assign_linexpr_array (ap_manager_t * man,
                            bool destructive, mset_t * a,
@@ -781,7 +812,7 @@ mset_assign_linexpr_array (ap_manager_t * man,
   if (size == 1)
     return mset_assign_linexpr (man, destructive, a, tdim[0], texpr[0], dest);
   mset_internal_t *pr =
-          mset_init_from_manager (man, AP_FUNID_ASSIGN_LINEXPR_ARRAY, 0);
+    mset_init_from_manager (man, AP_FUNID_ASSIGN_LINEXPR_ARRAY, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return a;
@@ -802,15 +833,14 @@ mset_substitute_linexpr_array (ap_manager_t * man,
                                     dest);
 
   mset_internal_t *pr =
-          mset_init_from_manager (man, AP_FUNID_SUBSTITUTE_TEXPR_ARRAY, 0);
+    mset_init_from_manager (man, AP_FUNID_SUBSTITUTE_TEXPR_ARRAY, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return a;
 }
 
-/* TODO: priority 0 */
 
-/* not used because of transformation to linexpr */
+/* NOT IMPLEMENTED: not used because of transformation to linexpr */
 mset_t *
 mset_assign_texpr_array (ap_manager_t * man,
                          bool destructive, mset_t * a,
@@ -818,13 +848,17 @@ mset_assign_texpr_array (ap_manager_t * man,
                          ap_texpr0_t ** texpr, size_t size, mset_t * dest)
 {
   mset_internal_t *pr =
-          mset_init_from_manager (man, AP_FUNID_ASSIGN_TEXPR_ARRAY, 0);
+    mset_init_from_manager (man, AP_FUNID_ASSIGN_TEXPR_ARRAY, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
+
+  if ((destructive != destructive) ||
+      (tdim != tdim) || (texpr != texpr) || (size != size) || (dest != dest))
+    return NULL;                /* to remove warning on unused parameter */
+
   return a;
 }
 
-/* TODO: priority 0 */
 
 /* used only for pre-image computation */
 mset_t *

@@ -1,9 +1,8 @@
 # Makefile
 #
-# CELIA Tool / LSUM Domain
+# CELIA Tools / MSET Abstract Domain
 #
-# Copyright (C) LIAFA 2009-2014
-
+# 
 # This file is part of the CELIA tool, released under LGPL license.
 # Please read the COPYING file packaged in the distribution.
 

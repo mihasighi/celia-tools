@@ -136,7 +136,7 @@ lsum_free_dname (lsum_t * a, char **t)
  * @brief Print the abstract value using the ACSL format.
  *
  * Use the ACSL format to print the abstract value in the
- * streal @p stream.
+ * file @p stream.
  * 
  * @param[in] stream   Output stream
  * @param[in] pr       Internal manager
@@ -271,7 +271,7 @@ lsum_serialize_raw (ap_manager_t * man, lsum_t * a)
 /**
  * @brief Build an abstract value using the code in @p ptr.
  *
- * Read at @p ptr tree size_t numebrs representing
+ * Read at @p ptr tree size_t numbers representing
  * the code (datasim, segmentdim, code) then build the
  * abstract value for the code.
  *

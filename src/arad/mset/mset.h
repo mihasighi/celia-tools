@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / MSET Abstract Domain                                    */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -21,8 +17,8 @@
 /**************************************************************************/
 
 
-#ifndef __MSET_H_
-#define __MSET_H_
+#ifndef MSET_H_
+#define MSET_H_
 
 /* dependencies */
 
@@ -58,4 +54,4 @@ ap_manager_t *mset_manager_alloc (void);
 #endif
 /* *INDENT-ON* */
 
-#endif /* __MSET_H_ */
+#endif /* MSET_H_ */

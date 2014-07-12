@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / MSET Abstract Domain                                    */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -23,7 +19,7 @@
 
 #include "mset.h"
 #include "mset_internal.h"
-#include "shape_macros.h"
+#include "sh_macros.h"
 #include "ap_generic.h"
 #include "ap_abstract0.h"
 
@@ -38,7 +34,8 @@ mset_meet (ap_manager_t * man, bool destructive, mset_t * a1, mset_t * a2)
     return NULL;
   mset_internal_t *pr = mset_init_from_manager (man, AP_FUNID_MEET, 0);
   arg_assert (a1->datadim == a2->datadim
-	      && a1->segmdim == a2->segmdim, return NULL;);
+              && a1->segmdim == a2->segmdim, return NULL;
+    );
   mset_t *r = mset_alloc_internal (pr, a1->datadim, a1->segmdim);
   r->mscons =
     ap_abstract0_meet (pr->man_mscons, destructive, a1->mscons, a2->mscons);
@@ -62,7 +59,8 @@ mset_join (ap_manager_t * man, bool destructive, mset_t * a1, mset_t * a2)
     return NULL;
   mset_internal_t *pr = mset_init_from_manager (man, AP_FUNID_JOIN, 0);
   arg_assert (a1->datadim == a2->datadim
-	      && a1->segmdim == a2->segmdim, return NULL;);
+              && a1->segmdim == a2->segmdim, return NULL;
+    );
   mset_t *r = mset_alloc_internal (pr, a1->datadim, a1->segmdim);
   r->mscons =
     ap_abstract0_join (pr->man_mscons, destructive, a1->mscons, a2->mscons);
@@ -82,7 +80,8 @@ mset_t *
 mset_meet_array (ap_manager_t * man, mset_t ** tab, size_t size)
 {
   mset_internal_t *pr = mset_init_from_manager (man, AP_FUNID_MEET_ARRAY, 0);
-  arg_assert (size > 0, return NULL;);
+  arg_assert (size > 0, return NULL;
+    );
   mset_t *r = mset_copy_internal (pr, tab[0]);
   size_t i;
   for (i = 1; i < size && !mset_is_bottom (man, r); i++)
@@ -98,7 +97,8 @@ mset_t *
 mset_join_array (ap_manager_t * man, mset_t ** tab, size_t size)
 {
   mset_internal_t *pr = mset_init_from_manager (man, AP_FUNID_JOIN_ARRAY, 0);
-  arg_assert (size > 0, return NULL;);
+  arg_assert (size > 0, return NULL;
+    );
   mset_t *r = mset_copy_internal (pr, tab[0]);
   size_t i;
   for (i = 1; i < size; i++)
@@ -120,60 +120,64 @@ mset_widening (ap_manager_t * man, mset_t * a1, mset_t * a2)
 {
   mset_internal_t *pr = mset_init_from_manager (man, AP_FUNID_WIDENING, 0);
   arg_assert (a1 && a2 && a1->datadim == a2->datadim
-	      && a1->segmdim == a2->segmdim, return NULL;);
+              && a1->segmdim == a2->segmdim, return NULL;
+    );
   mset_t *r = mset_alloc_internal (pr, a1->datadim, a1->segmdim);
   r->mscons = ap_abstract0_widening (pr->man_mscons, a1->mscons, a2->mscons);
   r->dcons = ap_abstract0_widening (pr->man_dcons, a1->dcons, a2->dcons);
   // TODO: put some normalization/saturation to obtain equalities
 #ifndef NDEBUG1
   fprintf (stdout, "\n++++mset_widening: with a1=(");
-  ap_abstract0_fprint(stdout,pr->man_dcons, a1->dcons, NULL);
-  fprintf(stdout, ", \n");
-  ap_abstract0_fprint(stdout,pr->man_mscons, a1->mscons, NULL);
-  fprintf(stdout, ") widen a2=(\n");
-  ap_abstract0_fprint(stdout,pr->man_dcons, a2->dcons, NULL);
-  fprintf(stdout, ", \n");
-  ap_abstract0_fprint(stdout,pr->man_mscons, a2->mscons, NULL);
-  fprintf(stdout, ") returns r=(\n");
-  ap_abstract0_fprint(stdout,pr->man_dcons, r->dcons, NULL);
-  fprintf(stdout, ", \n");
-  ap_abstract0_fprint(stdout,pr->man_mscons, r->mscons, NULL);
-  fprintf(stdout, ") \n");
-  fflush(stdout);
+  ap_abstract0_fprint (stdout, pr->man_dcons, a1->dcons, NULL);
+  fprintf (stdout, ", \n");
+  ap_abstract0_fprint (stdout, pr->man_mscons, a1->mscons, NULL);
+  fprintf (stdout, ") widen a2=(\n");
+  ap_abstract0_fprint (stdout, pr->man_dcons, a2->dcons, NULL);
+  fprintf (stdout, ", \n");
+  ap_abstract0_fprint (stdout, pr->man_mscons, a2->mscons, NULL);
+  fprintf (stdout, ") returns r=(\n");
+  ap_abstract0_fprint (stdout, pr->man_dcons, r->dcons, NULL);
+  fprintf (stdout, ", \n");
+  ap_abstract0_fprint (stdout, pr->man_mscons, r->mscons, NULL);
+  fprintf (stdout, ") \n");
+  fflush (stdout);
 #endif
   return r;
 }
 
 mset_t *
 mset_widening_threshold (ap_manager_t * man,
-			 mset_t * a1, mset_t * a2,
-			 ap_lincons0_array_t * array)
+                         mset_t * a1, mset_t * a2,
+                         ap_lincons0_array_t * array)
 {
   mset_internal_t *pr =
     mset_init_from_manager (man, AP_FUNID_WIDENING, array->size + 1);
   arg_assert (a1 && a2 && a1->datadim == a2->datadim
-	      && a1->segmdim == a2->segmdim, return NULL;);
+              && a1->segmdim == a2->segmdim, return NULL;
+    );
   mset_t *r = mset_alloc_internal (pr, a1->datadim, a1->segmdim);
-  r->mscons = ap_abstract0_widening_threshold (pr->man_mscons, a1->mscons, a2->mscons,array);
+  r->mscons =
+    ap_abstract0_widening_threshold (pr->man_mscons, a1->mscons, a2->mscons,
+                                     array);
   r->dcons =
     ap_abstract0_widening_threshold (pr->man_dcons, a1->dcons, a2->dcons,
-				     array);
+                                     array);
   // TODO: put some normalization/saturation to obtain equalities
 #ifndef NDEBUG1
   fprintf (stdout, "\n++++mset_widening_threshold: with a1=(");
-  ap_abstract0_fprint(stdout,pr->man_dcons, a1->dcons, NULL);
-  fprintf(stdout, ", \n");
-  ap_abstract0_fprint(stdout,pr->man_mscons, a1->mscons, NULL);
-  fprintf(stdout, ") widen a2=(\n");
-  ap_abstract0_fprint(stdout,pr->man_dcons, a2->dcons, NULL);
-  fprintf(stdout, ", \n");
-  ap_abstract0_fprint(stdout,pr->man_mscons, a2->mscons, NULL);
-  fprintf(stdout, ") returns r=(\n");
-  ap_abstract0_fprint(stdout,pr->man_dcons, r->dcons, NULL);
-  fprintf(stdout, ", \n");
-  ap_abstract0_fprint(stdout,pr->man_mscons, r->mscons, NULL);
-  fprintf(stdout, ") \n");
-  fflush(stdout);
+  ap_abstract0_fprint (stdout, pr->man_dcons, a1->dcons, NULL);
+  fprintf (stdout, ", \n");
+  ap_abstract0_fprint (stdout, pr->man_mscons, a1->mscons, NULL);
+  fprintf (stdout, ") widen a2=(\n");
+  ap_abstract0_fprint (stdout, pr->man_dcons, a2->dcons, NULL);
+  fprintf (stdout, ", \n");
+  ap_abstract0_fprint (stdout, pr->man_mscons, a2->mscons, NULL);
+  fprintf (stdout, ") returns r=(\n");
+  ap_abstract0_fprint (stdout, pr->man_dcons, r->dcons, NULL);
+  fprintf (stdout, ", \n");
+  ap_abstract0_fprint (stdout, pr->man_mscons, r->mscons, NULL);
+  fprintf (stdout, ") \n");
+  fflush (stdout);
 #endif
   return r;
 }
@@ -184,6 +188,9 @@ mset_narrowing (ap_manager_t * man, mset_t * a1, mset_t * a2)
 {
   mset_internal_t *pr = mset_init_from_manager (man, AP_FUNID_WIDENING, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
-			      "not implemented");
+                              "not implemented");
+  if (a1 != a1)
+    return NULL;                /* to remove warning on unsed parameter */
+
   return a2;
 }

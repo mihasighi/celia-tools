@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / MSET Abstract Domain                                    */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -21,10 +17,10 @@
 /**************************************************************************/
 
 
-#ifndef __MSET_INTERNAL_H_
-#define __MSET_INTERNAL_H_
+#ifndef MSET_INTERNAL_H_
+#define MSET_INTERNAL_H_
 
-#include "shape_options.h"
+#include "sh_options.h"
 #include "mset_fun.h"
 #include "shad.h"
 
@@ -44,32 +40,32 @@ extern "C"
   /* ============================================================ */
 
     /* manager-local data specific to universal constraints */
-  struct _mset_internal_t
-  {
-    /* current function */
-    ap_funid_t funid;
+struct _mset_internal_t
+{
+  /* current function */
+  ap_funid_t funid;
 
-    /* local parameters for current function */
-    ap_funopt_t *funopt;
+  /* local parameters for current function */
+  ap_funopt_t *funopt;
 
-    /* manager of the length domain */
-    ap_manager_t *man_lcons;
+  /* manager of the length domain */
+  ap_manager_t *man_lcons;
 
-    /* manager of the data domain */
-    ap_manager_t *man_dcons;
+  /* manager of the data domain */
+  ap_manager_t *man_dcons;
 
-    /* manager of the linear equations domain */
-    ap_manager_t *man_mscons;
+  /* manager of the linear equations domain */
+  ap_manager_t *man_mscons;
 
-    /* count errors */
-    int error_;
-    /* max number for anonymous nodes for closure */
-    size_t max_anon;
-    size_t segm_anon;
+  /* count errors */
+  int error_;
+  /* max number for anonymous nodes for closure */
+  size_t max_anon;
+  size_t segm_anon;
 
-    /* back-pointer */
-    ap_manager_t *man;
-  };
+  /* back-pointer */
+  ap_manager_t *man;
+};
 
 
   /* ============================================================ */
@@ -84,16 +80,19 @@ extern "C"
    */
 
     /* called by each function to setup and get manager-local data */
-  static inline mset_internal_t *
-  mset_init_from_manager (ap_manager_t * man, ap_funid_t id, size_t size)
-  {
-    mset_internal_t *pr = (mset_internal_t *) man->internal;
-    pr->funid = id;
-    pr->funopt = man->option.funopt + id;
-    man->result.flag_exact = man->result.flag_best = true;
+static inline mset_internal_t *
+mset_init_from_manager (ap_manager_t * man, ap_funid_t id, size_t size)
+{
+  mset_internal_t *pr = (mset_internal_t *) man->internal;
+  pr->funid = id;
+  pr->funopt = man->option.funopt + id;
+  man->result.flag_exact = man->result.flag_best = true;
 
-    return pr;
-  }
+  if (size != size)
+    return NULL;                /* to remove warning */
+
+  return pr;
+}
 
 
   /* ********************************************************************** */
@@ -111,46 +110,46 @@ extern "C"
    * So we have a product domain on lcons /\ dcons /\ mscons
    */
 
-  struct _mset_t
-  {
-    size_t datadim; /* number of scalar data variables (length and data) */
-    size_t segmdim; /* number of segments represented */
-    void *dcons; /* constraint on data of dimension
-				 * datadim + 2 segmdim */
-    void *mscons; /* constraint on multisets
+struct _mset_t
+{
+  size_t datadim;               /* number of scalar data variables (length and data) */
+  size_t segmdim;               /* number of segments represented */
+  void *dcons;                  /* constraint on data of dimension
+                                 * datadim + 2 segmdim */
+  void *mscons;                 /* constraint on multisets
                                  * DATA_DIM + 2 segmdim (data then multiset) */
-  };
+};
 
 
   /* ============================================================ */
   /* Internal Management */
   /* ============================================================ */
 
-  mset_t *mset_alloc_internal (mset_internal_t * pr, size_t intdim,
-                               size_t realdim);
-  mset_t *mset_alloc_top (mset_internal_t * pr, size_t intdim, size_t realdim);
-  void mset_free_internal (mset_internal_t * pr, mset_t * a);
-  mset_t *mset_copy_internal (mset_internal_t * pr, mset_t * a);
+mset_t *mset_alloc_internal (mset_internal_t * pr, size_t intdim,
+                             size_t realdim);
+mset_t *mset_alloc_top (mset_internal_t * pr, size_t intdim, size_t realdim);
+void mset_free_internal (mset_internal_t * pr, mset_t * a);
+mset_t *mset_copy_internal (mset_internal_t * pr, mset_t * a);
 
 
   /* ============================================================ */
   /* Extensions */
   /* ============================================================ */
 
-  mset_t* mset_meet_formula (mset_internal_t* pr, mset_t* a,
-                             sh_formula_t* f, size_t disj);
+mset_t *mset_meet_formula (mset_internal_t * pr, mset_t * a,
+                           sh_formula_t * f, size_t disj);
   /* Meets with a constraint from an SL3 disjunct. */
 
   /* ============================================================ */
   /* Strengthening between data and mset constraints */
   /* ============================================================ */
 
-  void mset_strengthen_dim (mset_internal_t * pr, mset_t *a, ap_dim_t dim);
+void mset_strengthen_dim (mset_internal_t * pr, mset_t * a, ap_dim_t dim);
   /* Strengthen after changes done on dimension dim */
-  void mset_strengthen_all (mset_internal_t * pr, mset_t *a);
+void mset_strengthen_all (mset_internal_t * pr, mset_t * a);
   /* Strengthen for all dimensions */
-  void mset_strengthen_assign (mset_internal_t *pr, mset_t *a,
-                               ap_dim_t d, ap_linexpr0_t *expr);
+void mset_strengthen_assign (mset_internal_t * pr, mset_t * a,
+                             ap_dim_t d, ap_linexpr0_t * expr);
   /* Strengthen after assignment d = expr */
 
   /* *INDENT-OFF* */
@@ -162,4 +161,4 @@ extern "C"
 
 
 
-#endif /* __MSET_INTERNAL_H_ */
+#endif /* MSET_INTERNAL_H_ */
