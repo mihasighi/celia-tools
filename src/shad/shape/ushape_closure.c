@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / Shape Abstract Domain                                   */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -33,13 +29,12 @@
 /* ============================================================ */
 
 
-/*
- * TODO: priority 1 What it is here closure? - close the hgraph and the lcons
- */
-
+/* NOT IMPLEMENTED */
 bool
 ushape_close (ushape_t * g, size_t dim)
 {
+  if ((g != g) || (dim != dim))
+    return true;                /* to remove warning on unused parameter */
   return false;
 }
 
@@ -48,29 +43,26 @@ ushape_close (ushape_t * g, size_t dim)
 /* Incremental Closure */
 /* ============================================================ */
 
-/*
- * TODO: priority 1
- *
- * ?? time. ?? space.
- */
-
+/* NOT IMPLEMENTED */
 bool
 ushape_close_incremental (ushape_t * m, size_t dim, size_t v)
 {
+  if ((m != m) || (dim != dim) || (v != v))
+    return true;                /* to remove warning on unused parameter */
   return false;
 }
-
 
 
 /* ============================================================ */
 /* Sanity Check */
 /* ============================================================ */
 
-/* TODO: priority 1 */
-/* Check if closed field is not NULL if yes test if h field is closed */
+/* NOT IMPLEMENTED */
 bool
 ushape_check_closed (ushape_t * m, size_t dim)
 {
+  if ((m != m) || (dim != dim))
+    return true;                /* to remove warning on unused parameter */
   return false;
 }
 
@@ -79,8 +71,12 @@ ushape_check_closed (ushape_t * m, size_t dim)
 /* Topological closure operation */
 /* ============================================================ */
 
-/* TODO: priority 3 */
-/* Eliminate anonimous nodes */
+/**
+ * @brief Returns a copy of the input value depending on @p destructive.
+ * 
+ * The semantics of the APRON library is not implemented.
+ * The copy of the value eliminates the anonymous nodes.
+ */
 ushape_t *
 ushape_closure (ap_manager_t * man, bool destructive, ushape_t * a)
 {

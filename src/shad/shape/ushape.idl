@@ -5,17 +5,13 @@
  *
  * OCaml interface specification for camlidl
  *
- * CINV Library / Shape Domain    
+ * CELIA Tools / Shape Absytract Domain    
  *
- * Copyright (C) LIAFA 2009-2011
- *
+ * This file is part of the CELIA Tools, released under LGPL license.
+ * Please read the COPYING file packaged in the distribution.
  */
 
-/* This file is part of the CINV Library, released under LGPL license.
-   Please read the COPYING file packaged in the distribution.
-*/
-
-quote(C,"/*\n This file is part of the CINV Library, released under LGPL license.\n Please read the COPYING file packaged in the distribution.\n*/")
+quote(C,"/*\n This file is part of the CELIA Tools, released under LGPL license.\n Please read the COPYING file packaged in the distribution.\n*/")
 quote(MLMLI,"(*\n This file is part of the APRON Library, released under LGPL license.\n Please read the COPYING file packaged in the distribution.\n*)")
 
 quote(MLI,"\n \n(** Shape abstract domain. *)\n \n")

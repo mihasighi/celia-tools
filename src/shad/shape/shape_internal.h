@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / Shape Abstract Domain                                   */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -21,14 +17,15 @@
 /**************************************************************************/
 
 
-#ifndef __SHAPE_INTERNAL_H_
-#define __SHAPE_INTERNAL_H_
+#ifndef SHAPE_INTERNAL_H_
+#define SHAPE_INTERNAL_H_
 
 #include "hgraph_fun.h"
 #include "ushape_fun.h"
 #include "ushape_internal.h"
 #include "shape_fun.h"
-#include "shape_manager.h"
+#include "sh_manager.h"
+#include "sh_options.h"
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
@@ -149,4 +146,4 @@ extern "C"
 /* *INDENT-ON* */
 
 
-#endif /* __SHAPE_INTERNAL_H_ */
+#endif /* SHAPE_INTERNAL_H_ */

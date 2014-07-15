@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / Shape Abstract Domain                                   */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -25,6 +21,8 @@
 #include "hgraph_internal.h"
 #include "ushape.h"
 #include "ushape_internal.h"
+#include "apron2shape.h"
+
 
 
 /* ============================================================ */
@@ -32,21 +30,26 @@
 
 /* ============================================================ */
 
-void ushape_fprint_dot (FILE * stream, shape_internal_t * man,
+void ushape_fprint_acsl (FILE * stream, shape_internal_t * pr,
+                         ushape_t * a, char **name_of_dim);
+void ushape_fprint_dot (FILE * stream, shape_internal_t * pr,
                         ushape_t * a, char **name_of_dim);
-void ushape_fprint_smt (FILE * stream, shape_internal_t * man,
-                        ushape_t * a, char **name_of_dim);
+void ushape_fprint_smtlib (FILE * stream, shape_internal_t * pr,
+                           ushape_t * a, char **name_of_dim);
 
 void
 ushape_fprint (FILE * stream, ap_manager_t * man,
                ushape_t * a, char **name_of_dim)
 {
   ushape_internal_t *pr = ushape_init_from_manager (man, AP_FUNID_FPRINT, 0);
-  bool isdot = shape_get_print ();
-  if (isdot)
+  if (sh_print_is_dot ())
     ushape_fprint_dot (stream, pr, a, name_of_dim);
+  else if (sh_print_is_smtlib ())
+    ushape_fprint_smtlib (stream, pr, a, name_of_dim);
+  else if (sh_print_is_acsl ())
+    ushape_fprint_acsl (stream, pr, a, name_of_dim);
   else
-    ushape_fprint_smt (stream, pr, a, name_of_dim);
+    assert (0);
 }
 
 void
@@ -54,7 +57,7 @@ ushape_fprintdiff (FILE * stream, ap_manager_t * man,
                    ushape_t * a1, ushape_t * a2, char **name_of_dim)
 {
   ushape_internal_t *pr =
-          ushape_init_from_manager (man, AP_FUNID_FPRINTDIFF, 0);
+    ushape_init_from_manager (man, AP_FUNID_FPRINTDIFF, 0);
   size_t i;
   hgraph_fprintdiff (stream, man, (a1) ? a1->h : NULL, (a2) ? a2->h : NULL,
                      name_of_dim);
@@ -64,8 +67,7 @@ ushape_fprintdiff (FILE * stream, ap_manager_t * man,
       ap_abstract0_fprintdiff (stream, pr->man_scons[i],
                                (a1 && a1->scons) ? a1->scons[i] : NULL, (a2
                                                                          &&
-                                                                         a2->
-                                                                         scons)
+                                                                         a2->scons)
                                ? a2->scons[i] : NULL, name_of_dim);
       fprintf (stream, "\n\t]\n");
     }
@@ -77,8 +79,58 @@ ushape_fdump (FILE * stream, ap_manager_t * man, ushape_t * a)
   ushape_fprint (stream, man, a, NULL);
 }
 
+/* ============================================================ */
+/* Printing internals */
+/* ============================================================ */
+
 void
-ushape_fprint_dot (FILE * stream, shape_internal_t *pr,
+ushape_fprint_acsl (FILE * stream, shape_internal_t * pr,
+                    ushape_t * a, char **name_of_dim)
+{
+  size_t i;
+
+  if (NULL == a)
+    {
+      fprintf (stream, "true\n");
+      return;
+    }
+
+  if (NULL != a->h)
+    {
+      // print the node variables used
+      if (a->h->size > 1)
+        {
+          fprintf (stream, "\\exists Node ");
+          for (i = 1; i < a->h->size; i++)
+            /* start at 1 because 0 is NULL */
+            fprintf (stream, "%s n%zu ", ((i == 1) ? "" : ","), i);
+          fprintf (stream, "; ");
+        }
+      // print the graph
+      hgraph_fprint (stream, pr->man, a->h, name_of_dim);
+    }
+  else
+    fprintf (stream, "true ");
+  if (NULL != a->scons)
+    {
+      for (i = 0; i < pr->size_scons; i++)
+        {
+          fprintf (stream, "&& ");
+          if (a->scons[i])
+            ap_abstract0_fprint (stream, pr->man_scons[i], a->scons[i],
+                                 name_of_dim);
+          else
+            fprintf (stream, "true\n");
+        }
+    }
+  else
+    fprintf (stream, "&& true\n");
+
+}
+
+
+void
+ushape_fprint_dot (FILE * stream, shape_internal_t * pr,
                    ushape_t * a, char **name_of_dim)
 {
   size_t i;
@@ -88,7 +140,8 @@ ushape_fprint_dot (FILE * stream, shape_internal_t *pr,
       fprintf (stream, "\tlabel = \"ushape empty\" ;\n");
       return;
     }
-  fprintf (stream, "\tlabel = \"ushape of dim (%zu,%zu)\" ;\n", a->datadim, a->ptrdim);
+  fprintf (stream, "\tlabel = \"ushape of dim (%zu,%zu)\" ;\n", a->datadim,
+           a->ptrdim);
   fflush (stream);
   fprintf (stream, "\tsubgraph cluster_hgraph_%zu {\n ", ushape_number);
   if (a->h)
@@ -105,13 +158,14 @@ ushape_fprint_dot (FILE * stream, shape_internal_t *pr,
                    ushape_number, i);
     }
   else
-    fprintf (stream, "\tsubgraph cluster_scons_%zu { label = \"scons [NULL]\" ; }\n",
+    fprintf (stream,
+             "\tsubgraph cluster_scons_%zu { label = \"scons [NULL]\" ; }\n",
              ushape_number);
 }
 
 void
-ushape_fprint_smt (FILE* stream, hgraph_internal_t* pr,
-                   ushape_t* a, char** name_of_dim)
+ushape_fprint_smtlib (FILE * stream, shape_internal_t * pr,
+                      ushape_t * a, char **name_of_dim)
 {
   size_t i;
 
@@ -149,7 +203,7 @@ ushape_fprint_smt (FILE* stream, hgraph_internal_t* pr,
   // end and
   fprintf (stream, "\n\t) ;; end and\n");
   if (a->h)
-    fprintf (stream, "\n\t) ;; end exists\n"); // exists
+    fprintf (stream, "\n\t) ;; end exists\n");  // exists
 
 }
 
@@ -163,10 +217,10 @@ ap_membuf_t
 ushape_serialize_raw (ap_manager_t * man, ushape_t * a)
 {
   ushape_internal_t *pr =
-          ushape_init_from_manager (man, AP_FUNID_SERIALIZE_RAW, 0);
+    ushape_init_from_manager (man, AP_FUNID_SERIALIZE_RAW, 0);
   ap_membuf_t buf;
   buf.size = 0;
-  buf.ptr = NULL;
+  buf.ptr = (size_t *) a;       /* to remove warning on unsed parameter */
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return buf;
@@ -176,8 +230,11 @@ ushape_serialize_raw (ap_manager_t * man, ushape_t * a)
 ushape_t *
 ushape_deserialize_raw (ap_manager_t * man, void *ptr, size_t * size)
 {
+  if ((ptr != ptr) && (size != size))
+    return NULL;                /* to remove warning on unused parameter */
+
   ushape_internal_t *pr =
-          ushape_init_from_manager (man, AP_FUNID_DESERIALIZE_RAW, 0);
+    ushape_init_from_manager (man, AP_FUNID_DESERIALIZE_RAW, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return NULL;

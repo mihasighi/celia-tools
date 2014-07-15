@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / Shape Abstract Domain                                   */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -24,7 +20,7 @@
 #include "hgraph_internal.h"
 #include "ushape.h"
 #include "ushape_internal.h"
-#include "shape_macros.h"
+#include "sh_macros.h"
 #include "ap_generic.h"
 
 /* ============================================================ */
@@ -44,15 +40,15 @@ ushape_meet (ap_manager_t * man, bool destructive, ushape_t * a1,
   if (ushape_is_bottom (man, a2))
     return (destructive) ? a2 : ushape_bottom (man, a2->datadim, a2->ptrdim);
 #ifndef NDEBUG1
-  fprintf (stdout, "\n====ushape_meet: with algo=%d and dimensions a1=(%d,%d), a2=(%d,%d)\n",
+  fprintf (stdout,
+           "\n====ushape_meet: with algo=%d and dimensions a1=(%d,%d), a2=(%d,%d)\n",
            pr->meet_algo, a1->datadim, a1->ptrdim, a2->datadim, a2->ptrdim);
   fflush (stdout);
 #endif
   size_t i;
   bool isbottom = false;
-  if (!hgraph_is_equal (a1->h, a2->h)
-      && pr->meet_algo == 0)
-    r = NULL; /* bottom */
+  if (!hgraph_is_equal (a1->h, a2->h) && pr->meet_algo == 0)
+    r = NULL;                   /* bottom */
   else if (pr->meet_algo == -1)
     {
       /****** Unify *******/
@@ -74,9 +70,11 @@ ushape_meet (ap_manager_t * man, bool destructive, ushape_t * a1,
           ap_dimchange_t dimchange1;
           ap_dimchange_t dimchange2;
           ap_dimchange_init (&dimchange1, 0, nadded1);
-          for (i = 0; i < nadded1; i++) dimchange1.dim[i] = a1->datadim + a1->h->size;
+          for (i = 0; i < nadded1; i++)
+            dimchange1.dim[i] = a1->datadim + a1->h->size;
           ap_dimchange_init (&dimchange2, 0, nadded2);
-          for (i = 0; i < nadded2; i++) dimchange2.dim[i] = a2->datadim + a2->h->size;
+          for (i = 0; i < nadded2; i++)
+            dimchange2.dim[i] = a2->datadim + a2->h->size;
           // apply dimperm_dimchange_n for a1 and a2 to obtain a1p, a2p
           ushape_t *a1p = ushape_alloc_internal (pr, r->datadim, r->ptrdim);
           a1p->h = hgraph_copy_internal (pr, r->h);
@@ -89,10 +87,11 @@ ushape_meet (ap_manager_t * man, bool destructive, ushape_t * a1,
           for (i = 0; i < pr->size_scons && !isbottom; i++)
             {
               r->scons[i] =
-                      ap_abstract0_meet (pr->man_scons[i], false,
-                                         (a1p->scons) ? a1p->scons[i] : NULL,
-                                         (a2p->scons) ? a2p->scons[i] : NULL);
-              isbottom = ap_abstract0_is_bottom (pr->man_scons[i], r->scons[i]);
+                ap_abstract0_meet (pr->man_scons[i], false,
+                                   (a1p->scons) ? a1p->scons[i] : NULL,
+                                   (a2p->scons) ? a2p->scons[i] : NULL);
+              isbottom =
+                ap_abstract0_is_bottom (pr->man_scons[i], r->scons[i]);
             }
           // free all allocated data
           ap_dimchange_clear (&dimchange1);
@@ -140,7 +139,8 @@ ushape_meet (ap_manager_t * man, bool destructive, ushape_t * a1,
               a2p = ushape_alloc_internal (pr, r->datadim, r->ptrdim);
               a2p->h = hgraph_copy_internal (pr, r->h);
               a2p->closed = NULL;
-              ushape_apply_dimperm_dimchange_n (pr, a2, a2p, &perm2, &dimchange2);
+              ushape_apply_dimperm_dimchange_n (pr, a2, a2p, &perm2,
+                                                &dimchange2);
               ap_dimchange_clear (&dimchange2);
               ap_dimperm_clear (&perm2);
             }
@@ -152,7 +152,7 @@ ushape_meet (ap_manager_t * man, bool destructive, ushape_t * a1,
                                        (a1->scons) ? a1->scons[i] : NULL,
                                        (a2p->scons) ? a2p->scons[i] : NULL))
                 r->scons[i] =
-                      ap_abstract0_copy (pr->man_scons[i], a2p->scons[i]);
+                  ap_abstract0_copy (pr->man_scons[i], a2p->scons[i]);
               else
                 isbottom = true;
             }
@@ -168,9 +168,9 @@ ushape_meet (ap_manager_t * man, bool destructive, ushape_t * a1,
       for (i = 0; i < pr->size_scons && !isbottom; i++)
         {
           r->scons[i] =
-                  ap_abstract0_meet (pr->man_scons[i], false,
-                                     (a1->scons) ? a1->scons[i] : NULL,
-                                     (a2->scons) ? a2->scons[i] : NULL);
+            ap_abstract0_meet (pr->man_scons[i], false,
+                               (a1->scons) ? a1->scons[i] : NULL,
+                               (a2->scons) ? a2->scons[i] : NULL);
           isbottom = ap_abstract0_is_bottom (pr->man_scons[i], r->scons[i]);
         }
     }
@@ -185,7 +185,8 @@ ushape_meet (ap_manager_t * man, bool destructive, ushape_t * a1,
       ushape_free_internal (pr, a2);
     }
 #ifndef NDEBUG1
-  fprintf (stdout, "\n====ushape_meet: with algo=%d returns r=(\n", pr->meet_algo);
+  fprintf (stdout, "\n====ushape_meet: with algo=%d returns r=(\n",
+           pr->meet_algo);
   ushape_fdump (stdout, man, r);
   fprintf (stdout, ")\n");
   fflush (stdout);
@@ -207,7 +208,7 @@ ushape_join (ap_manager_t * man, bool destructive, ushape_t * a1,
     return (destructive) ? a1 : ushape_copy (man, a1);
 
   if (!hgraph_is_equal (a1->h, a2->h))
-    return NULL; /* bottom */
+    return NULL;                /* bottom */
   else
     {
       size_t i;
@@ -217,8 +218,8 @@ ushape_join (ap_manager_t * man, bool destructive, ushape_t * a1,
       for (i = 0; i < pr->size_scons; i++)
         {
           r->scons[i] =
-                  ap_abstract0_join (pr->man_scons[i], false, a1->scons[i],
-                                     a2->scons[i]);
+            ap_abstract0_join (pr->man_scons[i], false, a1->scons[i],
+                               a2->scons[i]);
         }
       if (destructive)
         {
@@ -233,8 +234,7 @@ ushape_t *
 ushape_meet_array (ap_manager_t * man, ushape_t ** tab, size_t size)
 {
   ushape_internal_t *pr = ushape_init_from_manager (man, AP_FUNID_JOIN, 0);
-  arg_assert (size > 0, return NULL;
-              );
+  arg_assert (size > 0, return NULL;);
   ushape_t *r = ushape_copy_internal (pr, tab[0]);
   size_t i;
   bool isbottom = false;
@@ -258,9 +258,8 @@ ushape_t *
 ushape_join_array (ap_manager_t * man, ushape_t ** tab, size_t size)
 {
   ushape_internal_t *pr =
-          ushape_init_from_manager (man, AP_FUNID_JOIN_ARRAY, 0);
-  arg_assert (size > 0, return NULL;
-              );
+    ushape_init_from_manager (man, AP_FUNID_JOIN_ARRAY, 0);
+  arg_assert (size > 0, return NULL;);
 
   ushape_t *r = ushape_copy_internal (pr, tab[0]);
   size_t i;
@@ -374,8 +373,12 @@ ushape_t *
 ushape_add_set_var (ushape_internal_t * pr, ushape_t * a, node_t nsucc,
                     size_t vmin, size_t vmax)
 {
+  if (nsucc != nsucc)
+    return NULL;                /* to remove warning on unused parameter */
+
   node_t n;
   ap_dimperm_t perm;
+
   ap_dimperm_init (&perm, a->h->size);
   ushape_t *b = ushape_alloc_internal (pr, a->datadim, a->ptrdim);
   hgraph_t *h = hgraph_node_add (pr, a->h, NODE_T_TOP, vmin, 0, &n, &perm);
@@ -413,6 +416,9 @@ ushape_t *
 ushape_copy_set_info (ushape_internal_t * pr, ushape_t * a, node_t n,
                       node_t nsucc, size_t v, size_t nn)
 {
+  if (nn != nn)
+    return NULL;                /* to remove warning on unused parameter */
+
   ap_dimperm_t perm;
   ap_dimperm_init (&perm, a->h->size);
   ushape_t *b = ushape_alloc_internal (pr, a->datadim, a->ptrdim);
@@ -433,7 +439,7 @@ ushape_set_new_succ (ushape_internal_t * pr, ushape_t * a, node_t n, size_t v)
   ap_dimperm_init (&perm, a->h->size);
   ushape_t *b = ushape_alloc_internal (pr, a->datadim, a->ptrdim);
   hgraph_t *h = hgraph_node_add (pr, a->h, NODE_T_TOP, v, 0, &nnew, &perm);
-  ushape_apply_dimperm_dimchange (pr, a, b, &perm, nnew); /* also clear perm */
+  ushape_apply_dimperm_dimchange (pr, a, b, &perm, nnew);       /* also clear perm */
   hgraph_node_set_succ (h, n, nnew, &perm);
   b->h = hgraph_copy_internal (pr, h);
   hgraph_free_internal (pr, h);
@@ -536,18 +542,21 @@ ushape_add_between (ushape_internal_t * pr, ushape_t * a, size_t vsrc,
   return b;
 }
 
-/* Meet with a data constraint */
-ushape_array_t*
-ushape_meet_pcons_data (ushape_internal_t* pr, ushape_t* a, pcons0_t* c, size_t* rsize)
+/**
+ * @brief Meet with a data constraint.
+ */
+ushape_array_t *
+ushape_meet_pcons_data (ushape_internal_t * pr, ushape_t * a, pcons0_t * c,
+                        size_t * rsize)
 {
-  ushape_array_t* r = NULL;
+  ushape_array_t *r = NULL;
   bool isbot;
   size_t i;
   ap_lincons0_array_t arr = ap_lincons0_array_make (1);
   size_t *v2n = hgraph_get_var2node (a->h);
-  arr.p[0] = // set kind (scalar) to data constraint
-          shape_lincons_of_node (pr, &c->info.data.cons, c->info.data.offsets, v2n, a->h->size,
-                                 a->datadim, a->ptrdim);
+  arr.p[0] =                    // set kind (scalar) to data constraint
+    shape_lincons_of_node (&c->info.data.cons, c->info.data.offsets, v2n,
+                           a->h->size, a->datadim, a->ptrdim);
   free (v2n);
   r = ushape_array_make (pr, 1);
   r->p[0] = ushape_alloc_internal (pr, a->datadim, a->ptrdim);
@@ -558,8 +567,8 @@ ushape_meet_pcons_data (ushape_internal_t* pr, ushape_t* a, pcons0_t* c, size_t*
   for (i = 0; i < pr->size_scons && !isbot; i++)
     {
       r->p[0]->scons[i] =
-              ap_abstract0_meet_lincons_array (pr->man_scons[i], false,
-                                               a->scons[i], &arr);
+        ap_abstract0_meet_lincons_array (pr->man_scons[i], false,
+                                         a->scons[i], &arr);
       isbot = ap_abstract0_is_bottom (pr->man_scons[i], a->scons[i]);
     }
   ap_lincons0_array_clear (&arr);
@@ -574,15 +583,17 @@ ushape_meet_pcons_data (ushape_internal_t* pr, ushape_t* a, pcons0_t* c, size_t*
 }
 
 /* Test or (if isassume) build an acyclic graph from vx */
-ushape_array_t*
-ushape_meet_pcons_ptr_acyclic (ushape_internal_t* pr,
-                               ushape_t* a, pcons0_t *c,
+ushape_array_t *
+ushape_meet_pcons_ptr_acyclic (ushape_internal_t * pr,
+                               ushape_t * a, pcons0_t * c,
                                node_t vx, node_t nx, node_t nnx,
                                node_t vy, node_t ny, node_t nny,
-                               bool isassume,
-                               size_t* rsize)
+                               bool isassume, size_t * rsize)
 {
-  ushape_array_t* r = ushape_array_make (pr, 4);
+  if ((nx != nx) || (nnx != nnx) || (vy != vy) || (ny != ny) || (nny != nny))
+    return NULL;                /* to remove warning on unused parameter */
+
+  ushape_array_t *r = ushape_array_make (pr, 4);
   *rsize = 0;
   if (isassume)
     {
@@ -599,48 +610,45 @@ ushape_meet_pcons_ptr_acyclic (ushape_internal_t* pr,
       hgraph_free_internal (pr, h);
       // Step 2: add the constraint l[n] >= 1
       ap_lincons0_array_t arr = ap_lincons0_array_make (1);
-      ap_linexpr0_t *lexpr =
-              ap_linexpr0_alloc (AP_LINEXPR_DENSE,
-                                 a->datadim + a->h->size);
-      ap_scalar_t * zero = ap_scalar_alloc ();
+      ap_linexpr0_t *lexpr = ap_linexpr0_alloc (AP_LINEXPR_DENSE,
+                                                a->datadim + a->h->size);
+      ap_scalar_t *zero = ap_scalar_alloc ();
       ap_scalar_set_int (zero, OFFSET_LEN);
       ap_linexpr0_set_coeff_scalar_int (lexpr,
-                                        b->datadim +
-                                        DIM2NODE (b->h, vx),
-                                        1);
+                                        b->datadim + DIM2NODE (b->h, vx), 1);
       ap_linexpr0_set_cst_scalar_int (lexpr, -1);
       arr.p[0] = ap_lincons0_make (AP_CONS_SUPEQ, lexpr, zero);
       for (i = 0; i < pr->size_scons; i++)
         b->scons[i] =
-              ap_abstract0_meet_lincons_array (pr->man_scons[i],
-                                               true,
-                                               b->scons[i],
-                                               &arr);
+          ap_abstract0_meet_lincons_array (pr->man_scons[i],
+                                           true, b->scons[i], &arr);
       // Step 3: add to the result and free the constraints allocated
-      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);  /* copy and destroy */
       ap_lincons0_array_clear (&arr);
       ap_scalar_free (zero);
     }
   else
     {
       /* do meet ==> bottom or same */
-      hgraph_array_t* h_arr = hgraph_meet_pcons (pr, false, a->h, c);
+      hgraph_array_t *h_arr = hgraph_meet_pcons (pr, false, a->h, c);
       if (h_arr != NULL && !h_arr->size == 0)
-        *rsize += ushape_array_add (pr, true, r, *rsize, true, false, a); /* copy and destroy */
+        *rsize += ushape_array_add (pr, true, r, *rsize, true, false, a);       /* copy and destroy */
     }
   return r;
 }
 
 /* Test or (if isassume) build an acyclic graph from nx */
-ushape_array_t*
-ushape_meet_pcons_ptr_cyclic (ushape_internal_t* pr,
-                              ushape_t* a, pcons0_t *c,
+ushape_array_t *
+ushape_meet_pcons_ptr_cyclic (ushape_internal_t * pr,
+                              ushape_t * a, pcons0_t * c,
                               node_t vx, node_t nx, node_t nnx,
                               node_t vy, node_t ny, node_t nny,
-                              bool isassume,
-                              size_t* rsize)
+                              bool isassume, size_t * rsize)
 {
-  ushape_array_t* r = ushape_array_make (pr, 4);
+  if ((nx != nx) || (nnx != nnx) || (vy != vy) || (ny != ny) || (nny != nny))
+    return NULL;                /* to remove warning on unused parameter */
+
+  ushape_array_t *r = ushape_array_make (pr, 4);
   *rsize = 0;
   if (isassume)
     {
@@ -648,26 +656,21 @@ ushape_meet_pcons_ptr_cyclic (ushape_internal_t* pr,
       node_t n;
       size_t i;
       // Step 1: build the graph
-      ushape_t* b = ushape_add_loop (pr, a, vx, vx); // permutation of nodes done inside!
+      ushape_t *b = ushape_add_loop (pr, a, vx, vx);    // permutation of nodes done inside!
       // Step 2: add the length constraint l[nx]>=1
       ap_lincons0_array_t arr = ap_lincons0_array_make (1);
-      ap_linexpr0_t *lexpr =
-              ap_linexpr0_alloc (AP_LINEXPR_DENSE,
-                                 a->datadim + a->h->size);
-      ap_scalar_t * zero = ap_scalar_alloc ();
+      ap_linexpr0_t *lexpr = ap_linexpr0_alloc (AP_LINEXPR_DENSE,
+                                                a->datadim + a->h->size);
+      ap_scalar_t *zero = ap_scalar_alloc ();
       ap_scalar_set_int (zero, OFFSET_LEN);
       ap_linexpr0_set_coeff_scalar_int (lexpr,
-                                        b->datadim +
-                                        DIM2NODE (b->h, vx),
-                                        1);
+                                        b->datadim + DIM2NODE (b->h, vx), 1);
       ap_linexpr0_set_cst_scalar_int (lexpr, -1);
       arr.p[0] = ap_lincons0_make (AP_CONS_SUPEQ, lexpr, zero);
       for (i = 0; i < pr->size_scons; i++)
         b->scons[i] =
-              ap_abstract0_meet_lincons_array (pr->man_scons[i],
-                                               true,
-                                               b->scons[i],
-                                               &arr);
+          ap_abstract0_meet_lincons_array (pr->man_scons[i],
+                                           true, b->scons[i], &arr);
       *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);
       ap_lincons0_array_clear (&arr);
       ap_scalar_free (zero);
@@ -675,9 +678,9 @@ ushape_meet_pcons_ptr_cyclic (ushape_internal_t* pr,
   else
     {
       /* do meet ==> bottom or same */
-      hgraph_array_t* h_arr = hgraph_meet_pcons (pr, false, a->h, c);
+      hgraph_array_t *h_arr = hgraph_meet_pcons (pr, false, a->h, c);
       if (h_arr != NULL && h_arr->size != 0)
-        *rsize += ushape_array_add (pr, true, r, *rsize, true, false, a); /* copy and destroy */
+        *rsize += ushape_array_add (pr, true, r, *rsize, true, false, a);       /* copy and destroy */
     }
   return r;
 }
@@ -685,77 +688,73 @@ ushape_meet_pcons_ptr_cyclic (ushape_internal_t* pr,
 /* Meet with iso graphs from @code{vx} and @code{vy}.
  * @code{isassume} is not used.
  */
-ushape_array_t*
-ushape_meet_pcons_ptr_iso (ushape_internal_t* pr,
-                           ushape_t* a, pcons0_t *c,
+ushape_array_t *
+ushape_meet_pcons_ptr_iso (ushape_internal_t * pr,
+                           ushape_t * a, pcons0_t * c,
                            node_t vx, node_t nx, node_t nnx,
                            node_t vy, node_t ny, node_t nny,
-                           bool isassume,
-                           size_t* rsize)
+                           bool isassume, size_t * rsize)
 {
-  ushape_array_t* r = ushape_array_make (pr, 4);
+  if ((vx != vx) || (nnx != nnx) ||
+      (vy != vy) || (nny != nny) || (isassume != isassume))
+    return NULL;                /* to remove warning on unused parameter */
+
+  ushape_array_t *r = ushape_array_make (pr, 4);
   *rsize = 0;
   size_t i;
   // test sub-graphs iso in a->h ==> bottom or the same
-  hgraph_array_t* h_arr = hgraph_meet_pcons (pr, false, a->h, c);
+  hgraph_array_t *h_arr = hgraph_meet_pcons (pr, false, a->h, c);
   if (h_arr != NULL && h_arr->size != 0)
     {
       // Subgraphs are isomorphic, put constraint on data words
-      ushape_t* b = ushape_copy_internal (pr, a);
+      ushape_t *b = ushape_copy_internal (pr, a);
       // Meet with equality constraints in each data domain
       ap_lincons0_array_t arr = ap_lincons0_array_make (1);
-      ap_linexpr0_t *lexpr =
-              ap_linexpr0_alloc (AP_LINEXPR_DENSE,
-                                 a->datadim + a->h->size); // Warning: why 2*a->h->size?
+      ap_linexpr0_t *lexpr = ap_linexpr0_alloc (AP_LINEXPR_DENSE,
+                                                a->datadim + a->h->size);       // Warning: why 2*a->h->size?
       arr.p[0] = ap_lincons0_make (AP_CONS_EQMOD, lexpr, NULL);
-      ap_linexpr0_set_coeff_scalar_int (lexpr,
-                                        b->datadim +
-                                        nx,
-                                        1);
-      ap_linexpr0_set_coeff_scalar_int (lexpr,
-                                        b->datadim +
-                                        ny,
-                                        -1);
+      ap_linexpr0_set_coeff_scalar_int (lexpr, b->datadim + nx, 1);
+      ap_linexpr0_set_coeff_scalar_int (lexpr, b->datadim + ny, -1);
       // ap_linexpr0_set_cst_scalar_int(lexpr, -1);
       for (i = 0; i < pr->size_scons; i++)
         b->scons[i] =
-              ap_abstract0_meet_lincons_array (pr->man_scons[i],
-                                               true,
-                                               b->scons[i],
-                                               &arr);
-      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+          ap_abstract0_meet_lincons_array (pr->man_scons[i],
+                                           true, b->scons[i], &arr);
+      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);  /* copy and destroy */
       ap_lincons0_array_clear (&arr);
     }
   return r;
 }
 
 /* Meet with or (if isassume) build equality constraint between pointers */
-ushape_array_t*
-ushape_meet_pcons_ptr_eq (ushape_internal_t* pr,
-                          ushape_t* a, pcons0_t *c,
+ushape_array_t *
+ushape_meet_pcons_ptr_eq (ushape_internal_t * pr,
+                          ushape_t * a, pcons0_t * c,
                           node_t vx, node_t nx, node_t nnx,
                           node_t vy, node_t ny, node_t nny,
-                          bool isassume,
-                          size_t* rsize)
+                          bool isassume, size_t * rsize)
 {
-  ushape_t* b;
-  ushape_array_t* r = ushape_array_make (pr, 4);
+  if (isassume != isassume)
+    return NULL;                /* to remove warning on unused parameter */
+
+  ushape_t *b;
+  ushape_array_t *r = ushape_array_make (pr, 4);
   *rsize = 0;
 #ifndef NDEBUG1
-  fprintf (stdout, "\n++++ushape_meet_pcons_ptr_eq: nnx=%zu, nny=%zu\n", nnx, nny);
+  fprintf (stdout, "\n++++ushape_meet_pcons_ptr_eq: nnx=%zu, nny=%zu\n", nnx,
+           nny);
 #endif
   if (nnx != NODE_T_TOP && nny != NODE_T_TOP)
     {
       /* both nodes are defined, check their equality */
       if (nnx == nny)
-        *rsize += ushape_array_add (pr, true, r, *rsize, true, false, a); /* copy, not distroy */
+        *rsize += ushape_array_add (pr, true, r, *rsize, true, false, a);       /* copy, not distroy */
       /* else bottom result, keep NULL */
     }
   else
     if ((nx != NODE_T_TOP && nnx == NODE_T_TOP
          && nny != NODE_T_TOP) || (ny != NODE_T_TOP
-                                   && nny == NODE_T_TOP
-                                   && nnx != NODE_T_TOP))
+                                   && nny == NODE_T_TOP && nnx != NODE_T_TOP))
     {
       /* fix x->next == y resp. y->next == x */
       size_t n1, n2;
@@ -770,7 +769,7 @@ ushape_meet_pcons_ptr_eq (ushape_internal_t* pr,
           n2 = nx;
         }
       b = ushape_copy_set_succ (pr, a, n1, n2);
-      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);  /* copy and destroy */
     }
   else if ((nx != NODE_T_TOP && ny == NODE_T_TOP) ||
            (ny != NODE_T_TOP && nx == NODE_T_TOP))
@@ -800,7 +799,7 @@ ushape_meet_pcons_ptr_eq (ushape_internal_t* pr,
           size_t n;
           /* case (1) vany->next = vfixed, new node for vany */
           b = ushape_add_succ_fixed (pr, a, vany, nfixed);
-          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);      /* copy and destroy */
 
           /* case (2) vany->next = vfixed, existing node for vany */
           hgraph_node_forall (a->h, n)
@@ -808,46 +807,41 @@ ushape_meet_pcons_ptr_eq (ushape_internal_t* pr,
             if (hgraph_node_get_succ (a->h, n) == nfixed)
               {
                 b = ushape_copy_set_var (pr, a, n, vany, 0, 0);
-                *rsize += ushape_array_add (pr, *rsize, r, true, true, true, b); /* copy and destroy */
+                *rsize += ushape_array_add (pr, *rsize, r, true, true, true, b);        /* copy and destroy */
               }
-            else if (hgraph_node_get_succ (a->h, n) ==
-                     NODE_T_TOP)
+            else if (hgraph_node_get_succ (a->h, n) == NODE_T_TOP)
               {
-                b =
-                        ushape_copy_set_info (pr, a, n, nfixed, vany,
-                                              0);
-                *rsize += ushape_array_add (pr, *rsize, r, true, true, true, b); /* copy and destroy */
+                b = ushape_copy_set_info (pr, a, n, nfixed, vany, 0);
+                *rsize += ushape_array_add (pr, *rsize, r, true, true, true, b);        /* copy and destroy */
               }
             else
               continue;
           }
         }
-      else if (nnfixed != NODE_T_TOP) /* nextany == 0 */
-        { /* vfixed[->next] = vany */
+      else if (nnfixed != NODE_T_TOP)   /* nextany == 0 */
+        {                       /* vfixed[->next] = vany */
           /* set vany to nnfixed */
           b = ushape_copy_set_var (pr, a, nnfixed, vany, 0, 0);
-          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);      /* copy and destroy */
         }
       else
-        { /* nextany == 0 && nnfixed == NODE_T_TOP */
+        {                       /* nextany == 0 && nnfixed == NODE_T_TOP */
           /* case (1): vfixed->next = vany, new node for vany */
           node_t n;
           b = ushape_set_new_succ (pr, a, nfixed, vany);
-          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);      /* copy and destroy */
 
           /* case (2) vfixed->next = vany, existing node for vany */
           hgraph_node_forall (a->h, n)
           {
-            b =
-                    ushape_copy_set_info (pr, a, n, nfixed, vany, 0);
-            *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+            b = ushape_copy_set_info (pr, a, n, nfixed, vany, 0);
+            *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);    /* copy and destroy */
           }
         }
     }
   else
-    { /* nx == NODE_T_TOP && ny == NODE_T_TOP */
-      if (c->info.ptr.offx == OFFSET_NONE &&
-          c->info.ptr.offy == OFFSET_NONE)
+    {                           /* nx == NODE_T_TOP && ny == NODE_T_TOP */
+      if (c->info.ptr.offx == OFFSET_NONE && c->info.ptr.offy == OFFSET_NONE)
         {
           /* case (1): set x and y to new node */
           size_t v1, v2;
@@ -863,13 +857,13 @@ ushape_meet_pcons_ptr_eq (ushape_internal_t* pr,
               v2 = vx;
             }
           b = ushape_add_set_var (pr, a, NODE_T_TOP, v1, v2);
-          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);      /* copy and destroy */
 
           /* case (2): set x and y to existing nodes */
           hgraph_node_forall (a->h, n)
           {
             b = ushape_copy_set_var (pr, a, n, v1, n, v2);
-            *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+            *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);    /* copy and destroy */
           }
         }
       else
@@ -893,10 +887,10 @@ ushape_meet_pcons_ptr_eq (ushape_internal_t* pr,
           /* case (1): v1 == v2 and label a new node */
           b = ushape_add_loop (pr, a, ((v1 <= v2) ? v1 : v2),
                                ((v1 < v2) ? v2 : v1));
-          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);      /* copy and destroy */
           /* case (2): v1 != v2 and both label new nodes */
           b = ushape_add_edge (pr, a, v1, v2);
-          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);      /* copy and destroy */
 
           /* case (3): v1 and v2 are existing nodes */
           hgraph_node_forall (a->h, n)
@@ -908,17 +902,14 @@ ushape_meet_pcons_ptr_eq (ushape_internal_t* pr,
                 {
                   if (n2 == hgraph_node_get_succ (a->h, n))
                     {
-                      b =
-                              ushape_copy_set_var (pr, a, n, v1, n2,
-                                                   v2);
-                      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+                      b = ushape_copy_set_var (pr, a, n, v1, n2, v2);
+                      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);  /* copy and destroy */
                     }
                 }
               }
           }
           /* case (4): v1 is new, v2 is an existing node */
-          *rsize +=
-                  ushape_add_succ_fixed_all (pr, a, v1, v2, r, *rsize);
+          *rsize += ushape_add_succ_fixed_all (pr, a, v1, v2, r, *rsize);
           /* case (5): v1 is old with succ undefined, v2 is new */
           ushape_set_new_succ_all (pr, a, v1, v2, r, *rsize);
         }
@@ -926,33 +917,35 @@ ushape_meet_pcons_ptr_eq (ushape_internal_t* pr,
   return r;
 }
 
-ushape_array_t*
-ushape_meet_pcons_ptr_neq (ushape_internal_t* pr,
-                           ushape_t* a, pcons0_t *c,
+ushape_array_t *
+ushape_meet_pcons_ptr_neq (ushape_internal_t * pr,
+                           ushape_t * a, pcons0_t * c,
                            node_t vx, node_t nx, node_t nnx,
                            node_t vy, node_t ny, node_t nny,
-                           bool isassume,
-                           size_t* rsize)
+                           bool isassume, size_t * rsize)
 {
-  ushape_t* b;
+  if (isassume != isassume)
+    return NULL;                /* to remove warning on unused parameter */
+
+  ushape_t *b;
   node_t i;
-  ushape_array_t* r = ushape_array_make (pr, 4);
+  ushape_array_t *r = ushape_array_make (pr, 4);
   *rsize = 0;
 #ifndef NDEBUG1
-  fprintf (stdout, "\n++++ushape_meet_pcons_ptr_neq: nnx=%zu, nny=%zu\n", nnx, nny);
+  fprintf (stdout, "\n++++ushape_meet_pcons_ptr_neq: nnx=%zu, nny=%zu\n", nnx,
+           nny);
 #endif
   if (nnx != NODE_T_TOP && nny != NODE_T_TOP)
     {
       /* check only equality of nodes */
       if (nnx != nny)
-        *rsize +=
-              ushape_array_add (pr, true, r, *rsize, true, false, a);
+        *rsize += ushape_array_add (pr, true, r, *rsize, true, false, a);
       else if ((c->info.ptr.offx != OFFSET_NONE &&
                 c->info.ptr.offy == OFFSET_NONE) ||
                (c->info.ptr.offx == OFFSET_NONE &&
                 c->info.ptr.offy != OFFSET_NONE))
-        { /* v1->next != v2 : create a new node s.t. v1
-                   * -->new node --> v2 */
+        {                       /* v1->next != v2 : create a new node s.t. v1
+                                 * -->new node --> v2 */
           node_t n1, n2;
           size_t v1, v2;
           if (c->info.ptr.offx != OFFSET_NONE)
@@ -970,17 +963,16 @@ ushape_meet_pcons_ptr_neq (ushape_internal_t* pr,
               v2 = vx;
             }
           b = ushape_add_between (pr, a, v1, n1, n2);
-          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);      /* copy and destroy */
         }
       /* else bottom result, so keep NULL */
     }
   else
     if ((nx != NODE_T_TOP && nnx == NODE_T_TOP
          && nny != NODE_T_TOP) || (ny != NODE_T_TOP
-                                   && nny == NODE_T_TOP
-                                   && nnx != NODE_T_TOP))
-    { /* v1->next != v2, v1->next undefined, v2
-                   * fixed */
+                                   && nny == NODE_T_TOP && nnx != NODE_T_TOP))
+    {                           /* v1->next != v2, v1->next undefined, v2
+                                 * fixed */
       node_t n1, n2;
       size_t v1, v2;
       if (nnx == NODE_T_TOP)
@@ -999,7 +991,7 @@ ushape_meet_pcons_ptr_neq (ushape_internal_t* pr,
         }
       /* case (1): fix v1->next to some new node, so different from n2 */
       b = ushape_add_set_info (pr, a, NODE_T_TOP, v1, 1);
-      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);  /* copy and destroy */
 
       /* case (2): fix v1->next to some existing node, different from n2 */
       hgraph_node_forall (a->h, i)
@@ -1007,14 +999,14 @@ ushape_meet_pcons_ptr_neq (ushape_internal_t* pr,
         if (n2 != hgraph_node_get_succ (a->h, i))
           {
             b = ushape_copy_set_var (pr, a, i, v1, 0, 0);
-            *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+            *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);    /* copy and destroy */
           }
       }
     }
   else if ((nx == NODE_T_TOP && nny != NODE_T_TOP) ||
            (ny == NODE_T_TOP && nnx != NODE_T_TOP))
-    { /* case v1 != v2[->next] for v1 not yet fixed
-                   * and v2[->next] fixed */
+    {                           /* case v1 != v2[->next] for v1 not yet fixed
+                                 * and v2[->next] fixed */
       node_t n1, n2;
       size_t v1, v2;
       if (nx == NODE_T_TOP)
@@ -1033,7 +1025,7 @@ ushape_meet_pcons_ptr_neq (ushape_internal_t* pr,
         }
       /* case (1): fix v1 to some new node, so different from n2 */
       b = ushape_add_set_info (pr, a, NODE_T_TOP, v1, 0);
-      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);  /* copy and destroy */
 
       /* case (2): fix v1 to some existing node, different from n2 */
       hgraph_node_forall (a->h, i)
@@ -1041,13 +1033,13 @@ ushape_meet_pcons_ptr_neq (ushape_internal_t* pr,
         if (n2 != i)
           {
             b = ushape_copy_set_var (pr, a, i, v1, 0, 0);
-            *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+            *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);    /* copy and destroy */
           }
       }
     }
   else
-    { /* TODO: the same cases like for equality,
-                   * but more combinatorial explosion. */
+    {                           /* TODO: the same cases like for equality,
+                                 * but more combinatorial explosion. */
       ap_manager_raise_exception (pr->man,
                                   AP_EXC_NOT_IMPLEMENTED,
                                   pr->funid, "not implemented");
@@ -1056,25 +1048,24 @@ ushape_meet_pcons_ptr_neq (ushape_internal_t* pr,
   return r;
 }
 
-ushape_array_t*
-ushape_meet_pcons_ptr_reach (ushape_internal_t* pr,
-                             ushape_t* a, pcons0_t *c,
+ushape_array_t *
+ushape_meet_pcons_ptr_reach (ushape_internal_t * pr,
+                             ushape_t * a, pcons0_t * c,
                              node_t vx, node_t nx, node_t nnx,
                              node_t vy, node_t ny, node_t nny,
-                             bool isassume,
-                             size_t* rsize)
+                             bool isassume, size_t * rsize)
 {
-  ushape_t* b;
+  if ((nnx != nnx) || (nny != nny) || (isassume != isassume))
+    return NULL;                /* to remove warning on unused parameter */
+
+  ushape_t *b;
   node_t i;
-  ushape_array_t* r = ushape_array_make (pr, 4);
+  ushape_array_t *r = ushape_array_make (pr, 4);
   *rsize = 0;
   /* no next dereference */
-  if (c->info.ptr.offx != OFFSET_NONE ||
-      c->info.ptr.offy != OFFSET_NONE)
+  if (c->info.ptr.offx != OFFSET_NONE || c->info.ptr.offy != OFFSET_NONE)
     {
-      ERROR
-              ("Not a reachability predicate (no next dereferencing)",;
-               );
+      ERROR ("Not a reachability predicate (no next dereferencing)",;);
       return NULL;
     }
   if (nx != NODE_T_TOP && ny != NODE_T_TOP)
@@ -1082,8 +1073,7 @@ ushape_meet_pcons_ptr_reach (ushape_internal_t* pr,
       /* check only reachability of nodes */
       bool found = hgraph_node_is_reachable (a->h, nx, ny);
       if (found && c->type == REACH_CONS)
-        *rsize +=
-              ushape_array_add (pr, true, r, *rsize, true, false, a);
+        *rsize += ushape_array_add (pr, true, r, *rsize, true, false, a);
       /* else bottom result, keep NULL entry */
     }
   else if (nx != NODE_T_TOP && ny == NODE_T_TOP)
@@ -1092,12 +1082,10 @@ ushape_meet_pcons_ptr_reach (ushape_internal_t* pr,
       /* TODO: the test is more complex because of lasso from x */
       int j = 0;
       ap_lincons0_array_t arr = ap_lincons0_array_make (1);
-      ap_linexpr0_t *lexpr =
-              ap_linexpr0_alloc (AP_LINEXPR_DENSE,
-                                 a->datadim + 2 * a->h->size);
+      ap_linexpr0_t *lexpr = ap_linexpr0_alloc (AP_LINEXPR_DENSE,
+                                                a->datadim + 2 * a->h->size);
       ap_linexpr0_set_coeff_scalar_int (lexpr,
-                                        a->datadim +
-                                        a->h->size + nx, 1);
+                                        a->datadim + a->h->size + nx, 1);
       i = NODE_T_TOP;
       ny = hgraph_node_get_succ (a->h, nx);
       while (ny != NODE_T_TOP && ny != i && j <= 3)
@@ -1108,18 +1096,14 @@ ushape_meet_pcons_ptr_reach (ushape_internal_t* pr,
           ap_linexpr0_set_cst_scalar_int (lexpr, -1);
           for (i = 0; i < pr->size_scons; i++)
             b->scons[i] =
-                  ap_abstract0_meet_lincons_array (pr->
-                                                   man_scons[i],
-                                                   true,
-                                                   b->scons[i],
-                                                   &arr);
+              ap_abstract0_meet_lincons_array (pr->man_scons[i],
+                                               true, b->scons[i], &arr);
 
-          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); /* copy and destroy */
+          *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);      /* copy and destroy */
           i = ny;
           j++;
           ap_linexpr0_set_coeff_scalar_int (lexpr,
-                                            a->datadim +
-                                            a->h->size + i, 1);
+                                            a->datadim + a->h->size + i, 1);
           ny = hgraph_node_get_succ (a->h, i);
         }
     }
@@ -1131,20 +1115,17 @@ ushape_meet_pcons_ptr_reach (ushape_internal_t* pr,
       // add constraint l[nx]>=1
       ap_lincons0_array_t arr = ap_lincons0_array_make (1);
       arr.p[0] =
-              shape_lincons_x_y_v_cst (AP_CONS_SUPEQ, OFFSET_LEN,
-                                       1,
-                                       b->datadim +
-                                       DIM2NODE (b->h, vx), 0, 0,
-                                       0, 0, -1,
-                                       b->datadim, b->h->size);
+        shape_lincons_x_y_v_cst (AP_CONS_SUPEQ, OFFSET_LEN,
+                                 1,
+                                 b->datadim +
+                                 DIM2NODE (b->h, vx), 0, 0,
+                                 0, 0, -1, b->datadim, b->h->size);
       for (i = 0; i < pr->size_scons; i++)
         b->scons[i] =
-              ap_abstract0_meet_lincons_array (pr->man_scons[i],
-                                               true,
-                                               b->scons[i],
-                                               &arr);
+          ap_abstract0_meet_lincons_array (pr->man_scons[i],
+                                           true, b->scons[i], &arr);
       ap_lincons0_array_clear (&arr);
-      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); // copy and destroy
+      *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);  // copy and destroy
 
       /* case (2): if ny is not NULL, */
       /* set x to some existing node predecessor of ny */
@@ -1158,27 +1139,21 @@ ushape_meet_pcons_ptr_reach (ushape_internal_t* pr,
               {
                 b = ushape_copy_set_var (pr, a, i, vx, 0, 0);
                 // add constraint l[nx]>=1
-                ap_lincons0_array_t arr =
-                        ap_lincons0_array_make (1);
+                ap_lincons0_array_t arr = ap_lincons0_array_make (1);
                 arr.p[0] =
-                        shape_lincons_x_y_v_cst (AP_CONS_SUPEQ,
-                                                 OFFSET_LEN, 1,
-                                                 b->datadim +
-                                                 DIM2NODE (b->h, vx),
-                                                 0, 0, 0,
-                                                 0, -1,
-                                                 b->datadim,
-                                                 b->h->size);
+                  shape_lincons_x_y_v_cst (AP_CONS_SUPEQ,
+                                           OFFSET_LEN, 1,
+                                           b->datadim +
+                                           DIM2NODE (b->h, vx),
+                                           0, 0, 0,
+                                           0, -1, b->datadim, b->h->size);
                 for (i = 0; i < pr->size_scons; i++)
                   b->scons[i] =
-                        ap_abstract0_meet_lincons_array (pr->
-                                                         man_scons
-                                                         [i], true,
-                                                         b->
-                                                         scons[i],
-                                                         &arr);
+                    ap_abstract0_meet_lincons_array (pr->man_scons
+                                                     [i], true,
+                                                     b->scons[i], &arr);
                 ap_lincons0_array_clear (&arr);
-                *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b); //copy and destroy
+                *rsize += ushape_array_add (pr, true, r, *rsize, true, true, b);        //copy and destroy
 
               }
           }
@@ -1199,25 +1174,20 @@ ushape_meet_pcons_ptr_reach (ushape_internal_t* pr,
           v2 = vx;
         }
       ap_lincons0_array_t arr = ap_lincons0_array_make (1);
-      ap_linexpr0_t *lexpr =
-              ap_linexpr0_alloc (AP_LINEXPR_DENSE,
-                                 a->datadim + 2 * a->h->size);
+      ap_linexpr0_t *lexpr = ap_linexpr0_alloc (AP_LINEXPR_DENSE,
+                                                a->datadim + 2 * a->h->size);
       /* case (1): x and y are the same new node */
-      b = ushape_add_loop (pr, a, v1, v2); /* v1 <= v2 */
+      b = ushape_add_loop (pr, a, v1, v2);      /* v1 <= v2 */
       // add constraint l[nx]>=1
       arr.p[0] = ap_lincons0_make (AP_CONS_SUPEQ, lexpr, NULL);
       ap_linexpr0_set_coeff_scalar_int (lexpr,
                                         b->datadim +
-                                        b->h->size +
-                                        DIM2NODE (b->h, vx),
-                                        1);
+                                        b->h->size + DIM2NODE (b->h, vx), 1);
       ap_linexpr0_set_cst_scalar_int (lexpr, -1);
       for (i = 0; i < pr->size_scons; i++)
         b->scons[i] =
-              ap_abstract0_meet_lincons_array (pr->man_scons[i],
-                                               true,
-                                               b->scons[i],
-                                               &arr);
+          ap_abstract0_meet_lincons_array (pr->man_scons[i],
+                                           true, b->scons[i], &arr);
 
       *rsize += ushape_array_add (pr, true, r, *rsize, true, false, b);
 
@@ -1227,44 +1197,33 @@ ushape_meet_pcons_ptr_reach (ushape_internal_t* pr,
       // add constraint l[nx]>=1
       for (i = 0; i < pr->size_scons; i++)
         b->scons[i] =
-              ap_abstract0_meet_lincons_array (pr->man_scons[i],
-                                               true,
-                                               b->scons[i],
-                                               &arr);
+          ap_abstract0_meet_lincons_array (pr->man_scons[i],
+                                           true, b->scons[i], &arr);
 
       *rsize += ushape_array_add (pr, true, r, *rsize, true, false, b); /* copy and destroy */
       // add constraint l[ny]>=1
       ap_linexpr0_set_coeff_scalar_int (lexpr,
                                         b->datadim +
-                                        b->h->size +
-                                        DIM2NODE (b->h, vx),
-                                        0);
+                                        b->h->size + DIM2NODE (b->h, vx), 0);
       ap_linexpr0_set_coeff_scalar_int (lexpr,
                                         b->datadim +
-                                        b->h->size +
-                                        DIM2NODE (b->h, vy),
-                                        1);
+                                        b->h->size + DIM2NODE (b->h, vy), 1);
 
       for (i = 0; i < pr->size_scons; i++)
         b->scons[i] =
-              ap_abstract0_meet_lincons_array (pr->man_scons[i],
-                                               true,
-                                               b->scons[i],
-                                               &arr);
+          ap_abstract0_meet_lincons_array (pr->man_scons[i],
+                                           true, b->scons[i], &arr);
 
       *rsize += ushape_array_add (pr, true, r, *rsize, true, false, b); /* copy and destroy */
 
       ap_linexpr0_set_coeff_scalar_int (lexpr,
                                         b->datadim +
-                                        b->h->size +
-                                        DIM2NODE (b->h, vy),
-                                        0);
+                                        b->h->size + DIM2NODE (b->h, vy), 0);
 
       ushape_free_internal (pr, b);
       /* case (3): x new, y existing */
       /* TODO: add length constraints */
-      *rsize +=
-              ushape_add_succ_fixed_all (pr, a, vx, vy, r, *rsize);
+      *rsize += ushape_add_succ_fixed_all (pr, a, vx, vy, r, *rsize);
       /* case (4): x existing but no succ, y new */
       /* TODO: simple case here, no intermediate node between x and y */
       /* TODO: add length constraints */
@@ -1284,37 +1243,23 @@ ushape_meet_pcons_ptr_reach (ushape_internal_t* pr,
                   b = ushape_copy_set_var (pr, a, nx, vx, ny, vy);
                   // add constraint l[nx]>=1
                   ap_linexpr0_set_coeff_scalar_int (lexpr,
-                                                    b->
-                                                    datadim
+                                                    b->datadim
                                                     +
-                                                    b->h->
-                                                    size +
-                                                    DIM2NODE
-                                                    (b->h,
-                                                     vx),
-                                                    1);
+                                                    b->h->size +
+                                                    DIM2NODE (b->h, vx), 1);
                   for (i = 0; i < pr->size_scons; i++)
                     b->scons[i] =
-                          ap_abstract0_meet_lincons_array (pr->
-                                                           man_scons
-                                                           [i],
-                                                           true,
-                                                           b->
-                                                           scons
-                                                           [i],
-                                                           &arr);
-                  *rsize += ushape_array_add (pr, true, r, *rsize, true, false, b); /* copy and destroy */
+                      ap_abstract0_meet_lincons_array (pr->man_scons
+                                                       [i],
+                                                       true,
+                                                       b->scons[i], &arr);
+                  *rsize += ushape_array_add (pr, true, r, *rsize, true, false, b);     /* copy and destroy */
 
                   ap_linexpr0_set_coeff_scalar_int (lexpr,
-                                                    b->
-                                                    datadim
+                                                    b->datadim
                                                     +
-                                                    b->h->
-                                                    size +
-                                                    DIM2NODE
-                                                    (b->h,
-                                                     vx),
-                                                    0);
+                                                    b->h->size +
+                                                    DIM2NODE (b->h, vx), 0);
                   ushape_free_internal (pr, b);
                 }
             }
@@ -1331,7 +1276,8 @@ ushape_meet_pcons (ushape_internal_t * pr, bool destructive,
   ushape_array_t *r = NULL;
   size_t rsize = 0;
 
-  arg_assert (a && c, return NULL;);
+  arg_assert (a && c, return NULL;
+    );
 
 #ifndef NDEBUG
   fprintf (stdout, "\n++++ushape_meet_pcons: with pcons=(");
@@ -1346,8 +1292,7 @@ ushape_meet_pcons (ushape_internal_t * pr, bool destructive,
     {
       if (c->type == SL3_CONS)
         {
-          ERROR ("Ushape_meet_pcons: bad constraint (SL3)!",;
-                 );
+          ERROR ("Ushape_meet_pcons: bad constraint (SL3)!",;);
           return NULL;
         }
       else if (c->type == DATA_CONS)
@@ -1361,8 +1306,7 @@ ushape_meet_pcons (ushape_internal_t * pr, bool destructive,
           if (c->info.ptr.offx != OFFSET_NONE ||
               c->info.ptr.offy != OFFSET_NONE)
             {
-              ERROR ("Bad constraint: next reference is not allowed!",;
-                     );
+              ERROR ("Bad constraint: next reference is not allowed!",;);
               //ap_manager_raise_exception(pr->man, AP_EXC_NOT_IMPLEMENTED,
               //        pr->funid, "not implemented");
               return NULL;
@@ -1375,56 +1319,59 @@ ushape_meet_pcons (ushape_internal_t * pr, bool destructive,
           ny = DIM2NODE (a->h, vy);
           // OLD nny = hgraph_node_get_nsucc(a->h, ny, c->info.ptr.nexty);
           nny = ny;
-          arg_assert (vx < a->ptrdim || IS_NULLDIM (vx), return NULL;
-                      );
+          arg_assert (vx < a->ptrdim || IS_NULLDIM (vx), return NULL;);
 
           if (vx == 0 && vy == 0)
             {
               // empty constraint, return a
-              rsize += ushape_array_add (pr, true, r, rsize, true, false, a); /* copy and destroy */
+              rsize += ushape_array_add (pr, true, r, rsize, true, false, a);   /* copy and destroy */
             }
-          else /* if (vx < a->datadim && vy < a->datadim) {
-                ap_manager_raise_exception(pr->man, AP_EXC_NOT_IMPLEMENTED,
-                        pr->funid, "not implemented");
-                return NULL;
-            } else */
+          else                  /* if (vx < a->datadim && vy < a->datadim) {
+                                   ap_manager_raise_exception(pr->man, AP_EXC_NOT_IMPLEMENTED,
+                                   pr->funid, "not implemented");
+                                   return NULL;
+                                   } else */
             {
-              arg_assert (vy < a->ptrdim || IS_NULLDIM (vy), return NULL;
-                          );
+              arg_assert (vy < a->ptrdim || IS_NULLDIM (vy), return NULL;);
 
               if ((nx == 0 && c->info.ptr.offx != OFFSET_NONE)
                   || (ny == 0 && c->info.ptr.offy != OFFSET_NONE))
                 {
-                  ERROR ("Null pointer dereference",;
-                         );
+                  ERROR ("Null pointer dereference",;);
                   return NULL;
                 }
               switch (c->type)
                 {
                 case ACYCLIC_CONS:
-                  r = ushape_meet_pcons_ptr_acyclic (pr, a, c, vx, nx, nnx, vy, ny, nny,
-                                                     isassume, &rsize);
+                  r =
+                    ushape_meet_pcons_ptr_acyclic (pr, a, c, vx, nx, nnx, vy,
+                                                   ny, nny, isassume, &rsize);
                   break;
                 case CYCLIC_CONS:
-                  r = ushape_meet_pcons_ptr_cyclic (pr, a, c, vx, nx, nnx, vy, ny, nny,
-                                                    isassume, &rsize);
+                  r =
+                    ushape_meet_pcons_ptr_cyclic (pr, a, c, vx, nx, nnx, vy,
+                                                  ny, nny, isassume, &rsize);
                   break;
                 case ISO_CONS:
-                  r = ushape_meet_pcons_ptr_iso (pr, a, c, vx, nx, nnx, vy, ny, nny,
-                                                 isassume, &rsize);
+                  r =
+                    ushape_meet_pcons_ptr_iso (pr, a, c, vx, nx, nnx, vy, ny,
+                                               nny, isassume, &rsize);
                   break;
                 case EQ_CONS:
-                  r = ushape_meet_pcons_ptr_eq (pr, a, c, vx, nx, nnx, vy, ny, nny,
-                                                isassume, &rsize);
+                  r =
+                    ushape_meet_pcons_ptr_eq (pr, a, c, vx, nx, nnx, vy, ny,
+                                              nny, isassume, &rsize);
                   break;
                 case SEP_CONS:
                 case NE_CONS:
-                  r = ushape_meet_pcons_ptr_neq (pr, a, c, vx, nx, nnx, vy, ny, nny,
-                                                 isassume, &rsize);
+                  r =
+                    ushape_meet_pcons_ptr_neq (pr, a, c, vx, nx, nnx, vy, ny,
+                                               nny, isassume, &rsize);
                   break;
                 case REACH_CONS:
-                  r = ushape_meet_pcons_ptr_reach (pr, a, c, vx, nx, nnx, vy, ny, nny,
-                                                   isassume, &rsize);
+                  r =
+                    ushape_meet_pcons_ptr_reach (pr, a, c, vx, nx, nnx, vy,
+                                                 ny, nny, isassume, &rsize);
                   break;
 
                 default:
@@ -1480,10 +1427,10 @@ ushape_meet_pcons_array (ushape_internal_t * pr,
       for (j = 0; j < r->size && r->p[j] != NULL; j++)
         {
           ushape_array_t *lr =
-                  ushape_meet_pcons (pr, false, r->p[j], array->p[i], isassume);
+            ushape_meet_pcons (pr, false, r->p[j], array->p[i], isassume);
           if (lr)
             {
-              rc = ushape_array_add_array (pr, true, rc, lr); /* reused elements of lr */
+              rc = ushape_array_add_array (pr, true, rc, lr);   /* reused elements of lr */
               ushape_array_init (pr, lr, lr->size);
               free (lr);
             }
@@ -1515,16 +1462,16 @@ ushape_meet_lincons_array (ap_manager_t * man,
       pcons0_array_t *arr;
       ushape_array_t *r;
       ushape_internal_t *pr =
-              ushape_init_from_manager (man, AP_FUNID_MEET_LINCONS_ARRAY, 0);
+        ushape_init_from_manager (man, AP_FUNID_MEET_LINCONS_ARRAY, 0);
       if (!destructive)
         b = ushape_copy_internal (pr, a);
       else
         b = a;
       /* compute in arr the constraints sorted */
-      arr =
-              shape_pcons_array_of_lincons_array (pr, array, a->datadim, a->ptrdim);
+      arr = shape_pcons_array_of_lincons_array (array, a->datadim, a->ptrdim);
 #ifndef NDEBUG
-      fprintf (stdout, "\n++++ushape_meet_lincons_array: with pcons_array=(\n");
+      fprintf (stdout,
+               "\n++++ushape_meet_lincons_array: with pcons_array=(\n");
       shape_pcons_array_fdump (stdout, arr);
       fprintf (stdout, ")\n");
 #endif
@@ -1557,14 +1504,13 @@ ushape_meet_tcons_array (ap_manager_t * man,
       pcons0_array_t *arr;
       ushape_array_t *r;
       ushape_internal_t *pr =
-              ushape_init_from_manager (man, AP_FUNID_MEET_LINCONS_ARRAY, 0);
+        ushape_init_from_manager (man, AP_FUNID_MEET_LINCONS_ARRAY, 0);
       if (!destructive)
         b = ushape_copy_internal (pr, a);
       else
         b = a;
       /* compute in arr the constraints sorted */
-      arr =
-              shape_pcons_array_of_tcons_array (pr, array, a->datadim, a->ptrdim);
+      arr = shape_pcons_array_of_tcons_array (array, a->datadim, a->ptrdim);
 #ifndef NDEBUG
       fprintf (stdout, "\n++++ushape_meet_tcons_array: with pcons_array=[");
       shape_pcons_array_fdump (stdout, arr);
@@ -1586,12 +1532,12 @@ ushape_meet_tcons_array (ap_manager_t * man,
 }
 
 /* Abstract a conjunction of constraints. Based on meet, like in ap_abstract0. */
-ushape_t*
-ushape_of_lincons_array (ap_manager_t* man,
+ushape_t *
+ushape_of_lincons_array (ap_manager_t * man,
                          size_t intdim, size_t realdim,
-                         ap_lincons0_array_t* array)
+                         ap_lincons0_array_t * array)
 {
-  ushape_t* res = ushape_top (man, intdim, realdim);
+  ushape_t *res = ushape_top (man, intdim, realdim);
   res = ushape_meet_lincons_array (man, true, res, array);
   return res;
 }
@@ -1599,34 +1545,32 @@ ushape_of_lincons_array (ap_manager_t* man,
 /** Abstract a disjunct of an SL3 formulas.
  *  The disjunct is given by the param f.
  */
-ushape_t*
-ushape_of_formula_aux (ushape_internal_t* pr,
-                       sh_formula_t* f,
-                       size_t disj)
+ushape_t *
+ushape_of_formula_aux (ushape_internal_t * pr, sh_formula_t * f, size_t disj)
 {
 #ifndef NDEBUG1
   fprintf (stdout, "==== ushape_of_formula_aux: disjunct %zu\n", disj);
   fflush (stdout);
 #endif
   // fix the dimensions of the ushape
-  ap_environment_t* env = f->env;
+  ap_environment_t *env = f->env;
   size_t datadim = env->intdim;
   size_t ptrdim = env->realdim;
-  size_t segmdim = f->form[disj]->nodes->realdim + 1; // added nilNode
+  size_t segmdim = f->form[disj]->nodes->realdim + 1;   // added nilNode
   ushape_t *b = ushape_alloc_internal (pr, datadim, ptrdim);
 
   // fix the disjunct in a constraint
   ap_lincons0_array_t arr = ap_lincons0_array_make (1);
   ap_linexpr0_t *lexpr = ap_linexpr0_alloc (AP_LINEXPR_DENSE,
                                             datadim + segmdim);
-  ap_scalar_t * zero = ap_scalar_alloc ();
+  ap_scalar_t *zero = ap_scalar_alloc ();
   ap_scalar_set_int (zero, OFFSET_SL3);
   ap_linexpr0_set_cst_scalar_int (lexpr, disj); // disj in sh_crt
   arr.p[0] = ap_lincons0_make (AP_CONS_SUPEQ, lexpr, zero);
 
   // Step 1: build the graph part 
   ap_dimperm_t perm;
-  ap_dimperm_init (&perm, segmdim); // NULL already added
+  ap_dimperm_init (&perm, segmdim);     // NULL already added
   ap_dimperm_set_id (&perm);
   hgraph_t *h = hgraph_of_formula (pr, f, disj, &perm);
   b->h = hgraph_copy_internal (pr, h);
@@ -1636,16 +1580,16 @@ ushape_of_formula_aux (ushape_internal_t* pr,
   ap_dimperm_t dimperm;
   ap_dimperm_init (&dimperm, datadim + segmdim);
   ap_dimperm_set_id (&dimperm);
-  shape_dimperm_copy (&dimperm, datadim, &perm); // perm = nodes -> new nodes
+  shape_dimperm_copy (&dimperm, datadim, &perm);        // perm = nodes -> new nodes
   size_t i;
   for (i = 0; i < pr->size_scons; i++)
     {
       // meet with top, no need to apply the reverse permutation 
       // build the data constraint from the shadform over nodes
-      ap_abstract0_t* top_i = ap_abstract0_top (pr->man_scons[i], datadim, segmdim);
-      b->scons[i] = ap_abstract0_meet_lincons_array (pr->man_scons[i], true,
-                                                     top_i,
-                                                     &arr);
+      ap_abstract0_t *top_i =
+        ap_abstract0_top (pr->man_scons[i], datadim, segmdim);
+      b->scons[i] =
+        ap_abstract0_meet_lincons_array (pr->man_scons[i], true, top_i, &arr);
       // apply perm extended to data
       b->scons[i] = ap_abstract0_permute_dimensions (pr->man_scons[i],
                                                      true,
@@ -1654,7 +1598,7 @@ ushape_of_formula_aux (ushape_internal_t* pr,
   // free allocated data
   ap_dimperm_clear (&perm);
   ap_dimperm_clear (&dimperm);
-  ap_lincons0_array_clear (&arr); // free also zero!
+  ap_lincons0_array_clear (&arr);       // free also zero!
 #ifndef NDEBUG1
   fprintf (stdout, "==== ushape_of_formula_aux: returns r=(");
   ushape_fdump (stdout, pr->man, b);
@@ -1664,10 +1608,8 @@ ushape_of_formula_aux (ushape_internal_t* pr,
   return b;
 }
 
-ushape_array_t*
-ushape_of_formula (ushape_internal_t* pr,
-                   sh_formula_t* f,
-                   size_t* rsize)
+ushape_array_t *
+ushape_of_formula (ushape_internal_t * pr, sh_formula_t * f, size_t * rsize)
 {
   ushape_array_t *r = NULL;
   size_t sz = 0;
@@ -1677,7 +1619,8 @@ ushape_of_formula (ushape_internal_t* pr,
   size_t i, lst;
   lst = f->size;
   *rsize = 0;
-  if (lst == 0) return NULL;
+  if (lst == 0)
+    return NULL;
   // all formulas shall be in the array, so
   r = ushape_array_make (pr, lst);
   // build the ushape for each shadform
@@ -1685,8 +1628,8 @@ ushape_of_formula (ushape_internal_t* pr,
     {
       ushape_t *rr = ushape_of_formula_aux (pr, f, i);
       if (rr)
-        { // put rr in r (directly, without copy)
-          sz += ushape_array_add (pr, true, r, sz, false, false, rr); /* not copy, not distroy */
+        {                       // put rr in r (directly, without copy)
+          sz += ushape_array_add (pr, true, r, sz, false, false, rr);   /* not copy, not distroy */
         }
     }
   if (sz < lst)
@@ -1697,12 +1640,12 @@ ushape_of_formula (ushape_internal_t* pr,
 }
 
 /* Abstract a conjunction of constraints. Based on meet, like in ap_abstract0. */
-ushape_t*
-ushape_of_tcons_array (ap_manager_t* man,
+ushape_t *
+ushape_of_tcons_array (ap_manager_t * man,
                        size_t intdim, size_t realdim,
-                       ap_tcons0_array_t* array)
+                       ap_tcons0_array_t * array)
 {
-  ushape_t* res = ushape_top (man, intdim, realdim);
+  ushape_t *res = ushape_top (man, intdim, realdim);
   res = ushape_meet_tcons_array (man, true, res, array);
   return res;
 }
@@ -1713,8 +1656,11 @@ ushape_add_ray_array (ap_manager_t * man,
                       bool destructive, ushape_t * a,
                       ap_generator0_array_t * array)
 {
+  if ((destructive != destructive) || (array != array))
+    return NULL;                /* to remove warning on unused parameter */
+
   ushape_internal_t *pr =
-          ushape_init_from_manager (man, AP_FUNID_ADD_RAY_ARRAY, 0);
+    ushape_init_from_manager (man, AP_FUNID_ADD_RAY_ARRAY, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return a;
@@ -1729,10 +1675,9 @@ ushape_t *
 ushape_widening (ap_manager_t * man, ushape_t * a1, ushape_t * a2)
 {
   ushape_internal_t *pr =
-          ushape_init_from_manager (man, AP_FUNID_WIDENING, 0);
+    ushape_init_from_manager (man, AP_FUNID_WIDENING, 0);
   arg_assert (a1->datadim == a2->datadim
-              && a1->ptrdim == a2->ptrdim, return NULL;
-              );
+              && a1->ptrdim == a2->ptrdim, return NULL;);
   // widening is done only between ushape with isomorphic graphs
   if (!hgraph_is_eq (pr->man, a1->h, a2->h))
     return NULL;
@@ -1746,10 +1691,10 @@ ushape_widening (ap_manager_t * man, ushape_t * a1, ushape_t * a2)
           ap_abstract0_is_leq (pr->man_scons[i], a1->scons[i], a2->scons[i]))
         /* the test is needed to deal with function calls from specs */
         b->scons[i] =
-              ap_abstract0_widening (pr->man_scons[i], a1->scons[i], a2->scons[i]);
+          ap_abstract0_widening (pr->man_scons[i], a1->scons[i],
+                                 a2->scons[i]);
       else
-        b->scons[i] =
-              ap_abstract0_copy (pr->man_scons[i], a2->scons[i]);
+        b->scons[i] = ap_abstract0_copy (pr->man_scons[i], a2->scons[i]);
 
       isbot = ap_abstract0_is_bottom (pr->man_scons[i], b->scons[i]);
     }
@@ -1761,16 +1706,18 @@ ushape_widening (ap_manager_t * man, ushape_t * a1, ushape_t * a2)
   return b;
 }
 
-/* TODO: priority 1 */
+/* NOT IMPLEMENTED */
 ushape_t *
 ushape_widening_thresholds (ap_manager_t * man,
                             ushape_t * a1, ushape_t * a2,
                             ap_scalar_t ** array, size_t nb)
 {
+  if (array != array)
+    return NULL;                /* to remove warning on unused parameter */
+
   ushape_internal_t *pr =
-          ushape_init_from_manager (man, AP_FUNID_WIDENING, nb + 1);
-  arg_assert (a1->datadim == a2->datadim, return NULL;
-              );
+    ushape_init_from_manager (man, AP_FUNID_WIDENING, nb + 1);
+  arg_assert (a1->datadim == a2->datadim, return NULL;);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return a2;
@@ -1781,9 +1728,8 @@ ushape_t *
 ushape_narrowing (ap_manager_t * man, ushape_t * a1, ushape_t * a2)
 {
   ushape_internal_t *pr =
-          ushape_init_from_manager (man, AP_FUNID_WIDENING, 0);
-  arg_assert (a1->datadim == a2->datadim, return NULL;
-              );
+    ushape_init_from_manager (man, AP_FUNID_WIDENING, 0);
+  arg_assert (a1->datadim == a2->datadim, return NULL;);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return a2;

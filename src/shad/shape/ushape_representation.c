@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / Shape Abstract Domain                                   */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -25,14 +21,13 @@
 #include "ushape.h"
 #include "ushape_internal.h"
 #include "hgraph_internal.h"
-#include "shape_manager.h"
-#include "shape_options.h"
-#include "shape_macros.h"
+#include "sh_manager.h"
+#include "sh_options.h"
+#include "sh_macros.h"
 #include "ap_abstract0.h"
 #include "box.h"
 #include "oct.h"
 #include "pk.h"
-//#include "ucons.h"
 #include "lsum.h"
 
 
@@ -50,8 +45,7 @@ inline ushape_t *
 ushape_alloc_internal (ushape_internal_t * pr, size_t intdim, size_t realdim)
 {
   ushape_t *r;
-  checked_malloc (r, ushape_t, sizeof (ushape_t), 1, return NULL;
-    );
+  checked_malloc (r, ushape_t, sizeof (ushape_t), 1, return NULL;);
   r->h = r->closed = NULL;
   r->datadim = intdim;
   r->ptrdim = realdim;
@@ -73,7 +67,7 @@ ushape_alloc_internal (ushape_internal_t * pr, size_t intdim, size_t realdim)
 
 ushape_t *
 ushape_make (ushape_internal_t * pr, size_t code,
-	     size_t datadim, size_t ptrdim)
+             size_t datadim, size_t ptrdim)
 {
   ushape_t *a;
   hgraph_t *h;
@@ -82,28 +76,28 @@ ushape_make (ushape_internal_t * pr, size_t code,
   /* build the hgraph */
   switch (code)
     {
-    case 0:			/* x --> _null and l[x]==_l and l[x]>=1 and data(x) */
+    case 0:                    /* x --> _null and l[x]==_l and l[x]>=1 and data(x) */
       {
-	h = hgraph_make (pr, 0, datadim, ptrdim);
-	break;
+        h = hgraph_make (pr, 0, datadim, ptrdim);
+        break;
       }
-    case 1:			/* x-->y-->null and l[x]+l[y]==_l>=1 and l[x]>=1 and l[y]>=1 and data(xy) */
+    case 1:                    /* x-->y-->null and l[x]+l[y]==_l>=1 and l[x]>=1 and l[y]>=1 and data(xy) */
       {
-	h = hgraph_make (pr, 1, datadim, ptrdim);
-	break;
+        h = hgraph_make (pr, 1, datadim, ptrdim);
+        break;
       }
-    case 2:			/* x -->_null and y -->_null and l[x]==l[y]==_l>=1 and data(x) */
-    case 3:			/* x --> _null and y --> _null and l[x]==_l>=1 and l[y]+1<=_l and data(x) and data(y) */
+    case 2:                    /* x -->_null and y -->_null and l[x]==l[y]==_l>=1 and data(x) */
+    case 3:                    /* x --> _null and y --> _null and l[x]==_l>=1 and l[y]+1<=_l and data(x) and data(y) */
       {
-	h = hgraph_make (pr, 2, datadim, ptrdim);
-	break;
+        h = hgraph_make (pr, 2, datadim, ptrdim);
+        break;
       }
-    case 4:			/* x-->null and y-->null and z-->null and disjoint(x,y,z) and l[x]=l[y]=l[z] and data(x) and data(y) and data(z) */
+    case 4:                    /* x-->null and y-->null and z-->null and disjoint(x,y,z) and l[x]=l[y]=l[z] and data(x) and data(y) and data(z) */
       {
-	h = hgraph_make (pr, 3, datadim, ptrdim);
-	break;
+        h = hgraph_make (pr, 3, datadim, ptrdim);
+        break;
       }
-    default:			/* TODO: add other cases for ushapes */
+    default:                   /* TODO: add other cases for ushapes */
       h = hgraph_top (pr->man, datadim, ptrdim);
     }
 
@@ -122,7 +116,7 @@ ushape_make (ushape_internal_t * pr, size_t code,
 
 ushape_t *
 ushape_random (ushape_internal_t * pr, size_t size,
-	       size_t datadim, size_t ptrdim)
+               size_t datadim, size_t ptrdim)
 {
   ushape_t *r = ushape_alloc_internal (pr, datadim, ptrdim);
   /* generate a random graph with size nodes */
@@ -132,19 +126,18 @@ ushape_random (ushape_internal_t * pr, size_t size,
    * variables
    */
   ap_lincons0_t c = ap_lincons0_make ((lrand48 () % 100 >= 80) ? AP_CONS_EQ :
-				      (lrand48 () % 100 >= 80) ? AP_CONS_SUP :
-				      AP_CONS_SUPEQ,
-				      shape_linexpr_random (pr,
-							    (lrand48 () %
-							     100 >=
-							     80) ?
-							    expr_lindata :
-							    expr_data,
-							    datadim, ptrdim),
-				      NULL);
+                                      (lrand48 () % 100 >= 80) ? AP_CONS_SUP :
+                                      AP_CONS_SUPEQ,
+                                      shape_linexpr_random ((lrand48 () %
+                                                             100 >=
+                                                             80) ?
+                                                            expr_lindata :
+                                                            expr_data,
+                                                            datadim, ptrdim),
+                                      NULL);
   size_t *v2n = hgraph_get_var2node (r->h);
-  ap_lincons0_t dc = // set kind (scalar) to data constraint
-    shape_lincons_of_node (pr, &c, NULL, v2n, r->h->size, datadim, ptrdim);
+  ap_lincons0_t dc =            // set kind (scalar) to data constraint
+    shape_lincons_of_node (&c, NULL, v2n, r->h->size, datadim, ptrdim);
   free (v2n);
   ap_lincons0_array_t arr;
   size_t i;
@@ -152,13 +145,9 @@ ushape_random (ushape_internal_t * pr, size_t size,
   arr.p = &dc;
   for (i = 0; i < pr->size_scons; i++)
     r->scons[i] = ap_abstract0_meet_lincons_array (pr->man_scons[i], true,
-						   ap_abstract0_top (pr->
-								     man_scons
-								     [i],
-								     datadim,
-								     r->h->
-								     size),
-						   &arr);
+                                                   ap_abstract0_top
+                                                   (pr->man_scons[i], datadim,
+                                                    r->h->size), &arr);
   ap_lincons0_clear (&c);
   ap_lincons0_clear (&dc);
   ushape_check (pr, r);
@@ -182,11 +171,11 @@ ushape_set_bottom (ushape_internal_t * pr, ushape_t * a)
     {
       size_t i;
       for (i = 0; i < pr->size_scons; i++)
-	if (a->scons[i])
-	  {
-	    ap_abstract0_free (pr->man_scons[i], a->scons[i]);
-	    a->scons[i] = NULL;
-	  }
+        if (a->scons[i])
+          {
+            ap_abstract0_free (pr->man_scons[i], a->scons[i]);
+            a->scons[i] = NULL;
+          }
       free (a->scons);
       a->scons = NULL;
     }
@@ -209,8 +198,7 @@ ushape_check (ushape_internal_t * pr, ushape_t * a)
   size_t i, size;
   if (!a)
     {
-      ERROR ("ushape null!",;
-	);
+      ERROR ("ushape null!",;);
       return '!';
     }
   size = (a->h) ? a->h->size : 0;
@@ -219,13 +207,12 @@ ushape_check (ushape_internal_t * pr, ushape_t * a)
   for (i = 0; i < pr->size_scons; i++)
     {
       ap_dimension_t dc =
-	ap_abstract0_dimension (pr->man_scons[i], a->scons[i]);
+        ap_abstract0_dimension (pr->man_scons[i], a->scons[i]);
       if (dc.realdim < size || dc.intdim != a->datadim)
-	{
-	  ERROR ("ushape segment constraints dimension!",;
-	    );
-	  return '!';
-	}
+        {
+          ERROR ("ushape segment constraints dimension!",;);
+          return '!';
+        }
     }
   /* TODO: other checks? */
   return '.';
@@ -240,19 +227,20 @@ ushape_copy_internal (ushape_internal_t * pr, ushape_t * a)
   r->closed = hgraph_copy_internal (pr, a->closed);
   r->datadim = a->datadim;
   r->ptrdim = a->ptrdim;
-  ushape_copy_internal_scons(pr, a, r);
+  ushape_copy_internal_scons (pr, a, r);
   return r;
 }
 
 inline void
-ushape_copy_internal_scons (ushape_internal_t * pr, ushape_t * a, ushape_t * b)
+ushape_copy_internal_scons (ushape_internal_t * pr, ushape_t * a,
+                            ushape_t * b)
 {
   if (a && b && a->scons && b->scons)
     {
       size_t i;
       for (i = 0; i < pr->size_scons; i++)
-	if (a->scons[i])
-	  b->scons[i] = ap_abstract0_copy (pr->man_scons[i], a->scons[i]);
+        if (a->scons[i])
+          b->scons[i] = ap_abstract0_copy (pr->man_scons[i], a->scons[i]);
     }
 }
 
@@ -269,16 +257,16 @@ ushape_get_size (ushape_t * a)
  */
 ushape_t *
 ushape_set_hgraph (ushape_internal_t * pr, ushape_t * a, hgraph_t * h,
-		   hgraph_t * closed, bool destructive)
+                   hgraph_t * closed, bool destructive)
 {
   ushape_t *r;
   if (destructive)
     {
       /* free non-aliased ushapes */
       if (a->h && a->h != h && a->h != closed)
-	hgraph_free (pr->man, a->h);
+        hgraph_free (pr->man, a->h);
       if (a->closed && a->closed != h && a->closed != closed)
-	hgraph_free (pr->man, a->closed);
+        hgraph_free (pr->man, a->closed);
       r = a;
     }
   else
@@ -286,9 +274,9 @@ ushape_set_hgraph (ushape_internal_t * pr, ushape_t * a, hgraph_t * h,
       /* copy aliased ushapes */
       r = ushape_copy_internal (pr, a);
       if (h && (a->h == h || a->closed == h))
-	h = hgraph_copy (pr->man, h);
+        h = hgraph_copy (pr->man, h);
       if (closed && (a->h == closed || a->closed == closed))
-	closed = hgraph_copy (pr->man, closed);
+        closed = hgraph_copy (pr->man, closed);
     }
   r->h = h;
   r->closed = closed;
@@ -327,14 +315,17 @@ ushape_size (ap_manager_t * man, ushape_t * a)
 /* Control of internal representation */
 /* ============================================================ */
 
-/* TODO: priority 3 */
+/* NOT IMPLEMENTED */
 void
 ushape_minimize (ap_manager_t * man, ushape_t * a)
 {
+  if (a != a)
+    return;                     /* to remove warning on unused parameter */
+
   ushape_internal_t *pr =
     ushape_init_from_manager (man, AP_FUNID_MINIMIZE, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
-			      "not implemented");
+                              "not implemented");
 }
 
 ushape_array_t
@@ -342,33 +333,44 @@ ushape_canonicalize_internal (ushape_internal_t * pr, ushape_t * a)
 {
   ushape_array_t r;
   ushape_array_init (pr, &r, 1);
+
+  if (a != a)
+    return r;                   /* to remove warning on unused parameter */
+
   return r;
 }
 
-/* Put to NODE_NULL all undefined ptr vars. */
+/**
+ * @brief Put to NODE_NULL all undefined ptr vars. 
+ */
 void
 ushape_canonicalize (ap_manager_t * man, ushape_t * a)
 {
   ushape_internal_t *pr =
     ushape_init_from_manager (man, AP_FUNID_CANONICALIZE, 0);
-  hgraph_t* h = hgraph_copy_mem(pr,a->h);
-  hgraph_canonicalize(man,h); // SIDE EFFECT!!!!
+  hgraph_t *h = hgraph_copy_mem (pr, a->h);
+  hgraph_canonicalize (man, h); // SIDE EFFECT!!!!
   //hgraph_free_internal(pr,a->h);
-  a->h = hgraph_copy_internal(pr,h);
-  hgraph_free_internal(pr,h);
+  a->h = hgraph_copy_internal (pr, h);
+  hgraph_free_internal (pr, h);
 }
 
-/* TODO: priority 0 */
+/* NOT IMPLEMENTED */
 int
 ushape_hash (ap_manager_t * man, ushape_t * a)
 {
+  if (a != a)
+    return 0;                   /* to remove warning on unused parameter */
+
   ushape_internal_t *pr = ushape_init_from_manager (man, AP_FUNID_HASH, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
-			      "not implemented");
+                              "not implemented");
   return 0;
 }
 
-/* Used to change the parameters of the analysis */
+/**
+ * @brief Used to change the parameters of the analysis 
+ */
 void
 ushape_approximate (ap_manager_t * man, ushape_t * a, int algorithm)
 {
@@ -379,20 +381,23 @@ ushape_approximate (ap_manager_t * man, ushape_t * a, int algorithm)
     {
       size_t i;
       for (i = 0; i < pr->size_scons; i++)
-	if (a->scons[i])
-	  // NULL not accepted as input in ap_abstract0_approximate
-	  ap_abstract0_approximate (pr->man_scons[i], a->scons[i], algorithm);
+        if (a->scons[i])
+          // NULL not accepted as input in ap_abstract0_approximate
+          ap_abstract0_approximate (pr->man_scons[i], a->scons[i], algorithm);
     }
 }
 
-/* TODO: priority 3 */
+/* NOT IMPLEMENTED */
 bool
 ushape_is_minimal (ap_manager_t * man, ushape_t * a)
 {
+  if (a != a)
+    return false;               /* to remove warning on unused parameter */
+
   ushape_internal_t *pr =
     ushape_init_from_manager (man, AP_FUNID_MINIMIZE, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
-			      "not implemented");
+                              "not implemented");
   return true;
 }
 
@@ -401,7 +406,7 @@ ushape_is_canonical (ap_manager_t * man, ushape_t * a)
 {
   ushape_internal_t *pr =
     ushape_init_from_manager (man, AP_FUNID_CANONICALIZE, 0);
-  if (!a)
+  if (NULL == a)
     return true;
   return hgraph_is_canonical (man, a->h);
 }
@@ -438,7 +443,7 @@ ushape_top (ap_manager_t * man, size_t intdim, size_t realdim)
 /* Put only constraints on data vars */
 ushape_t *
 ushape_of_box (ap_manager_t * man, size_t intdim, size_t realdim,
-	       ap_interval_t ** t)
+               ap_interval_t ** t)
 {
   ushape_internal_t *pr = ushape_init_from_manager (man, AP_FUNID_OF_BOX, 0);
   ushape_t *r = ushape_alloc_internal (pr, intdim, realdim);
@@ -497,10 +502,7 @@ ushape_dimension (ap_manager_t * man, ushape_t * a)
 void
 ushape_internal_free (ushape_internal_t * pr)
 {
-  /* TODO: free htable */
-  pr->hgraphs = NULL;
-  pr->pcons = NULL;
-  pr->passigns = NULL;
+  /* TODO: free global tables */
   /* TODO: free segment managers */
   pr->man_scons = NULL;
   free (pr);
@@ -516,9 +518,11 @@ ushape_manager_alloc (void)
 
   pr = (ushape_internal_t *) malloc (sizeof (ushape_internal_t));
   assert (pr);
-  pr->hgraphs = NULL;
-  pr->pcons = NULL;
-  pr->passigns = NULL;
+
+  /* init global tables */
+  hgraph_init ();
+  ap_pcons0_init ();
+  ap_passign0_init ();
 
   i = 0;
   if (SHAPE_SCONS_LEN)
@@ -551,7 +555,7 @@ ushape_manager_alloc (void)
      }
    */
   if (SHAPE_SCONS_UCONS)
-    pr->man_scons[i++] = NULL;	/* ucons_manager_alloc (); */
+    pr->man_scons[i++] = NULL;  /* ucons_manager_alloc (); */
   if (SHAPE_SCONS_MSET)
     pr->man_scons[i++] = NULL;
   if (SHAPE_SCONS_LSUM)
@@ -563,16 +567,16 @@ ushape_manager_alloc (void)
   pr->error_ = 0;
 
   i = snprintf (domain, 127, "0.1 with dcons=%s and scons = [%s,%s,%s]",
-		((SHAPE_DCONS_DOMAIN ==
-		  DOM_BOX) ? "Box" : ((SHAPE_DCONS_DOMAIN ==
-				       DOM_OCT) ? "Oct" : "Polka")),
-		((SHAPE_SCONS_LEN) ? "LEN" : "null"),
-		((SHAPE_SCONS_UCONS) ? "UCONS" : "null"),
-		((SHAPE_SCONS_MSET) ? "MSET" : "null"));
+                ((SHAPE_DCONS_DOMAIN ==
+                  DOM_BOX) ? "Box" : ((SHAPE_DCONS_DOMAIN ==
+                                       DOM_OCT) ? "Oct" : "Polka")),
+                ((SHAPE_SCONS_LEN) ? "LEN" : "null"),
+                ((SHAPE_SCONS_UCONS) ? "UCONS" : "null"),
+                ((SHAPE_SCONS_MSET) ? "MSET" : "null"));
   domain[i] = '\0';
 
   man = ap_manager_alloc ("ushape", domain, pr,
-			  (void (*)(void *)) ushape_internal_free);
+                          (void (*)(void *)) ushape_internal_free);
 
   pr->man = man;
 
@@ -660,12 +664,14 @@ void
 ushape_array_init (ushape_internal_t * pr, ushape_array_t * a, size_t size)
 {
   size_t i;
-  arg_assert (a && (!a->p || (a->p && a->size >= size)), return;
-    );
+  arg_assert (a && (!a->p || (a->p && a->size >= size)), return;);
+
+  if (pr != pr)
+    return;                     /* to remove warning on unused parameter */
+
   if (!a->p)
     {
-      checked_malloc (a->p, ushape_t *, sizeof (ushape_t *), size, return;
-	);
+      checked_malloc (a->p, ushape_t *, sizeof (ushape_t *), size, return;);
       a->size = size;
     }
   for (i = 0; i < size; i++)
@@ -677,8 +683,12 @@ ushape_array_make (ushape_internal_t * pr, size_t size)
 {
   ushape_array_t *r;
   size_t i;
-  checked_malloc (r, ushape_array_t, sizeof (ushape_array_t), 1, return NULL;
-    );
+
+  if (pr != pr)
+    return NULL;                /* to remove warning on unused parameter */
+
+  checked_malloc (r, ushape_array_t, sizeof (ushape_array_t), 1,
+                  return NULL;);
   r->p = NULL;
   r->size = 0;
   ushape_array_init (pr, r, size);
@@ -688,7 +698,7 @@ ushape_array_make (ushape_internal_t * pr, size_t size)
 /* Add a ushape to an array either keeping the set or not */
 int
 ushape_array_add (ushape_internal_t * pr, bool isset, ushape_array_t * arr,
-		  size_t msize, bool docopy, bool destructive, ushape_t * a)
+                  size_t msize, bool docopy, bool destructive, ushape_t * a)
 {
   size_t found;
   size_t i, j;
@@ -699,30 +709,30 @@ ushape_array_add (ushape_internal_t * pr, bool isset, ushape_array_t * arr,
   if (!arr)
     {
       if (destructive)
-	ushape_free_internal (pr, a);
+        ushape_free_internal (pr, a);
       return 0;
     }
   found = arr->size;
-  j = arr->size;		/* first NULL position */
+  j = arr->size;                /* first NULL position */
   /* search if the element is already in the set and also the first position NULL */
   for (i = 0; i < arr->size && found == arr->size; i++)
     {
       if (arr->p[i] == NULL && j == arr->size)
-	j = i;
+        j = i;
       if (arr->p[i] && isset)
-	{
-	  u = ushape_join (pr->man, false, a, arr->p[i]);
-	  if (u)
-	    found = i;
-	}
+        {
+          u = ushape_join (pr->man, false, a, arr->p[i]);
+          if (u)
+            found = i;
+        }
     }
   if (found == arr->size)
     {
       /* now, add the ushape at the position msize, if given */
       if (msize == 0)
-	msize = j;
+        msize = j;
       if (arr->size == msize)
-	ushape_array_resize (pr, arr, arr->size + 4);
+        ushape_array_resize (pr, arr, arr->size + 4);
 
       arr->p[msize] = (docopy) ? ushape_copy_internal (pr, a) : a;
       r = 1;
@@ -740,7 +750,7 @@ ushape_array_add (ushape_internal_t * pr, bool isset, ushape_array_t * arr,
 
 ushape_array_t *
 ushape_array_add_array (ushape_internal_t * pr, bool isset,
-			ushape_array_t * a, ushape_array_t * b)
+                        ushape_array_t * a, ushape_array_t * b)
 {
   ushape_array_t *r;
   if ((!a || !a->size) && (!b || !b->size))
@@ -752,12 +762,12 @@ ushape_array_add_array (ushape_internal_t * pr, bool isset,
   else
     {
       size_t i, j;
-      for (i = 0; i < a->size; i++)	/* TODO: start with msize? */
-	if (!a->p[i])
-	  break;
+      for (i = 0; i < a->size; i++)     /* TODO: start with msize? */
+        if (!a->p[i])
+          break;
       j = i;
       for (i = 0; i < b->size; i++)
-	j += ushape_array_add (pr, isset, a, j, false, false, b->p[i]);
+        j += ushape_array_add (pr, isset, a, j, false, false, b->p[i]);
       r = a;
     }
   return r;
@@ -790,7 +800,7 @@ ushape_array_clear (ushape_internal_t * pr, ushape_array_t * a, size_t size)
   for (i = 0; i < size; i++)
     {
       if (a->p[i])
-	ushape_free_internal (pr, a->p[i]);
+        ushape_free_internal (pr, a->p[i]);
       a->p[i] = NULL;
     }
   free (a->p);
@@ -803,18 +813,17 @@ ushape_array_t *
 ushape_array_copy (ushape_internal_t * pr, ushape_array_t * src, size_t size)
 {
   size_t i;
-  arg_assert (src && 0 < size, return NULL;
-    );
+  arg_assert (src && 0 < size, return NULL;);
   ushape_array_t *r = ushape_array_make (pr, size);
   if (size > 0)
     {
       for (i = 0; i < src->size && i < size; i++)
-	if (src->p[i])
-	  r->p[i] = ushape_copy_internal (pr, src->p[i]);
-	else
-	  r->p[i] = NULL;
+        if (src->p[i])
+          r->p[i] = ushape_copy_internal (pr, src->p[i]);
+        else
+          r->p[i] = NULL;
       for (; i < size; i++)
-	r->p[i] = NULL;
+        r->p[i] = NULL;
     }
   return r;
 }
