@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / Shape Abstract Domain                                   */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -24,7 +20,7 @@
 #include "shape.h"
 #include "shape_internal.h"
 #include "apron2shape.h"
-#include "shape_macros.h"
+#include "sh_macros.h"
 #include "ap_generic.h"
 
 
@@ -45,7 +41,7 @@ shape_assign_passign_array (shape_internal_t * pr,
   for (i = 0; i < a->msize; i++)
     {
       ushape_array_t *rr =
-              ushape_assign_passign_array (pr, false, a->m.p[i], arr);
+        ushape_assign_passign_array (pr, false, a->m.p[i], arr);
       if (rr)
         {
           r = ushape_array_add_array (pr, true, r, rr);
@@ -59,8 +55,7 @@ shape_assign_passign_array (shape_internal_t * pr,
   for (i = 0; i < r->size; i++)
     if (!r->p[i])
       break;
-  checked_malloc (rs, shape_t, sizeof (shape_t), 1, return NULL;
-                  );
+  checked_malloc (rs, shape_t, sizeof (shape_t), 1, return NULL;);
   rs->m = *r;
   r->p = NULL;
   free (r);
@@ -87,14 +82,13 @@ shape_assign_linexpr (ap_manager_t * man,
       passign0_array_t *op;
       shape_t *r;
       shape_internal_t *pr =
-              shape_init_from_manager (man, AP_FUNID_ASSIGN_LINEXPR_ARRAY, 0);
+        shape_init_from_manager (man, AP_FUNID_ASSIGN_LINEXPR_ARRAY, 0);
       if (!destructive)
         b = shape_copy_internal (pr, a);
       else
         b = a;
       op =
-              shape_passign_of_linexpr_array (pr, &d, &expr, 1, a->intdim,
-                                              a->realdim);
+        shape_passign_of_linexpr_array (&d, &expr, 1, a->intdim, a->realdim);
 #ifndef NDEBUG1
       fprintf (stdout, "****shape_assign_linexpr: with passign=[");
       shape_passign_array_fdump (stdout, op, a->intdim, a->realdim);
@@ -105,7 +99,7 @@ shape_assign_linexpr (ap_manager_t * man,
       r = shape_assign_passign_array (pr, false, b, op);
       shape_free_internal (pr, b);
       if (dest)
-        { /* intersect r with dest */
+        {                       /* intersect r with dest */
           shape_t *rr = shape_meet (pr->man, false, r, dest);
           shape_free_internal (pr, r);
           return rr;
@@ -124,13 +118,11 @@ shape_assign_linexpr (ap_manager_t * man,
  * @param size length of tnew and tdim
  * @return 
  */
-shape_t*
-shape_substitute_actuals (shape_internal_t* pr,
+shape_t *
+shape_substitute_actuals (shape_internal_t * pr,
                           bool destructive,
-                          shape_t* a,
-                          ap_dim_t* tdim,
-                          ap_dim_t* tnew,
-                          size_t size)
+                          shape_t * a,
+                          ap_dim_t * tdim, ap_dim_t * tnew, size_t size)
 {
   if (!a || shape_is_top (pr->man, a))
     return (destructive) ? a : shape_copy (pr->man, a);
@@ -140,7 +132,8 @@ shape_substitute_actuals (shape_internal_t* pr,
   size_t i;
   for (i = 0; i < a->msize; i++)
     {
-      ushape_array_t *rr = ushape_substitute_actuals (pr, a->m.p[i], tdim, tnew, size);
+      ushape_array_t *rr =
+        ushape_substitute_actuals (pr, a->m.p[i], tdim, tnew, size);
       if (rr)
         {
           r = ushape_array_add_array (pr, true, r, rr);
@@ -154,8 +147,7 @@ shape_substitute_actuals (shape_internal_t* pr,
   for (i = 0; i < r->size; i++)
     if (!r->p[i])
       break;
-  checked_malloc (rs, shape_t, sizeof (shape_t), 1, return NULL;
-                  );
+  checked_malloc (rs, shape_t, sizeof (shape_t), 1, return NULL;);
   rs->m = *r;
   r->p = NULL;
   free (r);
@@ -184,7 +176,7 @@ shape_substitute_passign_array (shape_internal_t * pr,
   for (i = 0; i < a->msize; i++)
     {
       ushape_array_t *rr =
-              ushape_substitute_passign_array (pr, a->m.p[i], arr);
+        ushape_substitute_passign_array (pr, a->m.p[i], arr);
       if (rr)
         {
           r = ushape_array_add_array (pr, true, r, rr);
@@ -198,8 +190,7 @@ shape_substitute_passign_array (shape_internal_t * pr,
   for (i = 0; i < r->size; i++)
     if (!r->p[i])
       break;
-  checked_malloc (rs, shape_t, sizeof (shape_t), 1, return NULL;
-                  );
+  checked_malloc (rs, shape_t, sizeof (shape_t), 1, return NULL;);
   rs->m = *r;
   r->p = NULL;
   free (r);
@@ -212,18 +203,20 @@ shape_substitute_passign_array (shape_internal_t * pr,
   return rs;
 }
 
-/* TODO: priority 0 */
-
-/* used for pre-image computation */
+/* NOT IMPLEMENTED: used only for pre-image computation */
 shape_t *
 shape_substitute_linexpr (ap_manager_t * man,
                           bool destructive, shape_t * a,
                           ap_dim_t d, ap_linexpr0_t * expr, shape_t * dest)
 {
   shape_internal_t *pr =
-          shape_init_from_manager (man, AP_FUNID_SUBSTITUTE_LINEXPR_ARRAY, 0);
+    shape_init_from_manager (man, AP_FUNID_SUBSTITUTE_LINEXPR_ARRAY, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
+  if ((destructive != destructive) ||
+      (d != d) || (expr != expr) || (dest != dest))
+    return NULL;
+
   return a;
 }
 
@@ -243,14 +236,14 @@ shape_assign_linexpr_array (ap_manager_t * man,
       passign0_array_t *op;
       shape_t *r;
       shape_internal_t *pr =
-              shape_init_from_manager (man, AP_FUNID_ASSIGN_LINEXPR_ARRAY, 0);
+        shape_init_from_manager (man, AP_FUNID_ASSIGN_LINEXPR_ARRAY, 0);
       if (!destructive)
         b = shape_copy_internal (pr, a);
       else
         b = a;
       op =
-              shape_passign_of_linexpr_array (pr, tdim, texpr, size, a->intdim,
-                                              a->realdim);
+        shape_passign_of_linexpr_array (tdim, texpr, size, a->intdim,
+                                        a->realdim);
 #ifndef NDEBUG1
       fprintf (stdout, "\n****shape_assign_linexpr_array: with assign=[");
       size_t i;
@@ -263,9 +256,9 @@ shape_assign_linexpr_array (ap_manager_t * man,
       fprintf (stdout, "]\n");
       fflush (stdout);
       /*
-      fprintf (stdout, " (i.e.  ");
-      shape_passign_array_fdump (stdout, op, a->intdim, a->realdim);
-      fprintf (stdout, ") \n\t on ");
+         fprintf (stdout, " (i.e.  ");
+         shape_passign_array_fdump (stdout, op, a->intdim, a->realdim);
+         fprintf (stdout, ") \n\t on ");
        */
       fprintf (stdout, " on \n");
       shape_fdump (stdout, man, b);
@@ -276,7 +269,7 @@ shape_assign_linexpr_array (ap_manager_t * man,
       r = shape_assign_passign_array (pr, false, b, op);
       shape_free_internal (pr, b);
       if (dest)
-        { /* intersect r with dest */
+        {                       /* intersect r with dest */
           shape_t *rr = shape_meet (pr->man, false, r, dest);
           shape_free_internal (pr, r);
           return rr;
@@ -291,9 +284,10 @@ shape_assign_linexpr_array (ap_manager_t * man,
     }
 }
 
-/* TODO: priority 0 */
-
-/* used for pre-image computation */
+/**
+ * @brief Special use when @p size == 1, for pre-image computation 
+ *        otherwise NOT IMPLEMENTED
+ */
 shape_t *
 shape_substitute_linexpr_array (ap_manager_t * man,
                                 bool destructive, shape_t * a,
@@ -306,7 +300,7 @@ shape_substitute_linexpr_array (ap_manager_t * man,
                                      dest);
 
   shape_internal_t *pr =
-          shape_init_from_manager (man, AP_FUNID_SUBSTITUTE_TEXPR_ARRAY, 0);
+    shape_init_from_manager (man, AP_FUNID_SUBSTITUTE_TEXPR_ARRAY, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return a;
@@ -326,8 +320,8 @@ shape_assign_texpr_array (ap_manager_t * man,
       passign0_array_t *op;
       shape_t *r;
       shape_internal_t *pr =
-              shape_init_from_manager (man, AP_FUNID_ASSIGN_TEXPR_ARRAY, 0);
-      op = shape_passign_of_texpr_array (pr, tdim, texpr, size, a->intdim,
+        shape_init_from_manager (man, AP_FUNID_ASSIGN_TEXPR_ARRAY, 0);
+      op = shape_passign_of_texpr_array (tdim, texpr, size, a->intdim,
                                          a->realdim);
 #ifndef NDEBUG1
       fprintf (stdout, "\n****shape_assign_texpr_array: with assign=[");
@@ -349,7 +343,7 @@ shape_assign_texpr_array (ap_manager_t * man,
       /* go */
       r = shape_assign_passign_array (pr, false, a, op);
       if (dest)
-        { /* intersect r with dest */
+        {                       /* intersect r with dest */
           shape_t *rr = shape_meet (pr->man, false, r, dest);
           shape_free_internal (pr, r);
           return rr;
@@ -382,7 +376,7 @@ shape_substitute_texpr_array (ap_manager_t * man,
                               size_t size, shape_t * dest)
 {
   shape_internal_t *pr =
-          shape_init_from_manager (man, AP_FUNID_ASSIGN_TEXPR_ARRAY, 0);
+    shape_init_from_manager (man, AP_FUNID_ASSIGN_TEXPR_ARRAY, 0);
   shape_t *r = NULL;
 
   if (shape_is_bottom (man, a))
@@ -391,10 +385,11 @@ shape_substitute_texpr_array (ap_manager_t * man,
   else if (pr->meet_algo < 0)
     {
       /****** substitute actuals with ini formals ******/
-      ap_dim_t* tnew;
+      ap_dim_t *tnew;
       size_t i;
       // build array of new dimensions from texpr
-      checked_malloc (tnew, ap_dim_t, sizeof (ap_dim_t), size, return NULL;);
+      checked_malloc (tnew, ap_dim_t, sizeof (ap_dim_t), size, return NULL;
+        );
       for (i = 0; i < size; i++)
         if (texpr[i]->discr == AP_TEXPR_DIM)
           tnew[i] = texpr[i]->val.dim;
@@ -405,7 +400,7 @@ shape_substitute_texpr_array (ap_manager_t * man,
           }
 #ifndef NDEBUG1
       size_t hedge = 0;
-      FILE* fedge = NULL;
+      FILE *fedge = NULL;
       if ((fedge = fopen ("hedge.txt", "r")) != NULL)
         {
           fprintf (stdout, "\n****shape read hedge:\n");
@@ -434,8 +429,8 @@ shape_substitute_texpr_array (ap_manager_t * man,
   else
     {
       passign0_array_t *op =
-              shape_passign_of_texpr_array (pr, tdim, texpr, size, a->intdim,
-                                            a->realdim);
+        shape_passign_of_texpr_array (tdim, texpr, size, a->intdim,
+                                      a->realdim);
 #ifndef NDEBUG1
       fprintf (stdout, "\n****shape_substitute_texpr_array: with assign=[");
       size_t i;
@@ -457,7 +452,7 @@ shape_substitute_texpr_array (ap_manager_t * man,
       r = shape_substitute_passign_array (pr, false, a, op);
     }
   if (dest)
-    { /* intersect r with dest */
+    {                           /* intersect r with dest */
       shape_t *rr = shape_meet (pr->man, false, r, dest);
       shape_free_internal (pr, r);
       return rr;

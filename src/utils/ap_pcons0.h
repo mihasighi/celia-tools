@@ -2,10 +2,6 @@
 /*                                                                        */
 /*  CELIA Tools / Utilities for Abstract Domains                          */
 /*                                                                        */
-/*  Copyright (C) 2009-2014                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
-/*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
 /*  Foundation, version 3.                                                */

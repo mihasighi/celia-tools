@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / Shape Abstract Domain                                   */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -29,7 +25,9 @@
 /* constant names for domains */
 typedef enum
 {
-  DOM_BOX = 0, DOM_OCT, DOM_OCT_P11, DOM_OCT_P12, DOM_OCT_P21, DOM_POLY, DOM_POLY_P11, DOM_POLY_P12, DOM_POLY_P21
+  DOM_BOX =
+    0, DOM_OCT, DOM_OCT_P11, DOM_OCT_P12, DOM_OCT_P21, DOM_POLY, DOM_POLY_P11,
+    DOM_POLY_P12, DOM_POLY_P21
 } dom_t;
 
 

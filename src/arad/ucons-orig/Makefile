@@ -152,10 +152,10 @@ libucons_debug.a: $(subst .c,_debug.o,$(UCONS_CCSOURCES))
 	$(RANLIB) $@
 
 libucons.so: $(subst .c,.o,$(UCONS_CCSOURCES))
-	$(SHARED) $(LDFLAGS) $(SHARED_LIBS) -o $@ $^
+	$(SHARED) $(CFLAGS) $(LDFLAGS) $(SHARED_LIBS) -o $@ $^
 
 libucons_debug.so: $(subst .c,_debug.o,$(UCONS_CCSOURCES))
-	$(SHARED) $(LDFLAGS) $(SHARED_LIBS) -o $@ $^
+	$(SHARED) $(CFLAGS_DEBUG) $(LDFLAGS) $(SHARED_LIBS) -o $@ $^
 
 uconstest: libucons_debug.a ucons_test_debug.o
 	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -o $@ ucons_test_debug.o \
@@ -167,7 +167,7 @@ uconstest: libucons_debug.a ucons_test_debug.o
 # IMPLICIT RULES AND DEPENDENCIES
 #---------------------------------------
 
-.SUFFIXES: .tex .c .h .a .o .so .y .l
+.SUFFIXES: .c .h .a .o .so 
 
 
 %_caml.o: %_caml.c $(CCINC) $(DEPS) lib%.a

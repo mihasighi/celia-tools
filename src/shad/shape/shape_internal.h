@@ -26,6 +26,8 @@
 #include "shape_fun.h"
 #include "sh_manager.h"
 #include "sh_options.h"
+#include "apron2shape.h"
+
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
@@ -60,6 +62,8 @@ extern "C"
     size_t intdim;
     size_t realdim;
   };
+
+#define shape_init_from_manager(man,id,size)  ((ushape_internal_t*) sh_init_from_manager(man,id,size))
 
 
   /* ============================================================ */

@@ -2,10 +2,6 @@
 /*                                                                        */
 /*  CELIA Tools / SLL Abstract Domain                                     */
 /*                                                                        */
-/*  Copyright (C) 2009-2014                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
-/*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
 /*  Foundation, version 3.                                                */
@@ -24,6 +20,7 @@
 #include "hgraph.h"
 #include "hgraph_internal.h"
 #include "apron2shape.h"
+#include "sh_options.h"
 
 
 /* ============================================================ */
@@ -31,6 +28,9 @@
 
 /* ============================================================ */
 
+void
+hgraph_fprint_acsl (FILE * stream, hgraph_internal_t * pr,
+                    hgraph_t * a, char **name_of_dim);
 void
 hgraph_fprint_dot (FILE * stream, hgraph_internal_t * pr,
                    hgraph_t * a, char **name_of_dim);
@@ -46,11 +46,14 @@ hgraph_fprint (FILE * stream, sh_manager_t * man,
                hgraph_t * a, char **name_of_dim)
 {
   hgraph_internal_t *pr = hgraph_init_from_manager (man, AP_FUNID_FPRINT, 0);
-  bool isdot = shape_get_print ();
-  if (isdot)
+  if (sh_print_is_dot ())
     hgraph_fprint_dot (stream, pr, a, name_of_dim);
-  else
+  else if (sh_print_is_smtlib ())
     hgraph_fprint_smt (stream, pr, a, name_of_dim);
+  else if (sh_print_is_acsl ())
+    hgraph_fprint_acsl (stream, pr, a, name_of_dim);
+  else
+    assert (0);
 }
 
 void
@@ -106,12 +109,24 @@ hgraph_array_fdump (FILE * stream, sh_manager_t * man, hgraph_array_t * a)
 
 /* ============================================================ */
 
+void
+hgraph_fprint_acsl (FILE * stream, hgraph_internal_t * pr,
+                    hgraph_t * a, char **name_of_dim)
+{
+  if ((pr != pr) || (a != a) || (name_of_dim != name_of_dim))
+    return;                     /* to remove warning on unused parameter */
+
+  fprintf (stream, "sll()");    /* TODO */
+
+}
+
+
 inline void
 hgraph_fprint_dot_alone (FILE * stream, sh_manager_t * man,
                          hgraph_t * a, char **name_of_dim, char *name)
 {
-  if (man != man)               /* remove gcc warning */
-    return;
+  if (man != man)
+    return;                     /* to remove warning on unused parameter */
 
   size_t i, j;
   /* print graph name */

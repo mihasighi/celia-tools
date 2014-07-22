@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / Shape Abstract Domain                                   */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -23,20 +19,21 @@
 
 #include "shape.h"
 #include "shape_internal.h"
-#include "shape_macros.h"
+#include "sh_macros.h"
 
 
 /* ============================================================ */
 /* Projections */
 /* ============================================================ */
 
-/* TODO: priority 0 */
-
-/* not used */
+/* NOT IMPLEMENTED */
 shape_t *
-shape_forget_array(ap_manager_t * man,
-        bool destructive, shape_t * a,
+shape_forget_array(ap_manager_t * man, bool destructive, shape_t * a,
         ap_dim_t * tdim, size_t size, bool project) {
+    if ((destructive != destructive) ||
+        (tdim != tdim) || (size != size) || (project != project))
+      return NULL; /* to remove warning on unused parameter */
+
     shape_internal_t *pr =
             shape_init_from_manager(man, AP_FUNID_FORGET_ARRAY, 0);
     ap_manager_raise_exception(man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
@@ -314,24 +311,31 @@ shape_permute_dimensions(ap_manager_t * man,
 /* Expansion and folding of dimensions */
 /* ============================================================ */
 
-/* TODO: priority 0 */
-
-/* not used */
+/* NOT IMPLEMENTED */
 shape_t *
 shape_expand(ap_manager_t * man,
         bool destructive, shape_t * a, ap_dim_t dim, size_t n) {
+    if ((destructive != destructive) ||
+        (dim != dim) || (n != n))
+      return NULL; /* to remove warning on unused parameter */
+
     shape_internal_t *pr = shape_init_from_manager(man, AP_FUNID_EXPAND, 0);
     ap_manager_raise_exception(man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
             "not implemented");
     return a;
 }
 
-/* TODO: priority 0 */
+/* NOT IMPLEMENTED */
 shape_t *
 shape_fold(ap_manager_t * man,
         bool destructive, shape_t * a, ap_dim_t * tdim, size_t size) {
+    if ((destructive != destructive) ||
+        (tdim != tdim) || (size != size))
+      return NULL; /* to remove warning on unused parameter */
+
     shape_internal_t *pr = shape_init_from_manager(man, AP_FUNID_FOLD, 0);
     ap_manager_raise_exception(man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
             "not implemented");
     return a;
 }
+

@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / Shape Abstract Domain                                   */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -21,7 +17,7 @@
 /**************************************************************************/
 
 
-#include "shape_macros.h"
+#include "sh_macros.h"
 #include "shape.h"
 #include "shape_internal.h"
 
@@ -31,24 +27,33 @@
 
 /* ============================================================ */
 
-FILE * shape_fdump_new_file (FILE * stream, shape_internal_t * pr, bool isdot);
-void shape_fprint_dot (FILE * shape_stream, shape_internal_t *pr,
+void shape_fprint_acsl (FILE * stream, shape_internal_t * pr,
+                        shape_t * a, char **name_of_dim);
+FILE *shape_fdump_new_file (FILE * stream, shape_internal_t * pr, bool isdot);
+void shape_fprint_dot (FILE * shape_stream, shape_internal_t * pr,
                        shape_t * a, char **name_of_dim);
-void shape_fprint_smt (FILE* f, shape_internal_t *pr,
-                       shape_t* a, char** name_of_dim, bool ispos);
+void shape_fprint_smtlib (FILE * f, shape_internal_t * pr,
+                          shape_t * a, char **name_of_dim, bool ispos);
 
 void
 shape_fprint (FILE * stream, ap_manager_t * man,
               shape_t * a, char **name_of_dim)
 {
   shape_internal_t *pr = shape_init_from_manager (man, AP_FUNID_FPRINT, 0);
-  bool isdot = shape_get_print ();
-  FILE *shape_stream = shape_fdump_new_file (stream, pr, isdot);
-  if (isdot)
-    shape_fprint_dot (shape_stream, pr, a, name_of_dim);
+  if (sh_print_is_dot () || sh_print_is_smtlib ())
+    {
+      FILE *shape_stream =
+        shape_fdump_new_file (stream, pr, sh_print_is_dot ());
+      if (sh_print_is_dot ())
+        shape_fprint_dot (shape_stream, pr, a, name_of_dim);
+      else                      // sh_print_is_smtlib ()
+        shape_fprint_smtlib (shape_stream, pr, a, name_of_dim, true);
+      fclose (shape_stream);
+    }
+  else if (sh_print_is_acsl ())
+    shape_fprint_acsl (stream, pr, a, name_of_dim);
   else
-    shape_fprint_smt (shape_stream, pr, a, name_of_dim, true);
-  fclose (shape_stream);
+    assert (0);
 }
 
 void
@@ -56,7 +61,7 @@ shape_fprintdiff (FILE * stream, ap_manager_t * man,
                   shape_t * a1, shape_t * a2, char **name_of_dim)
 {
   shape_internal_t *pr =
-          shape_init_from_manager (man, AP_FUNID_FPRINTDIFF, 0);
+    shape_init_from_manager (man, AP_FUNID_FPRINTDIFF, 0);
   fprintf (stream, "shape1 (size %zu) and shape2 (%zu)\n",
            a1->msize, a2->msize);
   shape_fprint (stream, man, a1, name_of_dim);
@@ -76,16 +81,47 @@ shape_fdump (FILE * stream, ap_manager_t * man, shape_t * a)
 
 /* ============================================================ */
 
+/**
+ * @brief Print the abstract value in the ACSL format.
+ */
+void
+shape_fprint_acsl (FILE * f, shape_internal_t * pr,
+                   shape_t * a, char **name_of_dim)
+{
+  assert (NULL != stream);
+  if (NULL == a)
+    {
+      fprintf (f, "false");
+    }
+  else
+    {
+      if (a->msize == 0)
+        fprintf (f, "true");
+      else
+        {                       // print all ushapes
+          for (size_t i = 0; i < a->msize; i++)
+            {
+              ushape_fprint (f, pr->man, a->m.p[i], name_of_dim);
+              if ((i + 1) < a->msize)
+                fprintf (f, " || \n");
+            }
+        }
+    }
+  fprintf (f, "\n");
+  fflush (f);
+}
+
 FILE *
 shape_fdump_new_file (FILE * stream, shape_internal_t * pr, bool isdot)
 {
+  if (stream != stream)
+    return NULL;                /* to remove message on unused parameter */
+
   FILE *r = NULL;
   char filename[24];
   memset (filename, 0, 24 * sizeof (char));
   snprintf (filename, 24, "pan/%s_%ld.%s",
-            (isdot) ? "f" : "sl3",
-            pr->filenum++,
-            (isdot) ? "shp" : "smt");
+            (isdot) ? "f" : "sl3", pr->filenum++, (isdot) ? "shp" : "smt");
   r = fopen (filename, "w");
   if (!r)
     {
@@ -97,8 +133,9 @@ shape_fdump_new_file (FILE * stream, shape_internal_t * pr, bool isdot)
   return r;
 }
 
+
 void
-shape_fprint_dot (FILE * shape_stream, shape_internal_t *pr, shape_t * a,
+shape_fprint_dot (FILE * shape_stream, shape_internal_t * pr, shape_t * a,
                   char **name_of_dim)
 {
   size_t i;
@@ -109,8 +146,7 @@ shape_fprint_dot (FILE * shape_stream, shape_internal_t *pr, shape_t * a,
       fprintf (shape_stream, "label=\"shape EMPTY\";\n}\n");
       return;
     }
-  fprintf (shape_stream, "\tlabel=\"shape size %zu ",
-           a->msize);
+  fprintf (shape_stream, "\tlabel=\"shape size %zu ", a->msize);
   if (name_of_dim)
     {
       fprintf (shape_stream, " over variables rev[");
@@ -132,8 +168,7 @@ shape_fprint_dot (FILE * shape_stream, shape_internal_t *pr, shape_t * a,
 }
 
 void
-shape_fprint_smt_prelude (FILE* f, shape_internal_t *pr,
-                          shape_t* a, char** name_of_dim)
+shape_fprint_smtlib_prelude (FILE * f, shape_t * a, char **name_of_dim)
 {
   // logic
   fprintf (f, "(set-logic SL3)\n");
@@ -179,11 +214,11 @@ shape_fprint_smt_prelude (FILE* f, shape_internal_t *pr,
  * Print the abstract value in SMTLIB2 format.
  */
 void
-shape_fprint_smt (FILE* f, shape_internal_t *pr,
-                  shape_t* a, char** name_of_dim, bool ispos)
+shape_fprint_smtlib (FILE * f, shape_internal_t * pr,
+                     shape_t * a, char **name_of_dim, bool ispos)
 {
   if (ispos)
-    shape_fprint_smt_prelude (f, pr, a, name_of_dim);
+    shape_fprint_smtlib_prelude (f, a, name_of_dim);
   fprintf (f, "(assert \n");
 
   if (!ispos)
@@ -195,10 +230,10 @@ shape_fprint_smt (FILE* f, shape_internal_t *pr,
   size_t i;
   for (i = 0; i < a->msize; i++)
     ushape_fprint (f, pr->man, a->m.p[i], name_of_dim);
-  if (a->msize > 1) // end or
+  if (a->msize > 1)             // end or
     fprintf (f, ") ;; end or\n");
 
-  if (!ispos) // end not
+  if (!ispos)                   // end not
     fprintf (f, ") ;; end not\n");
 
   // end assert
@@ -211,21 +246,20 @@ void
 shape_fdump_le (FILE * stream, shape_internal_t * pr,
                 shape_t * a1, shape_t * a2)
 {
-  bool isdot = shape_get_print ();
-  if (isdot)
+  if (sh_print_is_smtlib ())
+    {
+      FILE *shape_stream = shape_fdump_new_file (stream, pr, false);
+      shape_fprint_smtlib (shape_stream, pr, a1, NULL, true);
+      shape_fprint_smtlib (shape_stream, pr, a2, NULL, false);
+      fprintf (shape_stream, "(check-sat)\n");
+      fflush (shape_stream);
+    }
+  else
     {
       shape_fdump (stream, pr->man, a1);
       fprintf (stream, " ==> ");
       shape_fdump (stream, pr->man, a2);
       fflush (stream);
-    }
-  else
-    {
-      FILE *shape_stream = shape_fdump_new_file (stream, pr, isdot);
-      shape_fprint_smt (shape_stream, pr, a1, NULL, true);
-      shape_fprint_smt (shape_stream, pr, a2, NULL, false);
-      fprintf (shape_stream, "(check-sat)\n");
-      fflush (shape_stream);
     }
 }
 
@@ -233,31 +267,29 @@ shape_fdump_le (FILE * stream, shape_internal_t * pr,
 /* Serialization */
 /* ============================================================ */
 
-/* TODO: priority 0 */
-
-/* NOT IMPLEMENTED: do nothing */
+/* NOT IMPLEMENTED */
 ap_membuf_t
 shape_serialize_raw (ap_manager_t * man, shape_t * a)
 {
   shape_internal_t *pr =
-          shape_init_from_manager (man, AP_FUNID_SERIALIZE_RAW, 0);
+    shape_init_from_manager (man, AP_FUNID_SERIALIZE_RAW, 0);
   ap_membuf_t buf;
   buf.size = 0;
-  buf.ptr = NULL;
+  buf.ptr = (char *) a;         /* to remove warning on unused parameter */
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
   return buf;
 }
 
-/* TODO: priority 0 */
-
-/* NOT IMPLEMENTED: do nothing */
+/* NOT IMPLEMENTED */
 shape_t *
 shape_deserialize_raw (ap_manager_t * man, void *ptr, size_t * size)
 {
   shape_internal_t *pr =
-          shape_init_from_manager (man, AP_FUNID_DESERIALIZE_RAW, 0);
+    shape_init_from_manager (man, AP_FUNID_DESERIALIZE_RAW, 0);
   ap_manager_raise_exception (man, AP_EXC_NOT_IMPLEMENTED, pr->funid,
                               "not implemented");
+  if ((ptr != ptr) || (size != size))
+    return NULL;                /* to remove warning on unused parameter */
   return NULL;
 }

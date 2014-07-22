@@ -1,10 +1,6 @@
 /**************************************************************************/
 /*                                                                        */
-/*  CINV Library / Shape Domain                                           */
-/*                                                                        */
-/*  Copyright (C) 2009-2011                                               */
-/*    LIAFA (University of Paris Diderot and CNRS)                        */
-/*                                                                        */
+/*  CELIA Tools / Shape Abstract Domain                                   */
 /*                                                                        */
 /*  you can redistribute it and/or modify it under the terms of the GNU   */
 /*  Lesser General Public License as published by the Free Software       */
@@ -22,11 +18,11 @@
 
 
 #include <stdio.h>
-#include "shape_options.h"
 #include "ushape_internal.h"
 #include "shape.h"
 #include "shape_internal.h"
-#include "shape_macros.h"
+#include "sh_options.h"
+#include "sh_macros.h"
 #include "ap_generic.h"
 #include "box.h"
 #include "oct.h"
@@ -166,19 +162,19 @@ shape_free_internal (shape_internal_t * pr, shape_t * a)
 
 }
 
-/* TODO */
+/* NOT IMPLEMENTED */
 char
 shape_check (shape_internal_t * pr, shape_t * a)
 {
+  if ((pr != pr) || (a != a))
+    return '-'; /* to remove warning on unused parameter */
 
   return '.';
-
 }
 
 inline shape_t *
 shape_copy_internal (shape_internal_t * pr, shape_t * a)
 {
-
   shape_t * r;
 
   ushape_array_t * rr;
@@ -245,9 +241,7 @@ shape_copy (ap_manager_t * man, shape_t * a)
 void
 shape_free (ap_manager_t * man, shape_t * a)
 {
-
-  if (!a)
-
+  if (NULL == a)
     return;
 
   shape_internal_t * pr = shape_init_from_manager (man, AP_FUNID_FREE, 0);
@@ -259,14 +253,13 @@ shape_free (ap_manager_t * man, shape_t * a)
 size_t
 shape_size (ap_manager_t * man, shape_t * a)
 {
+  if (a != a)
+    return 0; /* to remove warning on unused parameter */
 
   shape_internal_t * pr = shape_init_from_manager (man, AP_FUNID_ASIZE, 0);
 
   return sizeof (shape_t);
-
 }
-
-
 
 
 /* ============================================================ */
@@ -367,10 +360,12 @@ shape_canonicalize (ap_manager_t * man, shape_t * a)
 
 }
 
-/* TODO: priority 0 */
+/* NOT IMPLEMENTED */
 int
 shape_hash (ap_manager_t * man, shape_t * a)
 {
+  if (a != a)
+    return 0; /* to remove warning on unused parameter */
 
   shape_internal_t * pr = shape_init_from_manager (man, AP_FUNID_HASH, 0);
 
@@ -382,7 +377,9 @@ shape_hash (ap_manager_t * man, shape_t * a)
 
 }
 
-/* Used to signal an approximate meet in hgraphs. */
+/**
+ * @brief Used to signal an approximate meet in hgraphs. 
+ */
 void
 shape_approximate (ap_manager_t * man, shape_t * a, int algorithm)
 {
@@ -608,19 +605,9 @@ shape_dimension (ap_manager_t * man, shape_t * a)
 void
 shape_internal_free (shape_internal_t * pr)
 {
-
-  /* TODO: free htable */
-  pr->hgraphs = NULL;
-
-  pr->pcons = NULL;
-
-  pr->passigns = NULL;
-
-  /* TODO: free segment managers */
+  /* TODO: free arad managers */
   pr->man_scons = NULL;
-
   free (pr);
-
 }
 
 ap_manager_t *
@@ -635,9 +622,10 @@ shape_manager_alloc (void)
   pr = (shape_internal_t *) malloc (sizeof (shape_internal_t));
   assert (pr);
 
-  pr->hgraphs = NULL;
-  pr->pcons = NULL;
-  pr->passigns = NULL;
+  /* Initialize global tables */
+  hgraph_init();
+  ap_passign0_init ();
+  ap_pcons0_init ();
 
   /* input parameters */
   pr->intdim = 0;
